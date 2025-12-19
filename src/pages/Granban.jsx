@@ -1,82 +1,33 @@
-import { useState, useEffect } from 'react';
-import { db } from '../services/firebase';
-import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { useState } from 'react';
 import { Navbar } from '../components/Layout/Navbar';
 import { Column } from '../components/Board/Column';
 import { DragDropContext } from '@hello-pangea/dnd';
+import { useTarefa } from '../hooks/UseTarefas';
+import { COLUNAS } from '../constants/boardConfig';
 
 export default function Granban() {
-  const [loading, setLoading] = useState(false);
-  const [tarefas, setTarefas] = useState([]);
+  const {
+    loading,
+    adicionarTarefa,
+    excluirTarefa,
+    atualizarStatusTarefa,
+    getTarefasPorColuna
+  } = useTarefa();
+
   const [tarefaInput, setTarefaInput] = useState('');
 
-useEffect(() => {
-    async function carregarTarefas(){
-      const tarefasRef = collection(db, "tarefas");
-      onSnapshot(tarefasRef, (snapshot) => {
-        let lista = [];
+  const onDragEnd = (result) => {
+    const { destination, source, draggableId } = result;
+    if(!destination) return;
+    if(destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-        snapshot.forEach((doc) => {
-          lista.push({
-            id: doc.id,
-            nome: doc.data().titulo,
-            completada: doc.data().completada
-          })
-        })
-
-        setTarefas(lista); 
-      })
-    }
-    carregarTarefas();
-  }, [])
-
-  const adicionarTarefa = async () => {
-    setLoading(true);
-    try {
-      await addDoc(collection(db, "tarefas"), {
-        titulo: tarefaInput,
-        criadoEm: new Date(),
-        completada: false
-      });
-      alert("Sucesso! Tarefa enviada para o banco.")
-    } catch (error){
-      console.error("Erro ao adicionar:", error);
-      alert("Erro! Veja o console (F12).")
-    }
-    setLoading(false);
+    atualizarStatusTarefa(draggableId, destination.droppableId)
   };
-
-  async function excluirTarefa(id){
-    const docRef = doc(db, "tarefas", id);
-    await deleteDoc(docRef);
-  }
-
-  async function editarTarefa(tarefa){
-    const docRef = doc(db, "tarefas", tarefa.id);
-    await updateDoc(docRef, {
-      completada: !tarefa.completada
-    })
-  }
-
-const onDragEnd = async (result) => {
-  const { destination, source, draggableID } = result;
-  if(!destination) return;
-  if(destination.droppableId === source.droppableId && destination.index === source.index) return;
-  const novoStatus = destination.droppableId === 'done';
-  const docRef = doc(db, "tarefas", draggableId);
-  await updateDoc(docRef, {
-    completada: novoStatus
-  });
-};
-
-  const tarefasAFazer = tarefas.filter(tarefa => !tarefa.completada);
-  const tarefasConcluidas = tarefas.filter(tarefa => tarefa.completada);
 
   return (
     <div className="granban-container" style={{ padding: '20px', backgroundColor: '#f4f5f7', minHeight: '100vh' }}>
       
       <Navbar title="Granban - Conectado ao Firebase" />
-++
       <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
           <input 
             value={tarefaInput}
@@ -84,27 +35,29 @@ const onDragEnd = async (result) => {
             placeholder="Nova tarefa..."
             style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
           />
-          <button onClick={adicionarTarefa} disabled={loading} style={{ padding: '10px', background: '#0052cc', color: '#fff', border: 'none', borderRadius: '5px' }}>
+          <button 
+            onClick={() => {
+              adicionarTarefa(tarefaInput);
+              setTarefaInput('');
+            }}
+            disabled={loading}
+            >
             {loading ? 'Salvando...' : 'Adicionar'}
           </button>
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
           
-          <Column 
-              title="A Fazer" 
-              id="todo" 
-              tasks={tarefasAFazer} 
+          {COLUNAS.map(coluna => (
+            <Column
+              key={coluna.id}
+              id={coluna.id}
+              title={coluna.titulo}
+              tasks={getTarefasPorColuna(coluna.id)}
               onDelete={excluirTarefa}
-          />
-
-          <Column 
-              title="Concluído" 
-              id="done" 
-              tasks={tarefasConcluidas} 
-              onDelete={excluirTarefa}
-          />
+            />
+          ))}
           
         </div>
       </DragDropContext>

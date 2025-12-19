@@ -2,7 +2,6 @@ import React from 'react';
 import { Droppable } from '@hello-pangea/dnd';
 import { TaskCard } from './TaskCard';
 
-// Adicionamos 'id' nas props para identificar se é a coluna "todo" ou "done"
 export function Column({ title, tasks, id, onDelete }) {
   return (
     <div style={{ 
@@ -16,7 +15,6 @@ export function Column({ title, tasks, id, onDelete }) {
     }}>
       <h3 style={{ marginBottom: '15px', color: '#172b4d' }}>{title}</h3>
       
-      {/* Aqui definimos que esta área aceita cards */}
       <Droppable droppableId={id}>
         {(provided, snapshot) => (
           <div
@@ -25,7 +23,7 @@ export function Column({ title, tasks, id, onDelete }) {
             style={{
               flexGrow: 1,
               minHeight: '100px',
-              background: snapshot.isDraggingOver ? '#dfe1e6' : 'transparent', // Muda de cor quando arrasta por cima
+              background: snapshot.isDraggingOver ? '#dfe1e6' : 'transparent',
               transition: 'background 0.2s ease'
             }}
           >
@@ -37,7 +35,7 @@ export function Column({ title, tasks, id, onDelete }) {
                 onDelete={onDelete} 
               />
             ))}
-            {provided.placeholder} {/* Espaço fantasma enquanto arrasta */}
+            {provided.placeholder}
           </div>
         )}
       </Droppable>
