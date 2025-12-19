@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { db } from '../services/firebase';
 import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { Navbar } from '../components/Layout/Navbar';
+import { Column } from '../components/Board/Column';
+import { DragDropContext } from '@hello-pangea/dnd';
 
 export default function Granban() {
   const [loading, setLoading] = useState(false);
@@ -55,32 +58,57 @@ useEffect(() => {
     })
   }
 
+const onDragEnd = async (result) => {
+  const { destination, source, draggableID } = result;
+  if(!destination) return;
+  if(destination.droppableId === source.droppableId && destination.index === source.index) return;
+  const novoStatus = destination.droppableId === 'done';
+  const docRef = doc(db, "tarefas", draggableId);
+  await updateDoc(docRef, {
+    completada: novoStatus
+  });
+};
+
+  const tarefasAFazer = tarefas.filter(tarefa => !tarefa.completada);
+  const tarefasConcluidas = tarefas.filter(tarefa => tarefa.completada);
+
   return (
-    <div style={{padding: '50px'}}>
-      <h1>Granban - Teste de Conexão</h1>
-      <button onClick={adicionarTarefa} disabled={loading}>
-        {loading ? 'Enviando...' : 'Criar Tarefa de Teste'}
-      </button>
-      <input
-        placeholder="Digite sua tarefa"
-        value={tarefaInput}
-        onChange={(e) => setTarefaInput(e.target.value)}
-        />
-      <ul>
-          {tarefas.map((tarefa) => (
-            <li key={tarefa.id}>
-            <span style={{ textDecoration: tarefa.completada ? 'line-through' : 'none' }}>
-              {tarefa.nome}
-            </span>
-            <button onClick={() => editarTarefa(tarefa)}>
-              {tarefa.completada ? "Desmarcar" : "Concluir"}
-            </button>
-            <button onClick={() => excluirTarefa(tarefa.id)}>
-              Excluir
-            </button>
-          </li>
-          ))}
-        </ul>
+    <div className="granban-container" style={{ padding: '20px', backgroundColor: '#f4f5f7', minHeight: '100vh' }}>
+      
+      <Navbar title="Granban - Conectado ao Firebase" />
+++
+      <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
+          <input 
+            value={tarefaInput}
+            onChange={(e) => setTarefaInput(e.target.value)}
+            placeholder="Nova tarefa..."
+            style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
+          />
+          <button onClick={adicionarTarefa} disabled={loading} style={{ padding: '10px', background: '#0052cc', color: '#fff', border: 'none', borderRadius: '5px' }}>
+            {loading ? 'Salvando...' : 'Adicionar'}
+          </button>
+      </div>
+
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+          
+          <Column 
+              title="A Fazer" 
+              id="todo" 
+              tasks={tarefasAFazer} 
+              onDelete={excluirTarefa}
+          />
+
+          <Column 
+              title="Concluído" 
+              id="done" 
+              tasks={tarefasConcluidas} 
+              onDelete={excluirTarefa}
+          />
+          
+        </div>
+      </DragDropContext>
+
     </div>
   )
 }
