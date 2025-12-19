@@ -26,7 +26,7 @@ export default function Granban() {
 
   return (
     <div className="granban-container" style={{ padding: '20px', backgroundColor: '#f4f5f7', minHeight: '100vh' }}>
-      
+      <Navbar />
       <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
           <input 
             value={tarefaInput}
