@@ -5,6 +5,7 @@ import { useTarefa } from '../hooks/UseTarefas';
 import { COLUNAS } from '../constants/boardConfig';
 import '../style/Granban.css';
 import { Heading } from '../components/Layout/Heading';
+import { Navbar } from '../components/Layout/Navbar';
 
 export default function Granban() {
   const {
@@ -26,8 +27,10 @@ export default function Granban() {
   };
 
   return (
-    <div className="granban-container dark">
+      <div className="granban-container dark">
+      <Navbar />
       <Heading/>
+      <div className="granban-container">
       <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
           <input 
             value={tarefaInput}
@@ -62,6 +65,7 @@ export default function Granban() {
         </div>
       </DragDropContext>
 
+      </div>
     </div>
   )
 }
