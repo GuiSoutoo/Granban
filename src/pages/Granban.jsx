@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Navbar } from '../components/Layout/Navbar';
 import { Column } from '../components/Board/Column';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { useTarefa } from '../hooks/UseTarefas';
 import { COLUNAS } from '../constants/boardConfig';
+import '../style/Granban.css';
 
 export default function Granban() {
   const {
@@ -25,7 +25,7 @@ export default function Granban() {
   };
 
   return (
-    <div className="granban-container" style={{ padding: '20px', backgroundColor: '#f4f5f7', minHeight: '100vh' }}>
+    <div className="granban-container">
       
       <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
           <input 
