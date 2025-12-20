@@ -31,3 +31,12 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+
+h1 {
+  color: #FFFFFF !important;
+}
+
+body {
+  background-color: #1D0D32 !important;
+}

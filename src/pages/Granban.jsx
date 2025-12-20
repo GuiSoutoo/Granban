@@ -27,46 +27,46 @@ export default function Granban() {
   };
 
   return (
-      <div className="granban-container dark">
-      <Navbar />
-      <Heading/>
-      <div className="granban-container">
-      <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
-          <input 
-            value={tarefaInput}
-            onChange={(e) => setTarefaInput(e.target.value)}
-            placeholder="Nova tarefa..."
-            style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
-          />
-          <button 
-            onClick={() => {
-              adicionarTarefa(tarefaInput);
-              setTarefaInput('');
-            }}
-            disabled={loading}
-            >
-            {loading ? 'Salvando...' : 'Adicionar'}
-          </button>
-      </div>
-
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
-          
-          {COLUNAS.map(coluna => (
-            <Column
-              key={coluna.id}
-              id={coluna.id}
-              title={coluna.titulo}
-              tasks={getTarefasPorColuna(coluna.id)}
-              onDelete={excluirTarefa}
+      <>
+        <Navbar page="Granban"/>
+        <div className="granban-container dark">
+        <Heading page="Kanban pessoal"/>
+        <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
+            <input 
+              value={tarefaInput}
+              onChange={(e) => setTarefaInput(e.target.value)}
+              placeholder="Nova tarefa..."
+              style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
             />
-          ))}
-          
+            <button 
+              onClick={() => {
+                adicionarTarefa(tarefaInput);
+                setTarefaInput('');
+              }}
+              disabled={loading}
+              >
+              {loading ? 'Salvando...' : 'Adicionar'}
+            </button>
         </div>
-      </DragDropContext>
+
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
+            
+            {COLUNAS.map(coluna => (
+              <Column
+                key={coluna.id}
+                id={coluna.id}
+                title={coluna.titulo}
+                tasks={getTarefasPorColuna(coluna.id)}
+                onDelete={excluirTarefa}
+              />
+            ))}
+            
+          </div>
+        </DragDropContext>
 
       </div>
-    </div>
+    </>
   )
 }
 

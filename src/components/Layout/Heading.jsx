@@ -1,7 +1,7 @@
-export function Heading() {
+export function Heading(page) {
     return (
         <>
-            <h1 className="h1">lLl</h1>
+            <h1 className="h1">{page.page}</h1>
 
         </>
     );
