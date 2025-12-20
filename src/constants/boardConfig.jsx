@@ -1,7 +1,7 @@
 export const COLUNAS = [
-    { id: 'todo', titulo: 'A Fazer'},
-    { id: 'em-progresso', titulo: 'Em Progresso'},
-    { id: 'revisao', titulo: 'Em Revisão'},
-    { id: 'rejeitado', titulo: 'Rejeitado'},
-    { id: 'concluido', titulo: 'Concluído'}
+    { id: 'to-do', titulo: 'A Fazer'},
+    { id: 'in-progress', titulo: 'Em Progresso'},
+    { id: 'in-review', titulo: 'Em Revisão'},
+    { id: 'rejected', titulo: 'Rejeitado'},
+    { id: 'concluded', titulo: 'Concluído'}
 ]

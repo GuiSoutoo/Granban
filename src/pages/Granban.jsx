@@ -25,7 +25,7 @@ export default function Granban() {
   };
 
   return (
-    <div className="granban-container">
+    <div className="granban-container dark">
       
       <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
           <input 
