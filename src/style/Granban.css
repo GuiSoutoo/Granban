@@ -6,3 +6,32 @@
 
 /* Column.jsx */
 
+.col-status {
+    padding: 10px;
+    width: 300px;
+    border: 1px solid #8A70B3;
+}
+
+.dark {
+    background-color: #1D0D32 !important;
+}
+
+.to-do {
+    color: white;
+}
+
+.in-progress {
+    color: #2563EB;
+}
+
+.in-review {
+    color: #875AEC;
+}
+
+.rejected {
+    color: #E44448;
+}
+
+.concluded {
+    color: #25BD60;
+}

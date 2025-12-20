@@ -35,7 +35,7 @@ export function useTarefa() {
       await addDoc(collection(db, "tarefas"), {
         titulo: titulo,
         criadoEm: new Date(),
-        status: 'todo',
+        status: 'to-do',
       });
     } catch (error) {
       console.error("Erro ao adicionar:", error);
