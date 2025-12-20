@@ -26,8 +26,9 @@ export default function Granban() {
   };
 
   return (
-    <div className="granban-container">
+    <>
       <Navbar />
+      <div className="granban-container">
       <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
           <input 
             value={tarefaInput}
@@ -62,7 +63,8 @@ export default function Granban() {
         </div>
       </DragDropContext>
 
-    </div>
+      </div>
+    </>
   )
 }
 
