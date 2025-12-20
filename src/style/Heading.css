@@ -1,0 +1,21 @@
+.heading {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+
+.heading img{
+    width: 3vw;
+}
+
+h1 {
+    margin: auto 0;
+}
+
+.heading button {
+    all: unset;
+}
+
+.currentPage {
+    display: flex;
+    gap: 1vw;
+}

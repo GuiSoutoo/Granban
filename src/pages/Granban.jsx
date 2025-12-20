@@ -32,7 +32,7 @@ export default function Granban() {
         <div className="granban-container dark">
         <Heading page="Kanban pessoal"/>
         <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
-            <input 
+            {/* <input 
               value={tarefaInput}
               onChange={(e) => setTarefaInput(e.target.value)}
               placeholder="Nova tarefa..."
@@ -46,7 +46,7 @@ export default function Granban() {
               disabled={loading}
               >
               {loading ? 'Salvando...' : 'Adicionar'}
-            </button>
+            </button> */}
         </div>
 
         <DragDropContext onDragEnd={onDragEnd}>
