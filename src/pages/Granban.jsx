@@ -4,6 +4,7 @@ import { DragDropContext } from '@hello-pangea/dnd';
 import { useTarefa } from '../hooks/UseTarefas';
 import { COLUNAS } from '../constants/boardConfig';
 import '../style/Granban.css';
+import { Heading } from '../components/Layout/Heading';
 
 export default function Granban() {
   const {
@@ -26,7 +27,7 @@ export default function Granban() {
 
   return (
     <div className="granban-container dark">
-      
+      <Heading/>
       <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
           <input 
             value={tarefaInput}
