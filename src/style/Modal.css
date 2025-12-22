@@ -1,0 +1,185 @@
+/* ==================== MODAL OVERLAY ==================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* ==================== MODAL CONTAINER ==================== */
+.modal-container {
+  background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+/* ==================== MODAL HEADER ==================== */
+.modal-content-granban {
+  padding: 2rem;
+  color: #ffffff;
+}
+
+.modal-content-granban .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-content-granban .modal-header-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.modal-content-granban .modal-header-title i {
+  font-size: 2rem;
+}
+
+.modal-content-granban .btn-close-custom {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.8rem;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.modal-content-granban .btn-close-custom:hover {
+  transform: scale(1.2);
+}
+
+/* ==================== MODAL BODY ==================== */
+.modal-content-granban .modal-body {
+  padding: 0;
+}
+
+.modal-content-granban form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.modal-content-granban .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modal-content-granban label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.modal-content-granban input,
+.modal-content-granban select,
+.modal-content-granban textarea {
+  padding: 0.75rem 1rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.modal-content-granban input::placeholder,
+.modal-content-granban textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.modal-content-granban input:focus,
+.modal-content-granban select:focus,
+.modal-content-granban textarea:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+}
+
+.modal-content-granban select {
+  cursor: pointer;
+}
+
+.modal-content-granban select option {
+  background-color: #3f0f63;
+  color: #ffffff;
+}
+
+.modal-content-granban textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ==================== FORM ROWS (2 COLUNAS) ==================== */
+.modal-content-granban .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* ==================== BOTÃO SUBMIT ==================== */
+.modal-content-granban .btn-submit {
+  padding: 0.9rem 1.5rem;
+  margin-top: 1rem;
+  border: none;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: #6d28d9;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-content-granban .btn-submit:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content-granban .btn-submit:active {
+  transform: translateY(0);
+}
+
+/* ==================== RESPONSIVO ==================== */
+@media (max-width: 768px) {
+  .modal-container {
+    width: 95%;
+    max-width: 100%;
+  }
+
+  .modal-content-granban {
+    padding: 1.5rem;
+  }
+
+  .modal-content-granban .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content-granban .modal-header-title {
+    font-size: 1.2rem;
+  }
+}

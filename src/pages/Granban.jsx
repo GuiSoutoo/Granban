@@ -6,6 +6,7 @@ import { COLUNAS } from '../constants/boardConfig';
 import '../style/Granban.css';
 import { Heading } from '../components/Layout/Heading';
 import { Navbar } from '../components/Layout/Navbar';
+import ModalNewTask from '../components/Board/ModalNewTask';
 
 export default function Granban() {
   const {
@@ -32,21 +33,6 @@ export default function Granban() {
         <div className="granban-container dark">
         <Heading page="Kanban pessoal"/>
         <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
-            {/* <input 
-              value={tarefaInput}
-              onChange={(e) => setTarefaInput(e.target.value)}
-              placeholder="Nova tarefa..."
-              style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
-            />
-            <button 
-              onClick={() => {
-                adicionarTarefa(tarefaInput);
-                setTarefaInput('');
-              }}
-              disabled={loading}
-              >
-              {loading ? 'Salvando...' : 'Adicionar'}
-            </button> */}
         </div>
 
         <DragDropContext onDragEnd={onDragEnd}>

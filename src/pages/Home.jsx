@@ -5,6 +5,8 @@ import NovaTarefaIcon from "../assets/NovaTarefaIcon.svg";
 import GranbanIcon from "../assets/GranbanIcon.svg";
 import ProjetosIcon from "../assets/ProjetosIcon.svg";
 import "../style/Home.css";
+import OpenModal from "../components/Task/OpenModal";
+import ModalNewTask from "../components/Board/ModalNewTask";
 
 export default function Home() {
     return (
@@ -22,10 +24,9 @@ export default function Home() {
                         <span>Novo projeto</span>
                     </Link>
 
-                    <Link to="#" className="home-action-link">
-                        <img src={NovaTarefaIcon} alt="Nova tarefa" />
-                        <span>Nova tarefa</span>
-                    </Link>
+                
+                        <ModalNewTask />
+                        
 
                     <Link to="/Granban" className="home-action-link">
                         <img src={GranbanIcon} alt="Granban" />
