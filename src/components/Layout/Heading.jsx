@@ -21,10 +21,10 @@ export function Heading(page) {
     return (
             <div className="heading">
                 <div className="currentPage">
-                    <button><img src={pageIcon} /></button>
+                    <button className="buttonGr"><img src={pageIcon} /></button>
                     <h1 className="h1">{page.page}</h1>
                 </div>
-                <button className="funcIcon"><img src={funcIcon} /></button>
+                <button className="funcIcon buttonGr"><img src={funcIcon} /></button>
             </div>
     );
 }

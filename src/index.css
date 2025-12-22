@@ -41,3 +41,6 @@ body {
   background-color: #1D0D32 !important;
 }
 
+.buttonGr {
+    all: unset;
+}

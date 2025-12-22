@@ -11,10 +11,6 @@ h1 {
     margin: auto 0;
 }
 
-.heading button {
-    all: unset;
-}
-
 .currentPage {
     display: flex;
     gap: 1vw;
