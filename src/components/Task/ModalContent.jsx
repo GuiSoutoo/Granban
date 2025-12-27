@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useTarefa } from '../../hooks/UseTarefas';
 
 export default function ModalContent({ onClose }) {
+    const { adicionarTarefa, loading } = useTarefa();
     const [formData, setFormData] = useState({
             titulo: '',
             status: 'A fazer',
@@ -18,8 +20,20 @@ export default function ModalContent({ onClose }) {
         }))
     }
 
-    function createTask(e){
+    async function createTask(e){
         e.preventDefault();
+
+        await adicionarTarefa(formData);
+
+        setFormData({
+            titulo: '',
+            status: 'A fazer',
+            tag: '',
+            executor: '',
+            dataEntrega: '',
+            descricao: '',
+        });
+        onClose();
     }
         
     return (
@@ -122,8 +136,12 @@ export default function ModalContent({ onClose }) {
                     </div>
 
                     {/* Botão */}
-                    <button type="submit" className="btn-submit">
-                        Criar tarefa
+                    <button 
+                        type="submit" 
+                        className="btn-submit"
+                        disabled={loading}  
+                    >
+                        {loading ? 'Salvando...' : 'Criar tarefa'}
                     </button>
                 </form>
             </div>

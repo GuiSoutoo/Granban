@@ -24,21 +24,25 @@ export function useTarefa() {
     return () => unsubscribe(); 
   }, [])
 
-  const adicionarTarefa = async (titulo) => {
-    if (!titulo.trim()) {
-      alert("Por favor, digite uma tarefa.");
+  const adicionarTarefa = async (dados) => {
+    if (!dados.titulo.trim()) {
+      alert("Por favor, digite um título");
       return;
     }
     
     setLoading(true);
     try {
       await addDoc(collection(db, "tarefas"), {
-        titulo: titulo,
+        titulo: dados.titulo,
+        status: dados.status || 'A Fazer',
+        tag: dados.tag || '',
+        executor: dados.executor || '',
+        dataEntrega: dados.dataEntrega || '',
+        descricao: dados.descricao || '',
         criadoEm: new Date(),
-        status: 'to-do',
       });
     } catch (error) {
-      console.error("Erro ao adicionar:", error);
+      console.error("Erro ao adicionar tarefa:", error);
       alert("Erro! Veja o console (F12).");
     }
     setLoading(false);
