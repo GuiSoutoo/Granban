@@ -1,7 +1,7 @@
 import React from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 
-export function TaskCard({ task, index, onDelete }) {
+export function TaskCard({ task, index, onDelete, onEdit }) {
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided) => (
@@ -23,6 +23,12 @@ export function TaskCard({ task, index, onDelete }) {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>{task.titulo || task.nome}</span>
+            <button 
+                onClick={() => onEdit(task)}  // ← Novo botão
+                style={{ background: 'transparent', border: 'none', color: '#0052CC', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                ✏️
+            </button>
             <button 
                 onClick={() => onDelete(task.id)}
                 style={{ background: 'transparent', border: 'none', color: '#ff5630', cursor: 'pointer', fontWeight: 'bold' }}

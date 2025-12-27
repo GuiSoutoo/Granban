@@ -48,6 +48,31 @@ export function useTarefa() {
     setLoading(false);
   };
 
+  const atualizarTarefa = async (id, dados) => {
+    if (!dados.titulo.trim()) {
+      alert("Por favor, digite um título");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const docRef = doc(db, "tarefas", id);
+      await updateDoc(docRef, {
+        titulo: dados.titulo,
+        status: dados.status || 'A Fazer',
+        tag: dados.tag || '',
+        executor: dados.executor || '',
+        dataEntrega: dados.dataEntrega || '',
+        descricao: dados.descricao || '',
+        atualizadoEm: new Date(),
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar tarefa:", error);
+      alert("Erro! Veja o console (F12).");
+    }
+    setLoading(false);
+  };
+  
   const excluirTarefa = async (id) => {
     try {
       const docRef = doc(db, "tarefas", id);
@@ -75,6 +100,7 @@ export function useTarefa() {
     loading,
     adicionarTarefa,
     excluirTarefa,
+    atualizarTarefa,
     atualizarStatusTarefa,
     getTarefasPorColuna
   };
