@@ -13,7 +13,6 @@ export default function ModalEditTask({ task, onClose }) {
         descricao: '',
     });
 
-    // ← NOVO: useEffect pra preencher o form com dados da tarefa
     useEffect(() => {
         if (task) {
             setFormData({

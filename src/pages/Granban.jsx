@@ -6,7 +6,8 @@ import { COLUNAS } from '../constants/boardConfig';
 import '../style/Granban.css';
 import { Heading } from '../components/Layout/Heading';
 import { Navbar } from '../components/Layout/Navbar';
-import ModalNewTask from '../components/Board/ModalNewTask';
+import ModalNewTask from '../components/Task/ModalNewTask';
+import ModalEditTask from '../components/Task/ModalEditTask';
 
 export default function Granban() {
   const {
@@ -18,6 +19,13 @@ export default function Granban() {
   } = useTarefa();
 
   const [tarefaInput, setTarefaInput] = useState('');
+  const [editingTask, setEditingTask] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  function handleEditTask(task) {
+    setEditingTask(task);
+    setShowEditModal(true);
+  }
 
   const onDragEnd = (result) => {
     const { destination, source, draggableId } = result;
@@ -34,6 +42,13 @@ export default function Granban() {
         <Heading page="Kanban pessoal"/>
         <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
         </div>
+
+        {showEditModal && (
+          <ModalEditTask
+            task={editingTask}
+            onClose={() => setShowEditModal(false)}
+          />
+        )}
 
         <DragDropContext onDragEnd={onDragEnd}>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>

@@ -15,7 +15,13 @@ export function useTarefa() {
           id: doc.id,
           nome: doc.data().titulo,
           titulo: doc.data().titulo,
-          status: doc.data().status
+          status: doc.data().status,
+          tag: doc.data().tag,
+          executor: doc.data().executor,
+          dataEntrega: doc.data().dataEntrega,
+          descricao: doc.data().descricao,
+          criadoEm: doc.data().criadoEm ? doc.data().criadoEm.toDate().toLocaleDateString() : '',
+          criador: doc.data().criador,
         })
       })
       setTarefas(lista); 
@@ -34,7 +40,7 @@ export function useTarefa() {
     try {
       await addDoc(collection(db, "tarefas"), {
         titulo: dados.titulo,
-        status: dados.status || 'A Fazer',
+        status: dados.status || 'to-do',
         tag: dados.tag || '',
         executor: dados.executor || '',
         dataEntrega: dados.dataEntrega || '',
@@ -59,7 +65,7 @@ export function useTarefa() {
       const docRef = doc(db, "tarefas", id);
       await updateDoc(docRef, {
         titulo: dados.titulo,
-        status: dados.status || 'A Fazer',
+        status: dados.status || 'to-do',
         tag: dados.tag || '',
         executor: dados.executor || '',
         dataEntrega: dados.dataEntrega || '',

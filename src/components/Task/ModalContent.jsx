@@ -5,7 +5,7 @@ export default function ModalContent({ onClose }) {
     const { adicionarTarefa, loading } = useTarefa();
     const [formData, setFormData] = useState({
             titulo: '',
-            status: 'A fazer',
+            status: 'to-do',
             tag: '',
             executor: '',
             dataEntrega: '',
@@ -77,11 +77,11 @@ export default function ModalContent({ onClose }) {
                                 value={formData.status}
                                 onChange={handleChange}
                             >
-                                <option value="A fazer">A fazer</option>
-                                <option value="Em progresso">Em progresso</option>
-                                <option value="Revisão">Revisão</option>
-                                <option value="Rejeitado">Rejeitado</option>
-                                <option value="Concluído">Concluído</option>
+                                <option value="to-do">A fazer</option>
+                                <option value="in-progress">Em progresso</option>
+                                <option value="in-review">Revisão</option>
+                                <option value="rejected">Rejeitado</option>
+                                <option value="concluded">Concluído</option>
                             </select>
                         </div>
                         <div className="form-group">

@@ -6,7 +6,7 @@ import GranbanIcon from "../assets/GranbanIcon.svg";
 import ProjetosIcon from "../assets/ProjetosIcon.svg";
 import "../style/Home.css";
 import OpenModal from "../components/Task/OpenModal";
-import ModalNewTask from "../components/Board/ModalNewTask";
+import ModalNewTask from "../components/Task/ModalNewTask";
 
 export default function Home() {
     return (
