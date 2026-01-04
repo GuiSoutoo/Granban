@@ -22,10 +22,7 @@ export default function Granban() {
   const [editingTask, setEditingTask] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  function handleEditTask(task) {
-    setEditingTask(task);
-    setShowEditModal(true);
-  }
+  const handleEdit = (task) => { setEditingTask(task); setShowEditModal(true);  };
 
   const onDragEnd = (result) => {
     const { destination, source, draggableId } = result;
@@ -60,6 +57,7 @@ export default function Granban() {
                 title={coluna.titulo}
                 tasks={getTarefasPorColuna(coluna.id)}
                 onDelete={excluirTarefa}
+                onEdit={handleEdit}
               />
             ))}
             

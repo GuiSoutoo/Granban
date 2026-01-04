@@ -2,7 +2,7 @@ import React from 'react';
 import { Droppable } from '@hello-pangea/dnd';
 import { TaskCard } from './TaskCard';
 
-export function Column({ title, tasks, id, onDelete }) {
+export function Column({ title, tasks, id, onDelete, onEdit }) {
   return (
     <div className="col">
       <h3 className={id}>{title}</h3>
@@ -23,7 +23,8 @@ export function Column({ title, tasks, id, onDelete }) {
                   key={task.id} 
                   task={task} 
                   index={index} 
-                  onDelete={onDelete} 
+                  onDelete={onDelete}
+                  onEdit={onEdit}
                 />
               ))}
               {provided.placeholder}

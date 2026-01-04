@@ -6,7 +6,7 @@ export default function ModalEditTask({ task, onClose }) {
     const { atualizarTarefa, loading } = useTarefa();
     const [formData, setFormData] = useState({
         titulo: '',
-        status: 'A fazer',
+        status: 'to-do',
         tag: '',
         executor: '',
         dataEntrega: '',
@@ -17,7 +17,7 @@ export default function ModalEditTask({ task, onClose }) {
         if (task) {
             setFormData({
                 titulo: task.titulo || '',
-                status: task.status || 'A fazer',
+                status: task.status || 'to-do',
                 tag: task.tag || '',
                 executor: task.executor || '',
                 dataEntrega: task.dataEntrega || '',
@@ -83,11 +83,11 @@ export default function ModalEditTask({ task, onClose }) {
                                 value={formData.status}
                                 onChange={handleChange}
                             >
-                                <option value="A fazer">A fazer</option>
-                                <option value="Em progresso">Em progresso</option>
-                                <option value="Revisão">Revisão</option>
-                                <option value="Rejeitado">Rejeitado</option>
-                                <option value="Concluído">Concluído</option>
+                                <option value="to-do">A fazer</option>
+                                <option value="in-progress">Em progresso</option>
+                                <option value="in-review">Revisão</option>
+                                <option value="rejected">Rejeitado</option>
+                                <option value="concluded">Concluído</option>
                             </select>
                         </div>
                         <div className="form-group">
