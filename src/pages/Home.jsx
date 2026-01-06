@@ -24,10 +24,8 @@ export default function Home() {
                         <span>Novo projeto</span>
                     </Link>
 
-                
-                        <ModalNewTask />
+                    <ModalNewTask />
                         
-
                     <Link to="/Granban" className="home-action-link">
                         <img src={GranbanIcon} alt="Granban" />
                         <span>Granban</span>

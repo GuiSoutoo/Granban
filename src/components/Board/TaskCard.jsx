@@ -1,4 +1,3 @@
-import React from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 
 export function TaskCard({ task, index, onDelete, onEdit }) {

@@ -6,7 +6,7 @@ export default function ModalEditTask({ task, onClose }) {
     const { atualizarTarefa, loading } = useTarefa();
     const [formData, setFormData] = useState({
         titulo: '',
-        status: 'to-do',
+        status: 'todo',
         tag: '',
         executor: '',
         dataEntrega: '',
@@ -17,7 +17,7 @@ export default function ModalEditTask({ task, onClose }) {
         if (task) {
             setFormData({
                 titulo: task.titulo || '',
-                status: task.status || 'to-do',
+                status: task.status || 'todo',
                 tag: task.tag || '',
                 executor: task.executor || '',
                 dataEntrega: task.dataEntrega || '',
@@ -37,31 +37,32 @@ export default function ModalEditTask({ task, onClose }) {
     async function updateTask(e){
         e.preventDefault();
 
-        await atualizarTarefa(task.id, formData);  // ← Passa ID e dados
+        await atualizarTarefa(task.id, formData); 
 
         onClose();
     }
 
     return (
-        <div className="modal-content-granban">
-            <div className="modal-header">
-                <div className="modal-header-title">
-                    <i className="bi bi-pencil-square"></i>
-                    <span>Editar Tarefa</span>
-                </div>
-                <button
-                    type="button"
-                    className="btn-close-custom"
-                    onClick={onClose}
-                    aria-label="Close"
-                >
-                    ✕
-                </button>
-            </div>
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-content-granban">
+                    <div className="modal-header">
+                        <div className="modal-header-title">
+                            <i className="bi bi-pencil-square"></i>
+                            <span>Editar Tarefa</span>
+                        </div>
+                        <button
+                            type="button"
+                            className="btn-close-custom"
+                            onClick={onClose}
+                            aria-label="Close"
+                        >
+                            ✕
+                        </button>
+                    </div>
 
-            <div className="modal-body">
-                <form onSubmit={updateTask}>
-                    {/* Mesmo conteúdo do ModalContent, mas com updateTask em vez de createTask */}
+                    <div className="modal-body">
+                        <form onSubmit={updateTask}>
                     <div className="form-group">
                         <label>Título da tarefa</label>
                         <input
@@ -74,7 +75,6 @@ export default function ModalEditTask({ task, onClose }) {
                         />
                     </div>
 
-                    {/* Status e Tag */}
                     <div className="form-row">
                         <div className="form-group">
                             <label>Status</label>
@@ -83,11 +83,11 @@ export default function ModalEditTask({ task, onClose }) {
                                 value={formData.status}
                                 onChange={handleChange}
                             >
-                                <option value="to-do">A fazer</option>
-                                <option value="in-progress">Em progresso</option>
-                                <option value="in-review">Revisão</option>
-                                <option value="rejected">Rejeitado</option>
-                                <option value="concluded">Concluído</option>
+                                <option value="todo">A fazer</option>
+                                <option value="em-progresso">Em progresso</option>
+                                <option value="revisao">Revisão</option>
+                                <option value="rejeitado">Rejeitado</option>
+                                <option value="concluido">Concluído</option>
                             </select>
                         </div>
                         <div className="form-group">
@@ -105,7 +105,6 @@ export default function ModalEditTask({ task, onClose }) {
                         </div>
                     </div>
 
-                    {/* Executor e Data de entrega */}
                     <div className="form-row">
                         <div className="form-group">
                             <label>Executor</label>
@@ -130,7 +129,6 @@ export default function ModalEditTask({ task, onClose }) {
                         </div>
                     </div>
 
-                    {/* Descrição */}
                     <div className="form-group">
                         <label>Descrição</label>
                         <textarea
@@ -141,7 +139,6 @@ export default function ModalEditTask({ task, onClose }) {
                         ></textarea>
                     </div>
 
-                    {/* Botão */}
                     <button 
                         type="submit" 
                         className="btn-submit"
@@ -150,6 +147,8 @@ export default function ModalEditTask({ task, onClose }) {
                         {loading ? 'Salvando...' : 'Salvar Alterações'}
                     </button>
                 </form>
+                    </div>
+                </div>
             </div>
         </div>
     );

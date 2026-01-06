@@ -3,6 +3,7 @@ import GranbanIco from '../../assets/GranbanIcon.svg';
 import ProjectsIco from '../../assets/ProjetosIcon.svg';
 import NewProjectIco from '../../assets/NovoProjetoIcon.svg';
 import '../../style/Heading.css';
+import ModalNewTask from '../Task/ModalNewTask.jsx';
 
 export function Heading(page) {
     let pageIcon;
@@ -24,7 +25,7 @@ export function Heading(page) {
                     <button className="buttonGr"><img src={pageIcon} /></button>
                     <h1 className="h1">{page.page}</h1>
                 </div>
-                <button className="funcIcon buttonGr"><img src={funcIcon} /></button>
+                <ModalNewTask />
             </div>
     );
 }
