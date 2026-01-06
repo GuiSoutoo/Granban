@@ -22,6 +22,7 @@ export function useTarefa() {
           descricao: doc.data().descricao,
           criadoEm: doc.data().criadoEm ? doc.data().criadoEm.toDate().toLocaleDateString() : '',
           criador: doc.data().criador,
+          prioridade: doc.data().prioridade,
         })
       })
       setTarefas(lista); 
@@ -46,6 +47,7 @@ export function useTarefa() {
         dataEntrega: dados.dataEntrega || '',
         descricao: dados.descricao || '',
         criadoEm: new Date(),
+        prioridade: dados.prioridade || '',
       });
     } catch (error) {
       console.error("Erro ao adicionar tarefa:", error);
@@ -71,6 +73,7 @@ export function useTarefa() {
         dataEntrega: dados.dataEntrega || '',
         descricao: dados.descricao || '',
         atualizadoEm: new Date(),
+        prioridade: dados.prioridade || '',
       });
     } catch (error) {
       console.error("Erro ao atualizar tarefa:", error);

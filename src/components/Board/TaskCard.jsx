@@ -23,13 +23,17 @@ export function TaskCard({ task, index, onDelete, onEdit }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>Tarefa: {task.titulo}</span>
             <span>Tag: {task.tag}</span>
+            <span>Prioridade: {task.prioridade}</span>
             <span>Data de Entrega: {task.dataEntrega}</span>
             <span>Criado Em: {task.criadoEm}</span>
             <span>Criador: {task.criador}</span>
             <span>Executor: {task.executor}</span>
+            
+          </div>
+          <div>
             <button 
                 onClick={() => onEdit(task)}
-                style={{ background: 'transparent', border: 'none', color: '#0052CC', cursor: 'pointer', fontWeight: 'bold' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
               >
                 ✏️
             </button>

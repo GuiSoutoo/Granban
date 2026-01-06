@@ -10,6 +10,7 @@ export default function ModalContent({ onClose }) {
             executor: '',
             dataEntrega: '',
             descricao: '',
+            prioridade: '',
     });
         
     function handleChange(e){
@@ -27,11 +28,12 @@ export default function ModalContent({ onClose }) {
 
         setFormData({
             titulo: '',
-            status: 'A fazer',
+            status: 'to-do',
             tag: '',
             executor: '',
             dataEntrega: '',
             descricao: '',
+            prioridade: '',
         });
         onClose();
     }
@@ -55,7 +57,6 @@ export default function ModalContent({ onClose }) {
 
             <div className="modal-body">
                 <form onSubmit={createTask}>
-                    {/* Título da tarefa */}
                     <div className="form-group">
                         <label>Título da tarefa</label>
                         <input
@@ -68,8 +69,7 @@ export default function ModalContent({ onClose }) {
                         />
                     </div>
 
-                    {/* Status e Tag */}
-                    <div className="form-row">
+                    <div className="form-row-3">
                         <div className="form-group">
                             <label>Status</label>
                             <select
@@ -79,9 +79,23 @@ export default function ModalContent({ onClose }) {
                             >
                                 <option value="to-do">A fazer</option>
                                 <option value="in-progress">Em progresso</option>
-                                <option value="in-review">Revisão</option>
+                                <option value="review">Revisão</option>
                                 <option value="rejected">Rejeitado</option>
-                                <option value="concluded">Concluído</option>
+                                <option value="completed">Concluído</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Prioridade</label>
+                            <select
+                                name="prioridade"
+                                value={formData.prioridade}
+                                onChange={handleChange}
+                            >
+                                <option value="">Selecione uma prioridade</option>
+                                <option value="Urgente">Urgente</option>
+                                <option value="Alta">Alta</option>
+                                <option value="Média">Média</option>
+                                <option value="Baixa">Baixa</option>
                             </select>
                         </div>
                         <div className="form-group">
@@ -92,14 +106,17 @@ export default function ModalContent({ onClose }) {
                                 onChange={handleChange}
                             >
                                 <option value="">Selecione uma tag</option>
-                                <option value="urgent">Urgente</option>
-                                <option value="importante">Importante</option>
-                                <option value="normal">Normal</option>
+                                <option value="Bug">Bug</option>
+                                <option value="Layout">Layout</option>
+                                <option value="Alteração">Alteração</option>
+                                <option value="Melhoria">Melhoria</option>
+                                <option value="Essencial">Essencial</option>
+                                <option value="Remoção">Remoção</option>
+                                <option value="Funcionalidade">Funcionalidade</option>
                             </select>
                         </div>
                     </div>
 
-                    {/* Executor e Data de entrega */}
                     <div className="form-row">
                         <div className="form-group">
                             <label>Executor</label>
@@ -124,7 +141,6 @@ export default function ModalContent({ onClose }) {
                         </div>
                     </div>
 
-                    {/* Descrição */}
                     <div className="form-group">
                         <label>Descrição</label>
                         <textarea
@@ -135,7 +151,6 @@ export default function ModalContent({ onClose }) {
                         ></textarea>
                     </div>
 
-                    {/* Botão */}
                     <button 
                         type="submit" 
                         className="btn-submit"

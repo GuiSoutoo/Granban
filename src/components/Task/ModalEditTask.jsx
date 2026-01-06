@@ -8,6 +8,7 @@ export default function ModalEditTask({ task, onClose }) {
         titulo: '',
         status: 'todo',
         tag: '',
+        prioridade: '',
         executor: '',
         dataEntrega: '',
         descricao: '',
@@ -22,6 +23,7 @@ export default function ModalEditTask({ task, onClose }) {
                 executor: task.executor || '',
                 dataEntrega: task.dataEntrega || '',
                 descricao: task.descricao || '',
+                prioridade: task.prioridade || '',
             });
         }
     }, [task]);
@@ -75,7 +77,7 @@ export default function ModalEditTask({ task, onClose }) {
                         />
                     </div>
 
-                    <div className="form-row">
+                    <div className="form-row-3">
                         <div className="form-group">
                             <label>Status</label>
                             <select
@@ -83,11 +85,25 @@ export default function ModalEditTask({ task, onClose }) {
                                 value={formData.status}
                                 onChange={handleChange}
                             >
-                                <option value="todo">A fazer</option>
-                                <option value="em-progresso">Em progresso</option>
-                                <option value="revisao">Revisão</option>
-                                <option value="rejeitado">Rejeitado</option>
-                                <option value="concluido">Concluído</option>
+                                <option value="to-do">A fazer</option>
+                                <option value="in-progress">Em progresso</option>
+                                <option value="review">Revisão</option>
+                                <option value="rejected">Rejeitado</option>
+                                <option value="completed">Concluído</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Prioridade</label>
+                            <select
+                                name="prioridade"
+                                value={formData.prioridade}
+                                onChange={handleChange}
+                            >
+                                <option value="">Selecione uma prioridade</option>
+                                <option value="Urgente">Urgente</option>
+                                <option value="Alta">Alta</option>
+                                <option value="Média">Média</option>
+                                <option value="Baixa">Baixa</option>
                             </select>
                         </div>
                         <div className="form-group">
@@ -98,9 +114,13 @@ export default function ModalEditTask({ task, onClose }) {
                                 onChange={handleChange}
                             >
                                 <option value="">Selecione uma tag</option>
-                                <option value="urgent">Urgente</option>
-                                <option value="importante">Importante</option>
-                                <option value="normal">Normal</option>
+                                <option value="Bug">Bug</option>
+                                <option value="Layout">Layout</option>
+                                <option value="Alteração">Alteração</option>
+                                <option value="Melhoria">Melhoria</option>
+                                <option value="Essencial">Essencial</option>
+                                <option value="Remoção">Remoção</option>
+                                <option value="Funcionalidade">Funcionalidade</option>
                             </select>
                         </div>
                     </div>
