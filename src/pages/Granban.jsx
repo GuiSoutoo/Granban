@@ -6,19 +6,15 @@ import { COLUNAS } from '../constants/boardConfig';
 import '../style/Granban.css';
 import { Heading } from '../components/Layout/Heading';
 import { Navbar } from '../components/Layout/Navbar';
-import ModalNewTask from '../components/Task/ModalNewTask';
-import ModalEditTask from '../components/Task/ModalEditTask';
+import ModalTask from '../components/Task/ModalTask';
 
 export default function Granban() {
   const {
-    loading,
-    adicionarTarefa,
     excluirTarefa,
     atualizarStatusTarefa,
     getTarefasPorColuna
   } = useTarefa();
 
-  const [tarefaInput, setTarefaInput] = useState('');
   const [editingTask, setEditingTask] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
@@ -41,7 +37,7 @@ export default function Granban() {
         </div>
 
         {showEditModal && (
-          <ModalEditTask
+          <ModalTask
             task={editingTask}
             onClose={() => setShowEditModal(false)}
           />

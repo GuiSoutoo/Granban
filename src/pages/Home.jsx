@@ -1,11 +1,9 @@
 import { Link } from "react-router-dom";
 import { Navbar } from "../components/Layout/Navbar";
 import NovoProjetoIcon from "../assets/NovoProjetoIcon.svg";
-import NovaTarefaIcon from "../assets/NovaTarefaIcon.svg";
 import GranbanIcon from "../assets/GranbanIcon.svg";
 import ProjetosIcon from "../assets/ProjetosIcon.svg";
 import "../style/Home.css";
-import OpenModal from "../components/Task/OpenModal";
 import ModalNewTask from "../components/Task/ModalNewTask";
 
 export default function Home() {

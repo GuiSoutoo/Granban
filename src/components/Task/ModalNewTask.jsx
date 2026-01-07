@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ModalContent from '../Task/ModalContent';
+import ModalTask from './ModalTask';
 import NovaTarefaIcon from '../../assets/NovaTarefaIcon.svg';
 import '../../style/Modal.css';
 
@@ -17,11 +17,7 @@ export default function ModalNewTask() {
       </button>
 
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-            <ModalContent onClose={() => setShowModal(false)} />
-          </div>
-        </div>
+        <ModalTask onClose={() => setShowModal(false)} />
       )}
     </>
   );

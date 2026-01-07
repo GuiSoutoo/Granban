@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
-import ModalContent from './ModalContent.jsx';
+import ModalTask from './ModalTask';
 import NovaTarefaIcon from '../../assets/NovaTarefaIcon.svg';
 import '../../style/Task.css';
 
@@ -13,9 +12,8 @@ export default function OpenModal() {
         <img src={NovaTarefaIcon} alt="Nova tarefa" />
         <span>Nova tarefa</span>
       </button>
-      {showModal && createPortal(
-        <ModalContent onClose={() => setShowModal(false)} />,
-        document.body
+      {showModal && (
+        <ModalTask onClose={() => setShowModal(false)} />
       )}
     </>
   );
