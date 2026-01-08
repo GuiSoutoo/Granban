@@ -25,7 +25,7 @@ export function Heading(page) {
                     <button className="buttonGr"><img src={pageIcon} /></button>
                     <h1 className="h1">{page.page}</h1>
                 </div>
-                <ModalNewTask />
+                    <button className="funcIcon"><img src={funcIcon} /></button>
             </div>
     );
 }
