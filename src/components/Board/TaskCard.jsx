@@ -1,6 +1,9 @@
 import { Draggable } from '@hello-pangea/dnd';
+import { TaskButton } from './TaskButton';
+import { useTarefa } from '../../hooks/UseTarefas';
 
 export function TaskCard({ task, index, onDelete, onEdit }) {
+  const { atualizarStatusTarefa } = useTarefa();
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided) => (
@@ -43,6 +46,11 @@ export function TaskCard({ task, index, onDelete, onEdit }) {
             >
                 X
             </button>
+            <TaskButton
+              status={task.status}
+              taskId={task.id}
+              onStatusChange={(id, newStatus) => atualizarStatusTarefa(id, newStatus)}
+            />
           </div>
         </div>
       )}

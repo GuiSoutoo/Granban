@@ -8,7 +8,7 @@ export default function OpenModal() {
   return (
     <>
       
-      <button className="buttonGr TaskButton" onClick={() => setShowModal(true)}>
+      <button className="TaskButton" onClick={() => setShowModal(true)}>
         <img src={NovaTarefaIcon} alt="Nova tarefa" />
         <span>Nova tarefa</span>
       </button>

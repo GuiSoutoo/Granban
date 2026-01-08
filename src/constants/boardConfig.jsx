@@ -3,5 +3,6 @@ export const COLUNAS = [
     { id: 'in-progress', titulo: 'Em Progresso'},
     { id: 'in-review', titulo: 'Em Revisão'},
     { id: 'rejected', titulo: 'Rejeitado'},
-    { id: 'concluded', titulo: 'Concluído'}
+    { id: 'concluded', titulo: 'Concluído'},
+    { id: 'archived', titulo: 'Arquivado'},
 ]
