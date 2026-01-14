@@ -2,6 +2,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { TaskButton } from './TaskButton';
 import { useTarefa } from '../../hooks/UseTarefas';
+import '../../style/Task.css';
 
 export function TaskCard({ task, index, onDelete, onEdit, isMoving }) {
   const { atualizarStatusTarefa } = useTarefa();
@@ -36,29 +37,41 @@ export function TaskCard({ task, index, onDelete, onEdit, isMoving }) {
       style={style}
       {...listeners}
       {...attributes}
+      className="cardTask"
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-        <span>Tarefa: {task.titulo}</span>
-        <span>Tag: {task.tag}</span>
-        <span>Prioridade: {task.prioridade}</span>
-        <span>Data de Entrega: {task.dataEntrega}</span>
-        <span>Criado Em: {task.criadoEm}</span>
-        <span>Criador: {task.criador}</span>
-        <span>Executor: {task.executor}</span>
+      <div className="headTask">
+        <div className="infoTask">
+          <p>{task.tag}</p>
+          <h5>{task.tag}</h5>
+        </div>
+        <div className="dateTask">
+          <p>{task.dataEntrega ? new Date(task.dataEntrega).toLocaleDateString('pt-BR') : '-'}</p>
+          <p>{task.criadoEm}</p>
+        </div>
       </div>
-      <div style={{ marginTop: '8px' }}>
-        <button 
-          onClick={(e) => { e.stopPropagation(); onEdit(task); }}
-          style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          ✏️
-        </button>
-        <button 
-          onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
-          style={{ background: 'transparent', border: 'none', color: '#ff5630', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          X
-        </button>
+      
+      <h3>{task.titulo}</h3>
+      <div className="ownersTask">
+        <p>Executor: {task.executor}</p>
+        <p>Criador: {task.criador}</p>
+      </div>
+      
+      <div className="buttonTask">
+        <div className="actionButtons">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onEdit(task); }}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            ✏️
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
+            style={{ background: 'transparent', border: 'none', color: '#ff5630', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            X
+          </button>
+        </div>
+
         <TaskButton
           status={task.status}
           taskId={task.id}

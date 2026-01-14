@@ -30,3 +30,35 @@
 .botãoTask button:hover {
     background-color: #1d4ed8;
 }
+
+.cardTask {
+    display: flex;
+    flex-direction: column;
+}
+
+.headTask {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.infoTask {
+    display: flex;
+    flex-direction: column;
+}
+
+.dateTask{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.buttonTask {
+    display: flex;
+    justify-content: space-between;
+}
+
+.actionButtons {
+    display: flex;
+    flex-direction: row;
+}
