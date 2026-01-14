@@ -102,9 +102,9 @@ export default function ModalTask({ task, onClose }) {
                                     >
                                         <option value="to-do">A fazer</option>
                                         <option value="in-progress">Em progresso</option>
-                                        <option value="review">Revisão</option>
+                                        <option value="in-review">Revisão</option>
                                         <option value="rejected">Rejeitado</option>
-                                        <option value="completed">Concluído</option>
+                                        <option value="concluded">Concluído</option>
                                     </select>
                                 </div>
                                 <div className="form-group">
