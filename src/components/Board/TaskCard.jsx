@@ -1,59 +1,70 @@
-import { Draggable } from '@hello-pangea/dnd';
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import { TaskButton } from './TaskButton';
 import { useTarefa } from '../../hooks/UseTarefas';
 
-export function TaskCard({ task, index, onDelete, onEdit }) {
+export function TaskCard({ task, index, onDelete, onEdit, isMoving }) {
   const { atualizarStatusTarefa } = useTarefa();
+
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: task.id,
+  });
+
+  // Esconde o card se está sendo movido (evita o "fantasma")
+  if (isMoving) {
+    return null;
+  }
+
+  const style = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    userSelect: 'none',
+    padding: '16px',
+    margin: '0 0 8px 0',
+    minHeight: '50px',
+    backgroundColor: 'white',
+    borderRadius: '5px',
+    boxShadow: isDragging ? '0 4px 8px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.2)',
+    borderLeft: task.completada ? '5px solid #36B37E' : '5px solid #FFAB00',
+    cursor: isDragging ? 'grabbing' : 'grab',
+    zIndex: isDragging ? 1000 : 1,
+    position: 'relative',
+  };
+
   return (
-    <Draggable draggableId={task.id} index={index}>
-      {(provided) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          style={{
-            userSelect: 'none',
-            padding: '16px',
-            margin: '0 0 8px 0',
-            minHeight: '50px',
-            backgroundColor: 'white',
-            borderRadius: '5px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-            borderLeft: task.completada ? '5px solid #36B37E' : '5px solid #FFAB00',
-            ...provided.draggableProps.style,
-          }}
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+        <span>Tarefa: {task.titulo}</span>
+        <span>Tag: {task.tag}</span>
+        <span>Prioridade: {task.prioridade}</span>
+        <span>Data de Entrega: {task.dataEntrega}</span>
+        <span>Criado Em: {task.criadoEm}</span>
+        <span>Criador: {task.criador}</span>
+        <span>Executor: {task.executor}</span>
+      </div>
+      <div style={{ marginTop: '8px' }}>
+        <button 
+          onClick={(e) => { e.stopPropagation(); onEdit(task); }}
+          style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>Tarefa: {task.titulo}</span>
-            <span>Tag: {task.tag}</span>
-            <span>Prioridade: {task.prioridade}</span>
-            <span>Data de Entrega: {task.dataEntrega}</span>
-            <span>Criado Em: {task.criadoEm}</span>
-            <span>Criador: {task.criador}</span>
-            <span>Executor: {task.executor}</span>
-            
-          </div>
-          <div>
-            <button 
-                onClick={() => onEdit(task)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                ✏️
-            </button>
-            <button 
-                onClick={() => onDelete(task.id)}
-                style={{ background: 'transparent', border: 'none', color: '#ff5630', cursor: 'pointer', fontWeight: 'bold' }}
-            >
-                X
-            </button>
-            <TaskButton
-              status={task.status}
-              taskId={task.id}
-              onStatusChange={(id, newStatus) => atualizarStatusTarefa(id, newStatus)}
-            />
-          </div>
-        </div>
-      )}
-    </Draggable>
+          ✏️
+        </button>
+        <button 
+          onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
+          style={{ background: 'transparent', border: 'none', color: '#ff5630', cursor: 'pointer', fontWeight: 'bold' }}
+        >
+          X
+        </button>
+        <TaskButton
+          status={task.status}
+          taskId={task.id}
+          onStatusChange={(id, newStatus) => atualizarStatusTarefa(id, newStatus)}
+        />
+      </div>
+    </div>
   );
 }

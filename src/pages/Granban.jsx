@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Column } from '../components/Board/Column';
-import { DragDropContext } from '@hello-pangea/dnd';
 import { useTarefa } from '../hooks/UseTarefas';
 import { COLUNAS } from '../constants/boardConfig';
 import '../style/Granban.css';
 import { Heading } from '../components/Layout/Heading';
 import { Navbar } from '../components/Layout/Navbar';
 import ModalTask from '../components/Task/ModalTask';
+
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 
 export default function Granban() {
   const {
@@ -17,21 +18,42 @@ export default function Granban() {
 
   const [editingTask, setEditingTask] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [movingTaskId, setMovingTaskId] = useState(null);
 
-  const handleEdit = (task) => { setEditingTask(task); setShowEditModal(true);  };
+  const handleEdit = (task) => { setEditingTask(task); setShowEditModal(true); };
 
-  const onDragEnd = (result) => {
-    const { destination, source, draggableId } = result;
-    if(!destination) return;
-    if(destination.droppableId === source.droppableId && destination.index === source.index) return;
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
-    atualizarStatusTarefa(draggableId, destination.droppableId)
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    
+    if (!over) return;
+    
+    const taskId = active.id;
+    const newStatus = over.id;
+    
+    // Verifica se o over.id é uma coluna válida
+    const isValidColumn = COLUNAS.some(col => col.id === newStatus);
+    if (!isValidColumn) return;
+    
+    // Esconde o card temporariamente para evitar o "fantasma"
+    setMovingTaskId(taskId);
+    atualizarStatusTarefa(taskId, newStatus);
+    
+    // Limpa após um pequeno delay para garantir que o estado atualizou
+    setTimeout(() => setMovingTaskId(null), 100);
   };
 
   return (
-      <>
-        <Navbar page="Granban"/>
-        <div className="granban-container dark">
+    <>
+      <Navbar page="Granban"/>
+      <div className="granban-container dark">
         <Heading page="Kanban pessoal"/>
         <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
         </div>
@@ -42,10 +64,13 @@ export default function Granban() {
             onClose={() => setShowEditModal(false)}
           />
         )}
-
-        <DragDropContext onDragEnd={onDragEnd}>
+        
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
-            
             {COLUNAS.map(coluna => (
               <Column
                 key={coluna.id}
@@ -54,14 +79,13 @@ export default function Granban() {
                 tasks={getTarefasPorColuna(coluna.id)}
                 onDelete={excluirTarefa}
                 onEdit={handleEdit}
+                movingTaskId={movingTaskId}
               />
             ))}
-            
           </div>
-        </DragDropContext>
-
+        </DndContext>
       </div>
     </>
-  )
+  );
 }
 
