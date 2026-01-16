@@ -34,12 +34,50 @@
 .cardTask {
     display: flex;
     flex-direction: column;
+    background-color: #5F4588;
+    margin: 0 0 8px 0;
+    padding: 16px;
+    color: white;
+}
+
+.to-doCard {
+    background: linear-gradient(to bottom, #5D4386, #324055);
+}
+
+.in-progressCard {
+    background: linear-gradient(to bottom, #5D4386, #2563EB);
+}
+
+.in-reviewCard {
+    background: linear-gradient(to bottom, #5D4386, #8B5CF6);
+}
+
+.rejectedCard {
+    background: linear-gradient(to bottom, #5D4386, #EF4444);
+}
+
+.concludedCard {
+    background: linear-gradient(to bottom, #5D4386, #22C55E);
+}
+
+.archivedCard {
+    background: linear-gradient(to bottom, #5D4386, #b29bb8);
 }
 
 .headTask {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.headTask p{
+    margin-bottom: 2px !important;
+}
+
+.deliveryDate {
+    font-size: large;
+    margin: 10px 0;
 }
 
 .infoTask {
@@ -47,18 +85,54 @@
     flex-direction: column;
 }
 
+.cardTask p {
+    margin-bottom: 6px;
+}
+
 .dateTask{
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    font-family: "Noto Sans Lao", sans-serif;
+    font-size: small;
 }
 
 .buttonTask {
     display: flex;
     justify-content: space-between;
+    gap: 38px;
+}
+
+.buttonTask h1{
+    
 }
 
 .actionButtons {
     display: flex;
     flex-direction: row;
+}
+
+.Alta {
+    color: #e69e34;
+}
+
+.Média {
+    color: #fbff00;
+}
+
+.Baixa {
+    color: #10B981;
+}
+
+.Urgente {
+    color: #ff1515;
+}
+
+.bottomTask a {
+    opacity: 0.5;
+}
+
+.bottomTask p{
+    margin-bottom: 0 !important;
+}
+
+.bottomTask {
+    margin-bottom: 10px;
 }

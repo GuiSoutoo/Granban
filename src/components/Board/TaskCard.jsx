@@ -4,6 +4,25 @@ import { TaskButton } from './TaskButton';
 import { useTarefa } from '../../hooks/UseTarefas';
 import '../../style/Task.css';
 
+// Formata a data de criação para exibição relativa (Hoje, Há X dias)
+function formatarTempoDecorrido(dataString) {
+  if (!dataString) return '-';
+  
+  const partes = dataString.split('/');
+  if (partes.length !== 3) return dataString;
+  
+  const dataCriacao = new Date(partes[2], partes[1] - 1, partes[0]);
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  dataCriacao.setHours(0, 0, 0, 0);
+  
+  const dias = Math.floor((hoje - dataCriacao) / (1000 * 60 * 60 * 24));
+  
+  if (dias === 0) return 'Hoje';
+  if (dias === 1) return 'Há 1 dia';
+  return `Há ${dias} dias`;
+}
+
 export function TaskCard({ task, index, onDelete, onEdit, isMoving }) {
   const { atualizarStatusTarefa } = useTarefa();
 
@@ -16,48 +35,30 @@ export function TaskCard({ task, index, onDelete, onEdit, isMoving }) {
     return null;
   }
 
-  const style = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-    userSelect: 'none',
-    padding: '16px',
-    margin: '0 0 8px 0',
-    minHeight: '50px',
-    backgroundColor: 'white',
-    borderRadius: '5px',
-    boxShadow: isDragging ? '0 4px 8px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.2)',
-    borderLeft: task.completada ? '5px solid #36B37E' : '5px solid #FFAB00',
-    cursor: isDragging ? 'grabbing' : 'grab',
-    zIndex: isDragging ? 1000 : 1,
-    position: 'relative',
-  };
-
   return (
     <div
       ref={setNodeRef}
-      style={style}
       {...listeners}
       {...attributes}
-      className="cardTask"
+      className={`cardTask ${task.status}Card`}
     >
       <div className="headTask">
         <div className="infoTask">
           <p>{task.tag}</p>
-          <h5>{task.tag}</h5>
+          <h5>Nome Projeto</h5>
         </div>
-        <div className="dateTask">
-          <p>{task.dataEntrega ? new Date(task.dataEntrega).toLocaleDateString('pt-BR') : '-'}</p>
-          <p>{task.criadoEm}</p>
-        </div>
+          <p className="deliveryDate">{task.dataEntrega ? new Date(task.dataEntrega).toLocaleDateString('pt-BR') : '-'}</p>
       </div>
-      
-      <h3>{task.titulo}</h3>
-      <div className="ownersTask">
-        <p>Executor: {task.executor}</p>
-        <p>Criador: {task.criador}</p>
+
+      <p className="dateTask">{formatarTempoDecorrido(task.criadoEm)}</p>
+      <h4>{task.titulo}</h4>
+      <div className="bottomTask">
+        <p className={task.prioridade}>{task.prioridade} prioridade</p>
+        <p><a>Executor</a> {task.executor}</p>
       </div>
       
       <div className="buttonTask">
-        <div className="actionButtons">
+        {/* <div className="actionButtons">
           <button 
             onClick={(e) => { e.stopPropagation(); onEdit(task); }}
             style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
@@ -70,7 +71,9 @@ export function TaskCard({ task, index, onDelete, onEdit, isMoving }) {
           >
             X
           </button>
-        </div>
+        </div> */}
+
+        <h1>...</h1>
 
         <TaskButton
           status={task.status}
