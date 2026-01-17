@@ -52,6 +52,7 @@ export function TaskCard({ task, index, onDelete, onEdit, isMoving }) {
 
       <p className="dateTask">{formatarTempoDecorrido(task.criadoEm)}</p>
       <h4>{task.titulo}</h4>
+      <hr></hr>
       <div className="bottomTask">
         <p className={task.prioridade}>{task.prioridade} prioridade</p>
         <p><a>Executor</a> {task.executor}</p>
