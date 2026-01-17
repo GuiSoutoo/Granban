@@ -70,7 +70,7 @@ export default function Granban() {
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
+          <div className="board-granban">
             {COLUNAS.map(coluna => (
               <Column
                 key={coluna.id}

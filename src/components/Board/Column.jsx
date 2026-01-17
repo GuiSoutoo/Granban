@@ -1,5 +1,6 @@
 import { useDroppable } from '@dnd-kit/core';
 import { TaskCard } from './TaskCard';
+import ArcIcon from '../../assets/ArchivedIcon.svg';
 
 export function Column({ title, tasks, id, onDelete, onEdit, movingTaskId }) {
   const { isOver, setNodeRef } = useDroppable({
@@ -8,10 +9,10 @@ export function Column({ title, tasks, id, onDelete, onEdit, movingTaskId }) {
 
   return (
     <div className="col">
-      <h3 className={id}>{title}</h3>
+      <h3 className={id}>{title == 'Arquivado' ? <img src={ArcIcon} alt="Archived Icon"  width='25px'/> : title}</h3>
       <div 
         ref={setNodeRef}
-        className="col col-status"
+        className={`col col-status ${id}Col`}
         style={{
           flexGrow: 1,
           minHeight: '100px',

@@ -4,12 +4,27 @@
     min-height: 100vh;
 }
 
+.board-granban {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 /* Column.jsx */
 
+.col {
+    flex: 0 !important;
+}
+
 .col-status {
-    width: 300px;
     border: 1px solid #8A70B3;
-    min-height: 100vh !important;
+    min-height: 50vw !important;
+    width: 320px;
+}
+
+.archivedCol {
+    width: 70px !important;
 }
 
 .dark {
@@ -38,4 +53,5 @@
 
 .archived {
     color: #A0A0A0;
+    text-align: center;
 }
