@@ -20,14 +20,28 @@ export default function Granban() {
   const [editingTask, setEditingTask] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [detailsTask, setDetailsTask] = useState(null);
+  const [returnToDetailsTask, setReturnToDetailsTask] = useState(null);
   const [movingTaskId, setMovingTaskId] = useState(null);
 
   const handleEdit = (task) => { setEditingTask(task); setShowEditModal(true); };
   const handleOpenDetails = (task) => { setDetailsTask(task); };
   const handleAddTask = () => {
     setDetailsTask(null);
+    setReturnToDetailsTask(null);
     setEditingTask(null);
     setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setReturnToDetailsTask(null);
+  };
+
+  const handleBackToDetails = () => {
+    if (!returnToDetailsTask) return;
+    setShowEditModal(false);
+    setDetailsTask(returnToDetailsTask);
+    setReturnToDetailsTask(null);
   };
 
   const sensors = useSensors(
@@ -69,7 +83,8 @@ export default function Granban() {
         {showEditModal && (
           <ModalTask
             task={editingTask}
-            onClose={() => setShowEditModal(false)}
+            onClose={handleCloseEditModal}
+            onBack={returnToDetailsTask ? handleBackToDetails : undefined}
           />
         )}
 
@@ -78,9 +93,11 @@ export default function Granban() {
             task={detailsTask}
             onClose={() => setDetailsTask(null)}
             onEdit={(task) => {
+              setReturnToDetailsTask(task);
               setDetailsTask(null);
               handleEdit(task);
             }}
+            onDelete={(task) => excluirTarefa(task.id)}
             onStatusChange={atualizarStatusTarefa}
           />
         )}

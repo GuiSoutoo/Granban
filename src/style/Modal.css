@@ -210,14 +210,33 @@
 .modal-edit-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-bottom: 10px;
+  gap: 10px;
+}
+
+.modal-edit-back {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.modal-edit-back:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .modal-edit-headerLeft {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
+  gap: 10px;
 }
 
 .modal-edit-icon {
@@ -650,6 +669,14 @@ select.modal-edit-pill {
 
 .modal-details-iconBtn:hover {
   background: rgba(255, 255, 255, 0.08);
+}
+
+.modal-details-iconBtn--danger {
+  color: #ff4040;
+}
+
+.modal-details-iconBtn--danger:hover {
+  background: rgba(255, 64, 64, 0.12);
 }
 
 .modal-details-divider {

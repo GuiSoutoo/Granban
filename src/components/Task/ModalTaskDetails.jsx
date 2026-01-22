@@ -26,7 +26,7 @@ const getTagIcon = (tag) => {
   return foundKey ? tagIcons[foundKey] : null;
 };
 
-export default function ModalTaskDetails({ task, onClose, onEdit, onStatusChange }) {
+export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onStatusChange }) {
   const isOpen = !!task;
 
   useEffect(() => {
@@ -50,11 +50,17 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onStatusChange
 
   const tagIcon = getTagIcon(task.tag);
 
+  const handleDelete = async () => {
+    if (!task?.id) return;
+    const confirmed = window.confirm('Deseja excluir esta tarefa?');
+    if (!confirmed) return;
+    await onDelete?.(task);
+    onClose?.();
+  };
+
   return (
     <div className="modal-overlay" onClick={() => onClose?.()}>
       <div className="modal-details-wrap" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-details-caption">Detalhes de um card</div>
-
         <div className="modal-details-card">
           <div className="modal-details-header">
             <div className="modal-details-headerLeft">
@@ -136,6 +142,23 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onStatusChange
                     <path d="M20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z" fill="currentColor"/>
                   </svg>
                 </button>
+
+                {onDelete ? (
+                  <button
+                    type="button"
+                    className="modal-details-iconBtn modal-details-iconBtn--danger"
+                    aria-label="Excluir"
+                    title="Excluir"
+                    onClick={handleDelete}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 7h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M6 7l1 14h10l1-14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M9 7V4h6v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                ) : null}
               </div>
             </div>
           </div>

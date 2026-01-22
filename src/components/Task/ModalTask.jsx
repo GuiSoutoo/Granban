@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTarefa } from '../../hooks/UseTarefas';
 import '../../style/Modal.css';
 
-export default function ModalTask({ task, onClose }) {
-    const { adicionarTarefa, atualizarTarefa, excluirTarefa, loading } = useTarefa();
+export default function ModalTask({ task, onClose, onBack }) {
+    const { adicionarTarefa, atualizarTarefa, loading } = useTarefa();
     const isEditing = !!task;
     
     const [formData, setFormData] = useState({
@@ -59,16 +59,6 @@ export default function ModalTask({ task, onClose }) {
         onClose();
     }
 
-    async function handleDelete(){
-        if (!isEditing) return;
-
-        const confirmed = window.confirm('Deseja excluir esta tarefa?');
-        if (!confirmed) return;
-
-        await excluirTarefa(task.id);
-        onClose();
-    }
-
     const createdInfo = isEditing
         ? `Criado em ${task?.criadoEm || '--/--/----'} por ${task?.criador || 'Nome do Criador'}`
         : '';
@@ -78,6 +68,19 @@ export default function ModalTask({ task, onClose }) {
             <div className="modal-edit-wrap" onClick={(e) => e.stopPropagation()}>
                 <form className="modal-edit-card" onSubmit={handleSubmit}>
                     <header className="modal-edit-header">
+                        {onBack ? (
+                            <button
+                                type="button"
+                                className="modal-edit-back"
+                                onClick={onBack}
+                                aria-label="Voltar"
+                                title="Voltar"
+                            >
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </button>
+                        ) : null}
                         <div className="modal-edit-headerLeft">
                             <span className="modal-edit-icon" aria-hidden="true">
                                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -185,23 +188,6 @@ export default function ModalTask({ task, onClose }) {
                                         <option value="Remoção">Remoção</option>
                                         <option value="Funcionalidade">Funcionalidade</option>
                                     </select>
-
-                                    {isEditing ? (
-                                        <button
-                                            type="button"
-                                            className="modal-edit-trash"
-                                            onClick={handleDelete}
-                                            aria-label="Excluir tarefa"
-                                            title="Excluir"
-                                        >
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M4 7h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                                <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                                <path d="M6 7l1 14h10l1-14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                                <path d="M9 7V4h6v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                            </svg>
-                                        </button>
-                                    ) : null}
                                 </div>
                             </div>
                         </div>
