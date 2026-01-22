@@ -22,14 +22,14 @@ export default function Home() {
                         <span>Novo projeto</span>
                     </Link>
 
-                    <ModalNewTask />
+                    <ModalNewTask className="home-action-link home-action-link--newtask" />
                         
                     <Link to="/Granban" className="home-action-link">
                         <img src={GranbanIcon} alt="Granban" />
                         <span>Granban</span>
                     </Link>
 
-                    <Link to="#" className="home-action-link">
+                    <Link to="/Projetos" className="home-action-link">
                         <img src={ProjetosIcon} alt="Projetos" />
                         <span>Projetos</span>
                     </Link>

@@ -3,13 +3,14 @@ import ModalTask from './ModalTask';
 import NovaTarefaIcon from '../../assets/NovaTarefaIcon.svg';
 import '../../style/Modal.css';
 
-export default function ModalNewTask() {
+export default function ModalNewTask({ className = '' }) {
   const [showModal, setShowModal] = useState(false);
   
   return (
     <>
       <button 
-        className="buttonGr TaskButton"
+        type="button"
+        className={`buttonGr TaskButton ${className}`.trim()}
         onClick={() => setShowModal(true)}
       >
         <img src={NovaTarefaIcon} alt="Nova tarefa"/>

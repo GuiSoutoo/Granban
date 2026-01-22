@@ -25,7 +25,15 @@ export function Heading(page) {
                     <button className="buttonGr"><img src={pageIcon} /></button>
                     <h1 className="h1">{page.page}</h1>
                 </div>
-                    <button className="funcIcon"><img src={funcIcon} /></button>
+                    <button
+                        type="button"
+                        className={`funcIcon${page.page === 'Kanban pessoal' ? ' funcIcon--granban' : ''}`}
+                        onClick={page.onFuncClick}
+                        aria-label={page.page === 'Kanban pessoal' ? 'Adicionar tarefa' : 'Ação'}
+                        title={page.page === 'Kanban pessoal' ? 'Adicionar tarefa' : 'Ação'}
+                    >
+                        <img src={funcIcon} />
+                    </button>
             </div>
     );
 }

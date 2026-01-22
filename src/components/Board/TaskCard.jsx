@@ -48,8 +48,13 @@ function formatarTempoDecorrido(dataString) {
   return `Há ${dias} dias`;
 }
 
-export function TaskCard({ task, index, onDelete, onEdit, isMoving }) {
+export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, isMoving }) {
   const { atualizarStatusTarefa } = useTarefa();
+
+  const openDetails = (e) => {
+    e?.stopPropagation?.();
+    if (typeof onOpenDetails === 'function') onOpenDetails(task);
+  };
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
@@ -70,9 +75,6 @@ export function TaskCard({ task, index, onDelete, onEdit, isMoving }) {
         {...attributes}
         className={`cardTask ${task.status}Card`}
         title={task.titulo}
-        onClick={(e) => {
-          onEdit(task);
-        }}
       >
         <div className="iconContainer" style={{ width: '100%', justifyContent: 'center', display: 'flex' }}>
           {getIcon(task.tag) ? (
@@ -91,9 +93,6 @@ export function TaskCard({ task, index, onDelete, onEdit, isMoving }) {
       {...listeners}
       {...attributes}
       className={`cardTask ${task.status}Card`}
-      onClick={(e) => {
-        onEdit(task);
-      }}
     >
       <div className="headTask">
         {getIcon(task.tag) && (
@@ -119,22 +118,24 @@ export function TaskCard({ task, index, onDelete, onEdit, isMoving }) {
       </div>
       
       <div className="buttonTask">
-        {/* <div className="actionButtons">
-          <button 
-            onClick={(e) => { e.stopPropagation(); onEdit(task); }}
-            style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            ✏️
-          </button>
-          <button 
-            onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
-            style={{ background: 'transparent', border: 'none', color: '#ff5630', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            X
-          </button>
-        </div> */}
-
-        <h1>...</h1>
+        <button
+          type="button"
+          className="task-details-btn"
+          aria-label="Abrir detalhes"
+          title="Detalhes"
+          onPointerDown={(e) => {
+            e.stopPropagation();
+          }}
+          onPointerUp={openDetails}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openDetails(e);
+            }
+          }}
+        >
+          ...
+        </button>
 
         <TaskButton
           status={task.status}

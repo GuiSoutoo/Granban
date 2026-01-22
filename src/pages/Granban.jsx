@@ -6,6 +6,7 @@ import '../style/Granban.css';
 import { Heading } from '../components/Layout/Heading';
 import { Navbar } from '../components/Layout/Navbar';
 import ModalTask from '../components/Task/ModalTask';
+import ModalTaskDetails from '../components/Task/ModalTaskDetails';
 
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 
@@ -18,9 +19,16 @@ export default function Granban() {
 
   const [editingTask, setEditingTask] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [detailsTask, setDetailsTask] = useState(null);
   const [movingTaskId, setMovingTaskId] = useState(null);
 
   const handleEdit = (task) => { setEditingTask(task); setShowEditModal(true); };
+  const handleOpenDetails = (task) => { setDetailsTask(task); };
+  const handleAddTask = () => {
+    setDetailsTask(null);
+    setEditingTask(null);
+    setShowEditModal(true);
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -54,7 +62,7 @@ export default function Granban() {
     <>
       <Navbar page="Granban"/>
       <div className="granban-container dark">
-        <Heading page="Kanban pessoal"/>
+        <Heading page="Kanban pessoal" onFuncClick={handleAddTask} />
         <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
         </div>
 
@@ -62,6 +70,18 @@ export default function Granban() {
           <ModalTask
             task={editingTask}
             onClose={() => setShowEditModal(false)}
+          />
+        )}
+
+        {detailsTask && (
+          <ModalTaskDetails
+            task={detailsTask}
+            onClose={() => setDetailsTask(null)}
+            onEdit={(task) => {
+              setDetailsTask(null);
+              handleEdit(task);
+            }}
+            onStatusChange={atualizarStatusTarefa}
           />
         )}
         
@@ -79,6 +99,7 @@ export default function Granban() {
                 tasks={getTarefasPorColuna(coluna.id)}
                 onDelete={excluirTarefa}
                 onEdit={handleEdit}
+                onOpenDetails={handleOpenDetails}
                 movingTaskId={movingTaskId}
               />
             ))}

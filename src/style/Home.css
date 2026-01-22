@@ -40,18 +40,46 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
+  width: 130px;
+  min-height: 150px;
+  gap: 12px;
   text-decoration: none;
   color: rgba(255, 255, 255, 0.8);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   transition: transform 0.2s ease, color 0.2s ease;
 }
 
+/* O botão (Nova tarefa) precisa herdar a mesma cor dos Links */
+.home-actions button.home-action-link {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.home-actions button.home-action-link:hover {
+  color: #ffffff;
+}
+
 .home-action-link img {
+  width: 100px;
   height: 100px;
-  margin-bottom: 0.75rem;
+  object-fit: contain;
+}
+
+/* O SVG de 'Nova tarefa' é visualmente mais fino: aumenta um pouco para igualar */
+.home-action-link--newtask img {
+  transform: none;
 }
 
 .home-action-link span {
   font-weight: 600;
+}
+
+/* O ícone de 'Nova tarefa' ocupa mais a base do SVG; dá um respiro igual aos outros */
+.home-action-link--newtask span {
+  margin-top: 12px;
 }
 
 .home-action-link:hover {

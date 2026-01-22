@@ -192,3 +192,28 @@
 .Concluded {
     background-color: #8dbe9f;
 }
+
+/* Botão ... (detalhes) */
+.task-details-btn {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 2em;
+    font-weight: bold;
+    margin: 0.67em 0;
+    padding: 0;
+    line-height: 1.2;
+    cursor: pointer;
+    opacity: 0.9;
+    transition: opacity 0.15s ease;
+}
+
+.task-details-btn:hover {
+    opacity: 1;
+}
+
+.task-details-btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.55);
+    outline-offset: 3px;
+    border-radius: 6px;
+}
