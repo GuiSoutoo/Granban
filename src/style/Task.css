@@ -69,28 +69,61 @@
 }
 
 .archivedCard {
-    background: linear-gradient(to bottom, #5D4386, #b29bb8);
+    background: linear-gradient(to bottom, #5D4386);
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    min-height: auto;
 }
 
 .headTask {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
-    margin-bottom: 10px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    margin-bottom: 12px;
+    gap: 12px;
 }
 
-.headTask p{
-    margin-bottom: 2px !important;
-}
-
-.deliveryDate {
-    font-size: large;
-    margin: 10px 0;
+.iconContainer img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
 }
 
 .infoTask {
     display: flex;
     flex-direction: column;
+    flex: 1;
+}
+
+.headerTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 2px;
+}
+
+.infoTask p {
+    margin-bottom: 0 !important;
+}
+
+.tagName {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.deliveryDate {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.projectName {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.2;
 }
 
 .cardTask p {

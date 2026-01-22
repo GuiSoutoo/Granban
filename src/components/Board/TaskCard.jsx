@@ -4,6 +4,31 @@ import { TaskButton } from './TaskButton';
 import { useTarefa } from '../../hooks/UseTarefas';
 import '../../style/Task.css';
 
+import AlterIcon from '../../assets/TagIcon/AlterIcon.svg';
+import BugIcon from '../../assets/TagIcon/BugIcon.svg';
+import EssentialIcon from '../../assets/TagIcon/EssentialIcon.svg';
+import FuncIcon from '../../assets/TagIcon/FuncIcon.svg';
+import LayoutIcon from '../../assets/TagIcon/LayoutIcon.svg';
+import RemIcon from '../../assets/TagIcon/RemIcon.svg';
+import UpgradeIcon from '../../assets/TagIcon/UpgradeIcon.svg';
+
+const tagIcons = {
+  'Alteração': AlterIcon,
+  'Bug': BugIcon,
+  'Essencial': EssentialIcon,
+  'Funcionalidade': FuncIcon,
+  'Layout': LayoutIcon,
+  'Remoção': RemIcon,
+  'Melhoria': UpgradeIcon,
+};
+
+const getIcon = (tag) => {
+  if (!tag) return null;
+  const lowerTag = tag.toLowerCase();
+  const foundKey = Object.keys(tagIcons).find(key => lowerTag.includes(key.toLowerCase()));
+  return foundKey ? tagIcons[foundKey] : null;
+};
+
 // Formata a data de criação para exibição relativa (Hoje, Há X dias)
 function formatarTempoDecorrido(dataString) {
   if (!dataString) return '-';
@@ -35,19 +60,54 @@ export function TaskCard({ task, index, onDelete, onEdit, isMoving }) {
     return null;
   }
 
+  const isArchived = task.status === 'archived';
+
+  if (isArchived) {
+    return (
+      <div
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+        className={`cardTask ${task.status}Card`}
+        title={task.titulo}
+        onClick={(e) => {
+          onEdit(task);
+        }}
+      >
+        <div className="iconContainer" style={{ width: '100%', justifyContent: 'center', display: 'flex' }}>
+          {getIcon(task.tag) ? (
+             <img src={getIcon(task.tag)} alt={task.tag} style={{ width: '30px', height: '30px' }} />
+          ) : (
+            <span style={{ fontSize: '0.8rem' }}>{task.tag?.substring(0,2)}</span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
       className={`cardTask ${task.status}Card`}
+      onClick={(e) => {
+        onEdit(task);
+      }}
     >
       <div className="headTask">
+        {getIcon(task.tag) && (
+          <div className="iconContainer">
+            <img src={getIcon(task.tag)} alt={task.tag}/>
+          </div>
+        )}
         <div className="infoTask">
-          <p>{task.tag}</p>
-          <h5>Nome Projeto</h5>
+          <div className="headerTop">
+            <p className="tagName">{task.tag}</p>
+            <p className="deliveryDate">{task.dataEntrega ? new Date(task.dataEntrega).toLocaleDateString('pt-BR') : '-'}</p>
+          </div>
+          <h5 className="projectName">Nome Projeto</h5>
         </div>
-          <p className="deliveryDate">{task.dataEntrega ? new Date(task.dataEntrega).toLocaleDateString('pt-BR') : '-'}</p>
       </div>
 
       <p className="dateTask">{formatarTempoDecorrido(task.criadoEm)}</p>
