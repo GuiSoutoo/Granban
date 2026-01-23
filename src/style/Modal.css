@@ -43,7 +43,6 @@
   align-items: center;
   gap: 1rem;
   font-size: 1.5rem;
-  font-weight: 600;
 }
 
 .modal-content-granban .modal-header-title i {
@@ -522,9 +521,8 @@ select.modal-edit-pill {
 .modal-details-card {
   background: linear-gradient(180deg, #3a235f 0%, #6a35d7 100%);
   border-radius: 22px;
-  padding: 16px;
+  padding: 35px;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #fff;
   max-height: 86vh;
   overflow: auto;
@@ -537,24 +535,15 @@ select.modal-edit-pill {
   margin-bottom: 10px;
 }
 
+.modal-details-appIcon img{
+  width: 35px;
+  height: 35px;;
+}
+
 .modal-details-headerLeft {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.modal-details-appIcon {
-  width: 58px;
-  height: 34px;
-  position: relative;
-}
-
-.modal-details-appIcon span {
-  width: 12px;
-  height: 12px;
-  background: #eaff7a;
-  position: absolute;
-  border-radius: 2px;
 }
 
 .modal-details-appIcon span:nth-child(1) { left: 0; top: 6px; }
@@ -584,7 +573,6 @@ select.modal-edit-pill {
 
 .modal-details-tag {
   font-size: 18px;
-  font-weight: 600;
   line-height: 1;
 }
 
@@ -595,33 +583,31 @@ select.modal-edit-pill {
 }
 
 .modal-details-title {
-  font-size: 34px;
-  font-weight: 800;
+  font-size: 30px;
   letter-spacing: 0.2px;
   line-height: 1.05;
-  margin: 8px 0 12px;
+  margin: 18px 0 12px;
 }
 
 .modal-details-meta {
-  display: grid;
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: left;
   margin-bottom: 10px;
 }
 
-.modal-details-metaRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
 
 .modal-details-metaLabel {
-  width: 90px;
   opacity: 0.85;
 }
 
 .modal-details-metaValue {
-  font-weight: 600;
+  margin-left: 10px;
+}
+
+.modal-details-statusSelect{
+  margin-left: 10px;
 }
 
 .priority-Alta { color: #ffb020; }
@@ -630,13 +616,20 @@ select.modal-edit-pill {
 .priority-Baixa { color: #54ff9a; }
 
 .modal-details-statusSelect {
-  background: rgba(0, 0, 0, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: none;
+  outline: none;
   color: #fff;
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-weight: 600;
+  border-radius: 10px;
+  padding: 6px 28px 6px 12px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
 }
 
 .modal-details-statusSelect option {
@@ -644,14 +637,45 @@ select.modal-edit-pill {
   color: #fff;
 }
 
+.modal-details-statusSelect:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+/* Status colors */
+.modal-details-statusSelect.status--to-do {
+  background-color: #5D4386;
+}
+
+.modal-details-statusSelect.status--in-progress {
+  background-color: #2563EB;
+}
+
+.modal-details-statusSelect.status--in-review {
+  background-color: #8B5CF6;
+}
+
+.modal-details-statusSelect.status--rejected {
+  background-color: #EF4444;
+}
+
+.modal-details-statusSelect.status--concluded {
+  background-color: #22C55E;
+}
+
+.modal-details-statusSelect.status--archived {
+  background-color: #6B7280;
+}
+
 .modal-details-metaRow--executor {
-  justify-content: space-between;
-  gap: 14px;
+  display: flex;
 }
 
 .modal-details-actions {
-  display: inline-flex;
+  display: flex;
   gap: 12px;
+  margin-left: auto;
+  margin-top: -13px;
 }
 
 .modal-details-iconBtn {

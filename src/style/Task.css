@@ -41,11 +41,11 @@
 }
 
 .cardTask:hover{
-    box-shadow: inset 0 0 89px rgba(143, 46, 255, 0.20);
+    box-shadow: inset 0 0 89px rgba(144, 71, 226, 0.3);
 }
 
 .cardTask hr{
-    margin: 0.5rem 0 0.8rem 0;
+    margin: 0rem 0 0.5rem 0;
 }
 
 .to-doCard {
@@ -144,6 +144,7 @@
     justify-content: space-between;
     gap: 38px;
     align-items:last center;
+    height: 45px;
 }
 
 .Alta {
@@ -202,9 +203,10 @@
     background: transparent;
     border: none;
     color: inherit;
-    font-size: 2em;
+    font-size: 3em;
     font-weight: bold;
-    margin: 0.67em 0;
+    letter-spacing: 3px;
+    margin: 0 0 0.5em 0;
     padding: 0;
     line-height: 1.2;
     cursor: pointer;

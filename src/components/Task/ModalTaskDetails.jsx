@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import '../../style/Modal.css';
 
+import ChangeExecutorIcon from '../../assets/changeExecutorIcon.svg';
 import AlterIcon from '../../assets/TagIcon/AlterIcon.svg';
 import BugIcon from '../../assets/TagIcon/BugIcon.svg';
 import EssentialIcon from '../../assets/TagIcon/EssentialIcon.svg';
@@ -28,6 +29,13 @@ const getTagIcon = (tag) => {
 
 export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onStatusChange }) {
   const isOpen = !!task;
+  const [currentStatus, setCurrentStatus] = useState(task?.status || 'to-do');
+
+  useEffect(() => {
+    if (task?.status) {
+      setCurrentStatus(task.status);
+    }
+  }, [task?.status]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -45,7 +53,13 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
   const createdLabel = task.criadoEm || '-';
   const creatorLabel = task.criador || 'Nome do Criador';
   const deliveryLabel = task.dataEntrega
-    ? new Date(task.dataEntrega).toLocaleString('pt-BR')
+    ? (() => {
+        const date = new Date(task.dataEntrega);
+        const datePart = date.toLocaleDateString('pt-BR');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${datePart}, ${hours}h${minutes}`;
+      })()
     : '-';
 
   const tagIcon = getTagIcon(task.tag);
@@ -68,8 +82,7 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
                 {tagIcon ? (
                   <img
                     src={tagIcon}
-                    alt=""
-                    style={{ width: 42, height: 42, objectFit: 'contain' }}
+                    alt={task.tag || ''}
                   />
                 ) : (
                   <div
@@ -112,9 +125,13 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
             <div className="modal-details-metaRow">
               <span className="modal-details-metaLabel">Status</span>
               <select
-                className="modal-details-statusSelect"
-                value={task.status || 'to-do'}
-                onChange={(e) => onStatusChange?.(task.id, e.target.value)}
+                className={`modal-details-statusSelect status--${currentStatus}`}
+                value={currentStatus}
+                onChange={(e) => {
+                  const newStatus = e.target.value;
+                  setCurrentStatus(newStatus);
+                  onStatusChange?.(task.id, newStatus);
+                }}
               >
                 <option value="to-do">A fazer</option>
                 <option value="in-progress">Em progresso</option>
@@ -130,6 +147,15 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
               <span className="modal-details-metaValue">{task.executor || '-'}</span>
 
               <div className="modal-details-actions">
+                <button
+                  type="button"
+                  className="modal-details-iconBtn"
+                  aria-label="Alterar executor"
+                  title="Alterar executor"
+                >
+                  <img src={ChangeExecutorIcon} alt="Alterar executor" width="22" height="22" />
+                </button>
+
                 <button
                   type="button"
                   className="modal-details-iconBtn"
@@ -167,16 +193,6 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
 
           <div className="modal-details-description">
             {task.descricao || ''}
-          </div>
-
-          <div className="modal-details-image">
-            <div className="modal-details-imageInner" aria-hidden="true">
-              <svg width="78" height="78" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 6C4 4.9 4.9 4 6 4H18C19.1 4 20 4.9 20 6V18C20 19.1 19.1 20 18 20H6C4.9 20 4 19.1 4 18V6Z" fill="#6A35D7"/>
-                <path d="M8 14L10.5 11.5L14 15L16 13L20 17V18C20 19.1 19.1 20 18 20H6C4.9 20 4 19.1 4 18V17L8 14Z" fill="#4B2A7B"/>
-                <path d="M15.5 10.5C16.3284 10.5 17 9.82843 17 9C17 8.17157 16.3284 7.5 15.5 7.5C14.6716 7.5 14 8.17157 14 9C14 9.82843 14.6716 10.5 15.5 10.5Z" fill="#4B2A7B"/>
-              </svg>
-            </div>
           </div>
         </div>
       </div>
