@@ -7,6 +7,7 @@ import { Heading } from '../components/Layout/Heading';
 import { Navbar } from '../components/Layout/Navbar';
 import ModalTask from '../components/Task/ModalTask';
 import ModalTaskDetails from '../components/Task/ModalTaskDetails';
+import ModalTaskReview from '../components/Task/ModalTaskReview';
 
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 
@@ -20,13 +21,16 @@ export default function Granban() {
   const [editingTask, setEditingTask] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [detailsTask, setDetailsTask] = useState(null);
+  const [reviewTask, setReviewTask] = useState(null);
   const [returnToDetailsTask, setReturnToDetailsTask] = useState(null);
   const [movingTaskId, setMovingTaskId] = useState(null);
 
   const handleEdit = (task) => { setEditingTask(task); setShowEditModal(true); };
   const handleOpenDetails = (task) => { setDetailsTask(task); };
+  const handleOpenReview = (task) => { setReviewTask(task); };
   const handleAddTask = () => {
     setDetailsTask(null);
+    setReviewTask(null);
     setReturnToDetailsTask(null);
     setEditingTask(null);
     setShowEditModal(true);
@@ -101,6 +105,14 @@ export default function Granban() {
             onStatusChange={atualizarStatusTarefa}
           />
         )}
+
+        {reviewTask && (
+          <ModalTaskReview
+            task={reviewTask}
+            onClose={() => setReviewTask(null)}
+            onStatusChange={atualizarStatusTarefa}
+          />
+        )}
         
         <DndContext
           sensors={sensors}
@@ -117,6 +129,7 @@ export default function Granban() {
                 onDelete={excluirTarefa}
                 onEdit={handleEdit}
                 onOpenDetails={handleOpenDetails}
+                onOpenReview={handleOpenReview}
                 movingTaskId={movingTaskId}
               />
             ))}

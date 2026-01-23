@@ -488,6 +488,39 @@ select.modal-edit-pill {
   font-weight: 800;
 }
 
+/* ==================== MODAL REVIEW BUTTONS ==================== */
+.modal-review-btnReject {
+  background: linear-gradient(135deg, #ff3b3b 0%, #b91c1c 100%);
+  color: rgba(255, 255, 255, 0.96);
+  font-weight: 800;
+  border: none;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.18);
+}
+
+.modal-review-btnConclude {
+  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+  color: rgba(255, 255, 255, 0.96);
+  font-weight: 800;
+  border: none;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.18);
+}
+
+.modal-review-btnReject:hover,
+.modal-review-btnConclude:hover {
+  filter: brightness(1.05);
+}
+
+.modal-review-btnReject:focus,
+.modal-review-btnConclude:focus,
+.modal-review-btnReject:focus-visible,
+.modal-review-btnConclude:focus-visible,
+.modal-review-btnReject:active,
+.modal-review-btnConclude:active {
+  outline: none;
+  border: none;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.18);
+}
+
 .modal-edit-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;

@@ -1,6 +1,6 @@
 import '../../style/Task.css';
 
-export function TaskButton({ status, taskId, onStatusChange }) {
+export function TaskButton({ status, taskId, onStatusChange, task, onReview }) {
     const botaoStatus = (currentStatus) => {
       switch(currentStatus) {
         case 'to-do':
@@ -19,6 +19,10 @@ export function TaskButton({ status, taskId, onStatusChange }) {
     };
 
     const handleClick = () => {
+      if (status === 'in-review' && typeof onReview === 'function') {
+        onReview(task);
+        return;
+      }
       const { proximoStatus } = botaoStatus(status);
         if (onStatusChange && proximoStatus) {
           onStatusChange(taskId, proximoStatus);
@@ -27,7 +31,14 @@ export function TaskButton({ status, taskId, onStatusChange }) {
     const botaoInfo = botaoStatus(status);
     return (
         <div className='botãoTask'>
-          <button onClick={handleClick} className={botaoInfo.className}>
+          <button
+            type="button"
+            onPointerDown={(e) => {
+              e.stopPropagation();
+            }}
+            onClick={handleClick}
+            className={botaoInfo.className}
+          >
             {botaoInfo.text}
           </button>
         </div>
