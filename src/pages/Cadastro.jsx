@@ -1,23 +1,18 @@
-import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { login } from '../services/auth';
-import { getCurrentUser } from '../services/auth';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { createAccount } from '../services/auth';
+import { logout } from '../services/auth';
 
-export default function Login() {
+export default function Cadastro() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from || '/Granban';
 
-  const [identifier, setIdentifier] = useState('');
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    // Se já estiver logado, não precisa ver a tela de login.
-    if (getCurrentUser()) navigate('/Granban', { replace: true });
-  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,10 +20,13 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await login({ identifier, password });
-      navigate(from, { replace: true });
+      await createAccount({ name, username, email, password });
+      // Cadastro autentica o usuário automaticamente no Firebase.
+      // Como você pediu para ir para o login, desloga e redireciona.
+      await logout();
+      navigate('/login');
     } catch (err) {
-      const message = err?.message || 'Erro ao fazer login';
+      const message = err?.message || 'Erro ao cadastrar';
       setError(message);
     } finally {
       setLoading(false);
@@ -37,7 +35,7 @@ export default function Login() {
 
   return (
     <div className="container" style={{ maxWidth: 520, paddingTop: 40 }}>
-      <h1 className="h3 mb-3">Login</h1>
+      <h1 className="h3 mb-3">Cadastro</h1>
 
       {error ? (
         <div className="alert alert-danger" role="alert">
@@ -47,14 +45,39 @@ export default function Login() {
 
       <form onSubmit={handleSubmit} className="card p-3">
         <div className="mb-3">
-          <label className="form-label">Usuário ou e-mail</label>
+          <label className="form-label">Nome</label>
           <input
             className="form-control"
             type="text"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            autoComplete="name"
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Nome de usuário</label>
+          <input
+            className="form-control"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
             autoComplete="username"
+          />
+          <div className="form-text">Você vai poder entrar com ele ou com o e-mail.</div>
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">E-mail</label>
+          <input
+            className="form-control"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
           />
         </div>
 
@@ -67,7 +90,8 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              autoComplete="current-password"
+              minLength={6}
+              autoComplete="new-password"
             />
             <button
               type="button"
@@ -91,6 +115,7 @@ export default function Login() {
               )}
             </button>
           </div>
+          <div className="form-text">Mínimo 6 caracteres (Firebase Auth).</div>
         </div>
 
         <button
@@ -98,12 +123,12 @@ export default function Login() {
           className="btn btn-primary"
           disabled={loading}
         >
-          {loading ? 'Entrando...' : 'Entrar'}
+          {loading ? 'Cadastrando...' : 'Cadastrar'}
         </button>
 
         <div className="mt-3">
-          <span>Não tem conta? </span>
-          <Link to="/cadastro">Criar conta</Link>
+          <span>Já tem conta? </span>
+          <Link to="/login">Ir para login</Link>
         </div>
       </form>
     </div>

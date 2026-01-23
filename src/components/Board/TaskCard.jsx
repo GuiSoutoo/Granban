@@ -48,7 +48,7 @@ function formatarTempoDecorrido(dataString) {
   return `Há ${dias} dias`;
 }
 
-export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, isMoving, isExpanded = true }) {
+export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenReview, isMoving, isExpanded = true }) {
   const { atualizarStatusTarefa } = useTarefa();
 
   const openDetails = (e) => {
@@ -139,8 +139,10 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, isMovin
 
         {!isArchived && (
         <TaskButton
+          task={task}
           status={task.status}
           taskId={task.id}
+          onReview={onOpenReview}
           onStatusChange={(id, newStatus) => atualizarStatusTarefa(id, newStatus)}
         />
         )}
