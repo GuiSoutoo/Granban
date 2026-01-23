@@ -9,12 +9,12 @@ import {
 } from 'firebase/auth';
 import {
   doc,
-  collection,
   getDoc,
   setDoc,
   updateDoc,
   serverTimestamp,
   runTransaction,
+  deleteField,
 } from 'firebase/firestore';
 
 const USERS_COLLECTION = 'users';
@@ -63,7 +63,8 @@ async function ensureUserDoc(user, extras = {}) {
     // Compatível com coleção existente ("name") e também mantém "username".
     name: nameCandidate,
     username: usernameCandidate,
-    usernameLower: usernameCandidate ? usernameCandidate.toLowerCase() : (existing?.usernameLower || null),
+    // Não persistimos usernameLower: a normalização é feita no JS.
+    usernameLower: deleteField(),
     updatedAt: serverTimestamp(),
   };
 
@@ -92,7 +93,6 @@ async function reserveUsername(user, username) {
       uid: user.uid,
       email: user.email || null,
       username: rawUsername,
-      usernameLower,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
