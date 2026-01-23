@@ -48,7 +48,7 @@ function formatarTempoDecorrido(dataString) {
   return `Há ${dias} dias`;
 }
 
-export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, isMoving }) {
+export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, isMoving, isExpanded = true }) {
   const { atualizarStatusTarefa } = useTarefa();
 
   const openDetails = (e) => {
@@ -67,13 +67,13 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, isMovin
 
   const isArchived = task.status === 'archived';
 
-  if (isArchived) {
+  if (isArchived && !isExpanded) {
     return (
       <div
         ref={setNodeRef}
         {...listeners}
         {...attributes}
-        className={`cardTask ${task.status}Card`}
+        className={`cardTask ${task.status}Card collapsed`}
         title={task.titulo}
       >
         <div className="iconContainer" style={{ width: '100%', justifyContent: 'center', display: 'flex' }}>
@@ -137,11 +137,13 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, isMovin
           ...
         </button>
 
+        {!isArchived && (
         <TaskButton
           status={task.status}
           taskId={task.id}
           onStatusChange={(id, newStatus) => atualizarStatusTarefa(id, newStatus)}
         />
+        )}
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { TaskCard } from './TaskCard';
 import ArcIcon from '../../assets/ArchivedIcon.svg';
@@ -7,12 +8,26 @@ export function Column({ title, tasks, id, onDelete, onEdit, onOpenDetails, movi
     id: id,
   });
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleColumn = () => {
+    if (id === 'archived') {
+      setIsExpanded(!isExpanded);
+    }
+  };
+
   return (
-    <div className="col">
-      <h3 className={id}>{title == 'Arquivado' ? <img src={ArcIcon} alt="Archived Icon"  width='25px'/> : title}</h3>
+    <div className={`column-wrapper ${id === 'archived' ? 'archived-wrapper' : ''} ${isExpanded ? 'expanded' : ''}`}>
+      <h3 
+        className={id}  
+        onClick={toggleColumn}
+        style={{ cursor: id === 'archived' ? 'pointer' : 'default' }}
+      >
+        {title == 'Arquivado' ? <img src={ArcIcon} alt="Archived Icon"  width='25px'/> : title}
+      </h3>
       <div 
         ref={setNodeRef}
-        className={`col col-status ${id}Col`}
+        className={`col col-status ${id}Col ${isExpanded ? 'expanded' : ''}`}
         style={{
           flexGrow: 1,
           minHeight: '100px',
@@ -29,6 +44,7 @@ export function Column({ title, tasks, id, onDelete, onEdit, onOpenDetails, movi
             onEdit={onEdit}
             onOpenDetails={onOpenDetails}
             isMoving={task.id === movingTaskId}
+            isExpanded={id === 'archived' ? isExpanded : true}
           />
         ))}
       </div>

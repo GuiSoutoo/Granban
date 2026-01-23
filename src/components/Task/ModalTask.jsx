@@ -165,8 +165,8 @@ export default function ModalTask({ task, onClose, onBack }) {
                                     onChange={handleChange}
                                 >
                                     <option value="">Nome do Abençoado</option>
-                                    <option value="usuario1">Usuário 1</option>
-                                    <option value="usuario2">Usuário 2</option>
+                                    <option value="Raica">Raica</option>
+                                    <option value="Wilho">Wilho</option>
                                 </select>
                             </div>
 
@@ -202,7 +202,7 @@ export default function ModalTask({ task, onClose, onBack }) {
                                 onChange={handleChange}
                                 placeholder="Descrição"
                             />
-
+{/* 
                             <div className="modal-edit-attachment" aria-hidden="true">
                                 <span className="modal-edit-attachmentIcon">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -211,7 +211,7 @@ export default function ModalTask({ task, onClose, onBack }) {
                                     </svg>
                                 </span>
                                 <span className="modal-edit-attachmentName">IMG_3SA8SHFIA8S.png</span>
-                            </div>
+                            </div> */}
                         </div>
                     </section>
 

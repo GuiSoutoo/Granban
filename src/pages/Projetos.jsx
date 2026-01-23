@@ -1,13 +1,14 @@
 import { Heading } from "../components/Layout/Heading";
 import { Navbar } from "../components/Layout/Navbar";
+import '../style/Granban.css';
 
 export default function Projetos(){
     return(
         <>
-        <div>
-          <Navbar page="Projetos" />
-          <Heading page="Projetos" />
-        </div>
+            <Navbar page="Projetos" />
+            <div className="granban-container dark">
+                <Heading page="Projetos" />
+            </div>
         </>
     )
 }
