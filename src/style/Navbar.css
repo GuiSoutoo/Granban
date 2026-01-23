@@ -119,6 +119,7 @@
 .navbar-user {
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 .user-avatar {
@@ -129,11 +130,49 @@
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
+  padding: 0;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-avatar:hover {
   border-color: #6c5ce7;
   transform: scale(1.05);
+}
+
+.user-avatar-fallback {
+  font-weight: 700;
+  color: #2d004d;
+}
+
+.user-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 180px;
+  background: rgba(20, 10, 40, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  padding: 8px;
+  z-index: 10000;
+}
+
+.user-menu-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.user-menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* ==================== RESPONSIVO ==================== */
