@@ -90,7 +90,7 @@ export default function ModalTask({ task, onClose, onBack }) {
 
           {/* TITLE */}
           <input
-            className="modal-details-title"
+            className="modal-details-title task-input"
             type="text"
             name="titulo"
             value={formData.titulo}
@@ -104,7 +104,7 @@ export default function ModalTask({ task, onClose, onBack }) {
             <div className="modal-details-metaRow">
               <span className="modal-details-metaLabel">Prioridade</span>
               <select
-                className="modal-details-metaValue"
+                className="task-select modal-details-metaValue"
                 name="prioridade"
                 value={formData.prioridade}
                 onChange={handleChange}
@@ -120,7 +120,7 @@ export default function ModalTask({ task, onClose, onBack }) {
             <div className="modal-details-metaRow">
               <span className="modal-details-metaLabel">Prazo</span>
               <input
-                className="modal-details-metaValue"
+                className="task-select modal-details-metaValue"
                 type="datetime-local"
                 name="dataEntrega"
                 value={formData.dataEntrega}
@@ -147,7 +147,7 @@ export default function ModalTask({ task, onClose, onBack }) {
             <div className="modal-details-metaRow">
               <span className="modal-details-metaLabel">Executor</span>
               <select
-                className="modal-details-metaValue"
+                className="task-select modal-details-metaValue"
                 name="executor"
                 value={formData.executor}
                 onChange={handleChange}
@@ -161,7 +161,7 @@ export default function ModalTask({ task, onClose, onBack }) {
             <div className="modal-details-metaRow">
               <span className="modal-details-metaLabel">Tag</span>
               <select
-                className="modal-details-metaValue"
+                className="task-select modal-details-metaValue"
                 name="tag"
                 value={formData.tag}
                 onChange={handleChange}
@@ -182,7 +182,7 @@ export default function ModalTask({ task, onClose, onBack }) {
 
           {/* DESCRIPTION */}
           <textarea
-            className="modal-details-description"
+            className="modal-details-description task-textarea"
             name="descricao"
             value={formData.descricao}
             onChange={handleChange}
