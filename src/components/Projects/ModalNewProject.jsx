@@ -1,25 +1,10 @@
 import { useRef, useState } from 'react';
-import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import { getCurrentUser } from '../../services/auth';
+import { slugify } from '../../utils/slugify';
 import '../../style/Modal.css';
 import '../../style/Forms.css';
-
-function parseMembers(raw) {
-	return String(raw || '')
-		.split(/[\n,;]/g)
-		.map((v) => v.trim())
-		.filter(Boolean);
-}
-
-function toTimestampFromDateInput(dateStr) {
-	const value = String(dateStr || '').trim();
-	if (!value) return null;
-	// Input type=date devolve YYYY-MM-DD
-	const date = new Date(`${value}T00:00:00`);
-	if (Number.isNaN(date.getTime())) return null;
-	return Timestamp.fromDate(date);
-}
 
 export default function ModalNewProject({ onClose }) {
 	const fileInputRef = useRef(null);
@@ -29,10 +14,6 @@ export default function ModalNewProject({ onClose }) {
 	const [formData, setFormData] = useState({
 		title: '',
 		description: '',
-		membersRaw: '',
-		createdAtDate: '',
-		createdBy: '',
-		ownerId: '',
 	});
 
 	function handleChange(e) {
@@ -57,6 +38,7 @@ export default function ModalNewProject({ onClose }) {
 
 		const name = String(formData.title || '').trim();
 		const description = String(formData.description || '').trim();
+		const slug = slugify(name);
 		if (!name) {
 			setError('Informe um título.');
 			return;
@@ -68,17 +50,19 @@ export default function ModalNewProject({ onClose }) {
 			return;
 		}
 
-		const createdAtPicked = toTimestampFromDateInput(formData.createdAtDate);
-		const createdByValue = String(formData.createdBy || '').trim() || user?.displayName || user?.email || '';
-		const ownerIdValue = String(formData.ownerId || '').trim() || user?.uid || '';
+		const createdByValue = user?.displayName || user?.email || '';
+		// ownerId deve ser o nome de quem criou (conforme pedido)
+		const ownerIdValue = user?.displayName || user?.email || '';
+		const members = user?.email ? [user.email] : [];
 
 		setLoading(true);
 		try {
 			await addDoc(collection(db, 'projects'), {
 				name,
+					slug,
 				description,
-				members: parseMembers(formData.membersRaw),
-				createdAt: createdAtPicked || serverTimestamp(),
+				members,
+				createdAt: serverTimestamp(),
 				createdBy: createdByValue,
 				ownerId: ownerIdValue,
 			});
@@ -149,54 +133,9 @@ export default function ModalNewProject({ onClose }) {
 						<div className="modal-project-field">
 							<div className="modal-project-label">Descrição</div>
 							<textarea
-								className="task-input modal-details-description modal-project-description"
+								className="task-input modal-project-description"
 								name="description"
 								value={formData.description}
-								onChange={handleChange}
-							/>
-						</div>
-
-						<div className="modal-project-field">
-							<div className="modal-project-label">Membros (e-mails)</div>
-							<textarea
-								className="task-input modal-project-members"
-								name="membersRaw"
-								value={formData.membersRaw}
-								onChange={handleChange}
-							/>
-						</div>
-
-						<div className="modal-project-row">
-							<div className="modal-project-field">
-								<div className="modal-project-label">Criado em</div>
-								<input
-									className="task-input"
-									type="date"
-									name="createdAtDate"
-									value={formData.createdAtDate}
-									onChange={handleChange}
-								/>
-							</div>
-
-							<div className="modal-project-field">
-								<div className="modal-project-label">Criado por</div>
-								<input
-									className="task-input"
-									type="text"
-									name="createdBy"
-									value={formData.createdBy}
-									onChange={handleChange}
-								/>
-							</div>
-						</div>
-
-						<div className="modal-project-field">
-							<div className="modal-project-label">ownerId</div>
-							<input
-								className="task-input"
-								type="text"
-								name="ownerId"
-								value={formData.ownerId}
 								onChange={handleChange}
 							/>
 						</div>

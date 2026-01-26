@@ -119,7 +119,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
             <p className="tagName">{task.tag}</p>
             <p className="deliveryDate">{task.dataEntrega ? new Date(task.dataEntrega).toLocaleDateString('pt-BR') : '-'}</p>
           </div>
-          <h5 className="projectName">Nome Projeto</h5>
+          <h5 className="projectName">{task.projectName || 'Sem projeto'}</h5>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
 import Home from './pages/Home';
@@ -13,7 +13,9 @@ export function AppRoutes(){
         <Route path='/cadastro' element={<Cadastro/>}/>
         <Route path='/' element={<RequireAuth><Home/></RequireAuth>}/>
         <Route path='/Granban' element={<RequireAuth><Granban/></RequireAuth>}/>
+        <Route path='/Granban/:projectKey' element={<RequireAuth><Granban/></RequireAuth>}/>
         <Route path='/Projetos' element={<RequireAuth><Projetos/></RequireAuth>}/>
+        <Route path='/projetos' element={<Navigate to="/Projetos" replace />} />
       </Routes>
     )
 }

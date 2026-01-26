@@ -7,7 +7,7 @@ import { NavLink } from 'react-router-dom';
 const navLinks = [
   { to: '/', label: 'Início', end: true },
   { to: '/Granban', label: 'Granban' },
-  { to: '/projetos', label: 'Projetos' }
+  { to: '/Projetos', label: 'Projetos' }
 ];
 
 export function Navbar() {

@@ -2,34 +2,40 @@ import { useState, useEffect } from 'react';
 import { db } from '../services/firebase';
 import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 
-export function useTarefa() {
+export function useTarefa(projectId, projectName) {
   const [tarefas, setTarefas] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const tarefasRef = collection(db, "tarefas");
+    const tarefasRef = projectId
+      ? collection(db, 'projects', projectId, 'tasks')
+      : collection(db, 'tarefas');
+
     const unsubscribe = onSnapshot(tarefasRef, (snapshot) => {
       let lista = [];
       snapshot.forEach((doc) => {
+        const data = doc.data();
         lista.push({
           id: doc.id,
-          nome: doc.data().titulo,
-          titulo: doc.data().titulo,
-          status: doc.data().status,
-          tag: doc.data().tag,
-          executor: doc.data().executor,
-          dataEntrega: doc.data().dataEntrega,
-          descricao: doc.data().descricao,
-          criadoEm: doc.data().criadoEm ? doc.data().criadoEm.toDate().toLocaleDateString() : '',
-          criador: doc.data().criador,
-          prioridade: doc.data().prioridade,
+          nome: data.titulo,
+          titulo: data.titulo,
+          status: data.status,
+          tag: data.tag,
+          executor: data.executor,
+          dataEntrega: data.dataEntrega,
+          descricao: data.descricao,
+          criadoEm: data.criadoEm ? data.criadoEm.toDate().toLocaleDateString() : '',
+          criador: data.criador,
+          prioridade: data.prioridade,
+          projectId: projectId ? (data.projectId || projectId) : (data.projectId || ''),
+          projectName: projectId ? (data.projectName || projectName || '') : (data.projectName || ''),
         })
       })
       setTarefas(lista); 
     })
     
     return () => unsubscribe(); 
-  }, [])
+  }, [projectId, projectName])
 
   const adicionarTarefa = async (dados) => {
     if (!dados.titulo.trim()) {
@@ -39,7 +45,11 @@ export function useTarefa() {
     
     setLoading(true);
     try {
-      await addDoc(collection(db, "tarefas"), {
+      const tarefasRef = projectId
+        ? collection(db, 'projects', projectId, 'tasks')
+        : collection(db, 'tarefas');
+
+      await addDoc(tarefasRef, {
         titulo: dados.titulo,
         status: dados.status || 'to-do',
         tag: dados.tag || '',
@@ -48,6 +58,7 @@ export function useTarefa() {
         descricao: dados.descricao || '',
         criadoEm: new Date(),
         prioridade: dados.prioridade || '',
+        ...(projectId ? { projectId, projectName: projectName || '' } : {}),
       });
     } catch (error) {
       console.error("Erro ao adicionar tarefa:", error);
@@ -64,7 +75,9 @@ export function useTarefa() {
 
     setLoading(true);
     try {
-      const docRef = doc(db, "tarefas", id);
+      const docRef = projectId
+        ? doc(db, 'projects', projectId, 'tasks', id)
+        : doc(db, 'tarefas', id);
       await updateDoc(docRef, {
         titulo: dados.titulo,
         status: dados.status || 'to-do',
@@ -74,6 +87,7 @@ export function useTarefa() {
         descricao: dados.descricao || '',
         atualizadoEm: new Date(),
         prioridade: dados.prioridade || '',
+        ...(projectId ? { projectId, projectName: projectName || '' } : {}),
       });
     } catch (error) {
       console.error("Erro ao atualizar tarefa:", error);
@@ -84,7 +98,9 @@ export function useTarefa() {
   
   const excluirTarefa = async (id) => {
     try {
-      const docRef = doc(db, "tarefas", id);
+      const docRef = projectId
+        ? doc(db, 'projects', projectId, 'tasks', id)
+        : doc(db, 'tarefas', id);
       await deleteDoc(docRef);
     } catch (error) {
       console.error("Erro ao excluir:", error);
@@ -93,7 +109,9 @@ export function useTarefa() {
 
   const atualizarStatusTarefa = async (id, status) => {
     try {
-      const docRef = doc(db, "tarefas", id);
+      const docRef = projectId
+        ? doc(db, 'projects', projectId, 'tasks', id)
+        : doc(db, 'tarefas', id);
       await updateDoc(docRef, { status });
     } catch (error) {
       console.error("Erro ao atualizar:", error);

@@ -346,6 +346,12 @@
   margin-top: 2px;
 }
 
+.modal-details-project {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-top: 6px;
+}
+
 .modal-details-title {
   font-size: 30px;
   letter-spacing: 0.2px;
@@ -508,10 +514,13 @@
 .modal-project-cover {
   position: relative;
   background: #ffffff;
-  padding: 18px 18px 16px;
+  padding: 26px 18px 22px;
+  min-height: 200px;
+  max-height: 550px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 12px;
 }
 
@@ -564,7 +573,7 @@
 }
 
 .modal-project-description {
-  min-height: 110px;
+  min-height: 84px;
   resize: vertical;
 }
 

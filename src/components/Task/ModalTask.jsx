@@ -6,8 +6,8 @@ import ArrowSelectIcon from '../../assets/ArrowSelectIcon.svg';
 import EditIcon from '../../assets/EditTaskIcon.svg';
 import AddTaskIcon from '../../assets/NovaTarefaIcon.svg';
 
-export default function ModalTask({ task, onClose, onBack }) {
-  const { adicionarTarefa, atualizarTarefa, loading } = useTarefa();
+export default function ModalTask({ task, onClose, onBack, projectId, projectName }) {
+  const { adicionarTarefa, atualizarTarefa, loading } = useTarefa(projectId, projectName);
   const isEditing = !!task;
 
   const [formData, setFormData] = useState({
@@ -59,6 +59,7 @@ export default function ModalTask({ task, onClose, onBack }) {
 
   const createdLabel = task?.criadoEm || '-';
   const creatorLabel = task?.criador || 'Nome do Criador';
+  const projectLabel = projectName || task?.projectName || '';
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -83,6 +84,10 @@ export default function ModalTask({ task, onClose, onBack }) {
               <div className="modal-details-tagWrap">
                 
                   {isEditing ? <div className="modal-details-tag">Editar tarefa</div> : <div className="modal-details-tag"><h4>Nova tarefa</h4></div>}
+
+                {projectLabel ? (
+                  <div className="modal-details-project">Projeto: {projectLabel}</div>
+                ) : null}
                 
                 {isEditing && (
                   <div className="modal-details-created">
