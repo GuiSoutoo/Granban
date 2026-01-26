@@ -62,6 +62,37 @@
     height: 26px;
 }
 
+.heading-btn--expand {
+    position: relative;
+    width: 42px;
+    height: 42px;
+}
+
+.heading-btn--expand .expand-icon {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    transition: opacity 0.32s ease-in-out, transform 0.32s ease-in-out;
+    transform-origin: center;
+    opacity: 0;
+    transform: scale(0.92);
+}
+
+.heading-btn--expand .icon-expanded {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.heading-btn--expand.is-compact .icon-expanded {
+    opacity: 0;
+    transform: scale(0.92);
+}
+
+.heading-btn--expand.is-compact .icon-contracted {
+    opacity: 1;
+    transform: scale(1);
+}
+
 .heading-btn:hover {
     background-color: rgba(255, 255, 255, 0.08);
     transform: translateY(-1px);

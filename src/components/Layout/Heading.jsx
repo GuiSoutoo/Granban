@@ -6,6 +6,7 @@ import FilterIcon from '../../assets/FilterIcon.svg';
 import SearchIcon from '../../assets/SearchIcon.svg';
 import OrderByIcon from '../../assets/OrderByIcon.svg';
 import ExpandedIcon from '../../assets/ExpandedIcon.svg';
+import ContractedIcon from '../../assets/ContractedIcon.svg';
 import '../../style/Heading.css';
 
 export function Heading({
@@ -14,6 +15,7 @@ export function Heading({
     onFilterClick,
     onOrderClick,
     onExpandClick,
+    isCompact = false,
     onSearchChange,
     searchValue = '',
 }) {
@@ -67,12 +69,13 @@ export function Heading({
                 {isGranban && (
                     <button
                         type="button"
-                        className="heading-btn"
+                        className={`heading-btn heading-btn--expand${isCompact ? ' is-compact' : ''}`}
                         onClick={onExpandClick}
-                        aria-label="Expandir"
-                        title="Expandir"
+                        aria-label={isCompact ? 'Expandir cards' : 'Recolher cards'}
+                        title={isCompact ? 'Expandir cards' : 'Recolher cards'}
                     >
-                        <img src={ExpandedIcon} alt="Expandir" />
+                        <img className="expand-icon icon-expanded" src={ExpandedIcon} alt="Recolher cards" />
+                        <img className="expand-icon icon-contracted" src={ContractedIcon} alt="Expandir cards" />
                     </button>
                 )}
 

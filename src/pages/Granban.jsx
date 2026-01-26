@@ -85,6 +85,7 @@ export default function Granban() {
           page="Kanban pessoal"
           onFuncClick={handleAddTask}
           onExpandClick={() => setCompactCards((prev) => !prev)}
+          isCompact={compactCards}
         />
         <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
         </div>
