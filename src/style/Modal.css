@@ -499,3 +499,97 @@
   justify-content: center;
 }
 
+/* ==================== MODAL NEW PROJECT (PRINT) ==================== */
+.modal-project-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.modal-project-cover {
+  position: relative;
+  background: #ffffff;
+  padding: 18px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+
+.modal-project-upload {
+  width: min(420px, 92%);
+  background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: 24px 1fr 24px;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.modal-project-uploadText {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  text-align: center;
+}
+
+.modal-project-uploadLeft,
+.modal-project-uploadRight {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-project-content {
+  padding: 18px 26px 26px;
+}
+
+.modal-project-label {
+  font-size: 14px;
+  color: #e9d5ff;
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.modal-project-field {
+  margin-bottom: 16px;
+}
+
+.modal-project-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.modal-project-description {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.modal-project-members {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.modal-project-error {
+  flex: 1 1 auto;
+  align-self: center;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+@media (max-width: 520px) {
+  .modal-project-content {
+    padding: 16px 18px 20px;
+  }
+  .modal-project-row {
+    grid-template-columns: 1fr;
+  }
+}
+
