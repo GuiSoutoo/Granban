@@ -5,6 +5,7 @@ import NewProjectIco from '../../assets/NovoProjetoIcon.svg';
 import FilterIcon from '../../assets/FilterIcon.svg';
 import SearchIcon from '../../assets/SearchIcon.svg';
 import OrderByIcon from '../../assets/OrderByIcon.svg';
+import ExpandedIcon from '../../assets/ExpandedIcon.svg';
 import '../../style/Heading.css';
 
 export function Heading({
@@ -12,6 +13,7 @@ export function Heading({
     onFuncClick,
     onFilterClick,
     onOrderClick,
+    onExpandClick,
     onSearchChange,
     searchValue = '',
 }) {
@@ -61,6 +63,18 @@ export function Heading({
                 >
                     <img src={OrderByIcon} alt="Ordenar" />
                 </button>
+
+                {isGranban && (
+                    <button
+                        type="button"
+                        className="heading-btn"
+                        onClick={onExpandClick}
+                        aria-label="Expandir"
+                        title="Expandir"
+                    >
+                        <img src={ExpandedIcon} alt="Expandir" />
+                    </button>
+                )}
 
                 <button
                     type="button"

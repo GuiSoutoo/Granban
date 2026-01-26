@@ -48,7 +48,7 @@ function formatarTempoDecorrido(dataString) {
   return `Há ${dias} dias`;
 }
 
-export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenReview, isMoving, isExpanded = true }) {
+export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenReview, isMoving, isExpanded = true, showOnlyTitle = false }) {
   const { atualizarStatusTarefa } = useTarefa();
 
   const openDetails = (e) => {
@@ -66,23 +66,37 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
   }
 
   const isArchived = task.status === 'archived';
+  const shortId = task.id ? String(task.id).slice(0, 4).toUpperCase() : '';
 
+  // Coluna Arquivado recolhida: mostra apenas o código
   if (isArchived && !isExpanded) {
     return (
       <div
         ref={setNodeRef}
         {...listeners}
         {...attributes}
-        className={`cardTask ${task.status}Card collapsed`}
+        className={`cardTask ${task.status}Card archivedCodeOnly`}
         title={task.titulo}
       >
-        <div className="iconContainer" style={{ width: '100%', justifyContent: 'center', display: 'flex' }}>
-          {getIcon(task.tag) ? (
-             <img src={getIcon(task.tag)} alt={task.tag} style={{ width: '30px', height: '30px' }} />
-          ) : (
-            <span style={{ fontSize: '0.8rem' }}>{task.tag?.substring(0,2)}</span>
-          )}
-        </div>
+        <span className="archivedCodeOnly-text">{shortId ? `#${shortId}` : '#----'}</span>
+      </div>
+    );
+  }
+
+  // Modo compacto (recolher global): título + id curto
+  if (showOnlyTitle) {
+    return (
+      <div
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+        className={`cardTask ${task.status}Card titleOnly`}
+        title={task.titulo}
+      >
+        <h4 className="titleOnly-text">
+          {shortId && <span className="titleOnly-id">#{shortId}</span>}
+          {task.titulo}
+        </h4>
       </div>
     );
   }
@@ -109,7 +123,11 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
         </div>
       </div>
 
-      <p className="dateTask">{formatarTempoDecorrido(task.criadoEm)}</p>
+      <p className="dateTask">
+        {shortId &&<span className="inline-id">#{shortId} </span>}
+        <span>· {formatarTempoDecorrido(task.criadoEm)}</span>
+        
+      </p>
       <h4>{task.titulo}</h4>
       <hr></hr>
       <div className="bottomTask">

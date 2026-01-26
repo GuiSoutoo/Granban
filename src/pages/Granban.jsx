@@ -24,6 +24,7 @@ export default function Granban() {
   const [reviewTask, setReviewTask] = useState(null);
   const [returnToDetailsTask, setReturnToDetailsTask] = useState(null);
   const [movingTaskId, setMovingTaskId] = useState(null);
+  const [compactCards, setCompactCards] = useState(false);
 
   const handleEdit = (task) => { setEditingTask(task); setShowEditModal(true); };
   const handleOpenDetails = (task) => { setDetailsTask(task); };
@@ -80,7 +81,11 @@ export default function Granban() {
     <>
       <Navbar page="Granban"/>
       <div className="granban-container dark">
-        <Heading page="Kanban pessoal" onFuncClick={handleAddTask} />
+        <Heading
+          page="Kanban pessoal"
+          onFuncClick={handleAddTask}
+          onExpandClick={() => setCompactCards((prev) => !prev)}
+        />
         <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
         </div>
 
@@ -131,6 +136,7 @@ export default function Granban() {
                 onOpenDetails={handleOpenDetails}
                 onOpenReview={handleOpenReview}
                 movingTaskId={movingTaskId}
+                showOnlyTitle={compactCards}
               />
             ))}
           </div>

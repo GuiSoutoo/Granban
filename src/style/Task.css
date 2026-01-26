@@ -22,7 +22,6 @@
     border: none;
     border-radius: 8px;
     font-size: 16px;
-    font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
@@ -38,6 +37,58 @@
     margin: 0 0 8px 0;
     padding: 16px;
     color: white;
+    transition: padding 0.2s ease, min-height 0.2s ease, max-height 0.2s ease, opacity 0.2s ease;
+    max-height: 420px;
+    overflow: hidden;
+}
+
+.cardTask.archivedCodeOnly {
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    min-height: 48px;
+    max-height: 64px;
+}
+
+.archivedCodeOnly-text {
+    font-size: 0.95rem;
+    letter-spacing: 0.4px;
+    opacity: 0.75;
+}
+
+.cardTask.titleOnly {
+    padding: 10px 12px;
+    min-height: 20px;
+    max-height: 76px;
+    animation: card-compact-in 0.18s ease;
+}
+
+.titleOnly-text {
+    margin: 0;
+    font-size: 1rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.titleOnly-id {
+    font-size: 0.92rem;
+    opacity: 0.5;
+}
+
+.cardTask:not(.titleOnly) {
+    animation: card-expand-in 0.18s ease;
+}
+
+@keyframes card-compact-in {
+    from { opacity: 0.6; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes card-expand-in {
+    from { opacity: 0.6; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .cardTask:hover{
@@ -139,6 +190,11 @@
     font-size: small;
 }
 
+.dateTask .inline-id {
+    opacity: 0.7;
+    font-size: 0.9em;
+}
+
 .buttonTask {
     display: flex;
     justify-content: space-between;
@@ -204,7 +260,7 @@
     border: none;
     color: inherit;
     font-size: 3em;
-    font-weight: bold;
+
     letter-spacing: 3px;
     margin: 0 0 0.5em 0;
     padding: 0;

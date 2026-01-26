@@ -3,7 +3,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { TaskCard } from './TaskCard';
 import ArcIcon from '../../assets/ArchivedIcon.svg';
 
-export function Column({ title, tasks, id, onDelete, onEdit, onOpenDetails, onOpenReview, movingTaskId }) {
+export function Column({ title, tasks, id, onDelete, onEdit, onOpenDetails, onOpenReview, movingTaskId, showOnlyTitle = false }) {
   const { isOver, setNodeRef } = useDroppable({
     id: id,
   });
@@ -46,6 +46,7 @@ export function Column({ title, tasks, id, onDelete, onEdit, onOpenDetails, onOp
             onOpenReview={onOpenReview}
             isMoving={task.id === movingTaskId}
             isExpanded={id === 'archived' ? isExpanded : true}
+            showOnlyTitle={showOnlyTitle}
           />
         ))}
       </div>
