@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { login } from '../services/auth';
 import { getCurrentUser } from '../services/auth';
+import logoHome from '../assets/GranbanLogoIcon.svg';
+import '../style/Login.css';
+import loginConcept from'../assets/LoginConcept.jpg';
+import UserIcon from '../assets/UserIconLogin.svg';
+import PasswordIcon from '../assets/PasswordIconLogin.svg';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -36,76 +41,69 @@ export default function Login() {
   };
 
   return (
-    <div className="container" style={{ maxWidth: 520, paddingTop: 40 }}>
-      <h1 className="h3 mb-3">Login</h1>
+    <>
+      <div className="nav-login">
+        <img src={logoHome} width="30px" alt="Granban Logo" />Granban, o Kanban para devs
 
-      {error ? (
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
-      ) : null}
+      </div>
 
-      <form onSubmit={handleSubmit} className="card p-3">
-        <div className="mb-3">
-          <label className="form-label">Usuário ou e-mail</label>
-          <input
-            className="form-control"
-            type="text"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            required
-            autoComplete="username"
-          />
-        </div>
+      <div className="login-container">
+        <div className="login-left">
+          {error ? (
+            <div className="alert alert-danger" role="alert">
+              {error}
+            </div>
+          ) : null}
 
-        <div className="mb-3">
-          <label className="form-label">Senha</label>
-          <div className="input-group">
-            <input
-              className="form-control"
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
+          <form onSubmit={handleSubmit} className="login-form">
+            <h1>Login</h1>
+            <div className="mb-3">
+              <label className="form-label">
+                <img src={UserIcon} alt="" /> email ou usuário
+              </label>
+              <input
+                className="login-input"
+                type="text"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                required
+                autoComplete="username"
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">
+                <img src={PasswordIcon} alt="" /> senha
+              </label>
+              <input
+                className="login-input"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+            </div>
+            <div className="check-connected">
+              <input type="checkbox" /> Me mantenha conectado
+            </div>
             <button
-              type="button"
-              className="btn btn-outline-secondary"
-              onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-              title={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              type="submit"
+              className="button-login"
+              disabled={loading}
             >
-              {showPassword ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M3 3l18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M10.58 10.58A2 2 0 0 0 13.42 13.42" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M9.88 5.5A10.94 10.94 0 0 1 12 5c6.5 0 10 7 10 7a18.02 18.02 0 0 1-3.34 4.28" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M6.1 6.1C3.55 8 2 12 2 12s3.5 7 10 7c1.34 0 2.58-.3 3.7-.8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              )}
+              {loading ? 'Entrando...' : 'Entrar'}
             </button>
-          </div>
-        </div>
 
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={loading}
-        >
-          {loading ? 'Entrando...' : 'Entrar'}
-        </button>
-
-        <div className="mt-3">
-          <span>Não tem conta? </span>
-          <Link to="/cadastro">Criar conta</Link>
+            <div className="bottom-login">
+              Não tenho uma conta. <Link to="/cadastro">Cadastrar</Link>
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
+        <div className="login-right">
+          <img src={loginConcept} alt="Imagem ilustração Granban" />
+        </div>
+      </div>
+    </>
   );
 }

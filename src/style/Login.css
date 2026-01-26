@@ -1,0 +1,229 @@
+.nav-login {
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    justify-content: center;
+    align-items: center;
+    height: 8%;
+    gap: 8px;
+    color: white;
+    padding: 17px 10px;
+    background-color: #251240;
+    border-bottom: 2px solid #5F4588;
+}
+
+.login-right {
+    flex: 1;
+    background: #251240;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-right img {
+    width: 100%;
+}
+
+.login-container h1 {
+    color: white;
+    margin: 0 0 32px 0;
+    text-align: center;
+    font-size: 36px;
+    font-weight: 700;
+}
+
+.form-label {
+    display: flex;
+    gap: 8px;
+    color: #e0d4f0;
+    margin-bottom: 2px !important;
+    margin-left: 5px;
+    align-self: start;
+}
+
+.form-label img {
+    width: 19px;
+    opacity: 0.9;
+}
+
+.login-input {
+  background-color: rgba(42, 23, 69, 0.5);
+  color: white;
+  padding: 8px 10px;
+  border-radius: 8px;
+  width: 80%;
+  border: 1px solid rgba(236, 217, 255, 0.35);
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.login-input:focus {
+  border-color: #c4b5fd;
+  box-shadow: 0 0 0 1px #c4b5fd;
+  outline: none;
+}
+
+.check-connected {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e0d4f0;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.check-connected input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #7c3aed;
+}
+
+.button-login {
+  background-color: #ffffff;
+  color: #5b21b6;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 32px;
+  margin-top: 30px;
+  width: 80%;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.button-login:hover {
+  opacity: 0.9;
+}
+
+.bottom-login {
+    margin-top: 18px;
+    text-align: center;
+    color: #e0d4f0;
+    font-size: 14px;
+}
+
+.bottom-login a {
+    color: white;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+
+.login-container {
+    width: 900px;
+    max-width: 90vw;
+    display: flex;
+    margin: auto;
+    margin-top: 80px;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+.login-left {
+    flex: 1;
+    background: linear-gradient(180deg, #4a2c7a 0%, #6a35d7 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 20px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+}
+
+.mb-3 {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.login-input,
+.button-login,
+.check-connected {
+    width: 100%;
+}
+
+.cadastro-container {
+    width: 900px;
+    max-width: 90vw;
+    display: flex;
+    margin: auto;
+    margin-top: 80px;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+.cadastro-left {
+    flex: 1;
+    background: #251240;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+}
+
+.cadastro-left img {
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+}
+
+.cadastro-right {
+    flex: 1;
+    background: linear-gradient(180deg, #4a2c7a 0%, #6a35d7 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 20px;
+}
+
+.cadastro-right h1 {
+    color: white;
+    margin: 0 0 32px 0;
+    text-align: center;
+    font-size: 36px;
+    font-weight: 700;
+}
+
+.cadastro-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+}
+
+.login-right img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+@media (max-width: 900px) {
+    .login-container {
+        flex-direction: column;
+        width: 95%;
+        margin-top: 40px;
+    }
+
+    .login-left,
+    .login-right {
+        width: 100%;
+    }
+
+    .login-right {
+        min-height: 220px;
+    }
+
+    .login-right img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+}
