@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useTarefa } from '../../hooks/UseTarefas';
 import '../../style/Modal.css';
+import '../../style/Forms.css';
+import ArrowSelectIcon from '../../assets/ArrowSelectIcon.svg';
+import EditIcon from '../../assets/EditTaskIcon.svg';
+import AddTaskIcon from '../../assets/NovaTarefaIcon.svg';
 
 export default function ModalTask({ task, onClose, onBack }) {
   const { adicionarTarefa, atualizarTarefa, loading } = useTarefa();
@@ -33,6 +37,12 @@ export default function ModalTask({ task, onClose, onBack }) {
   function handleChange(e) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Auto-resize textarea
+    if (e.target.tagName === 'TEXTAREA') {
+      e.target.style.height = 'auto';
+      e.target.style.height = e.target.scrollHeight + 'px';
+    }
   }
 
   async function handleSubmit(e) {
@@ -61,24 +71,19 @@ export default function ModalTask({ task, onClose, onBack }) {
               <div
                 className="modal-details-appIcon"
                 aria-hidden="true"
-                style={{ width: 42, height: 42 }}
+                style={{ width: isEditing ? 40 : 50, height: isEditing ? 40 : 50 }}
               >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25Z"
-                    fill="currentColor"
-                  />
-                  <path
-                    d="M20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z"
-                    fill="currentColor"
-                  />
-                </svg>
+                <img 
+                  src={isEditing ? EditIcon : AddTaskIcon} 
+                  alt={isEditing ? 'Editar' : 'Adicionar'} 
+                  style={{ width: '80%', height: '80%', objectFit: 'contain' }}
+                />
               </div>
 
               <div className="modal-details-tagWrap">
-                <div className="modal-details-tag">
-                  {isEditing ? 'Editar tarefa' : 'Nova tarefa'}
-                </div>
+                
+                  {isEditing ? <div className="modal-details-tag">Editar tarefa</div> : <div className="modal-details-tag"><h4>Nova tarefa</h4></div>}
+                
                 {isEditing && (
                   <div className="modal-details-created">
                     Criado em {createdLabel} por {creatorLabel}
@@ -101,26 +106,29 @@ export default function ModalTask({ task, onClose, onBack }) {
 
           {/* META */}
           <div className="modal-details-meta">
-            <div className="modal-details-metaRow">
-              <span className="modal-details-metaLabel">Prioridade</span>
-              <select
-                className="task-select modal-details-metaValue"
-                name="prioridade"
-                value={formData.prioridade}
-                onChange={handleChange}
-              >
-                <option value="">Selecione</option>
-                <option value="Urgente">Urgente</option>
-                <option value="Alta">Alta</option>
-                <option value="Média">Média</option>
-                <option value="Baixa">Baixa</option>
-              </select>
+            <div className="tag-container">
+              <span className="tag-label">Prioridade</span>
+              <div className="select-wrapper">
+                <select
+                  className="tag-select"
+                  name="prioridade"
+                  value={formData.prioridade}
+                  onChange={handleChange}
+                >
+                  <option value="">Selecione</option>
+                  <option value="Urgente">Urgente</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Média">Média</option>
+                  <option value="Baixa">Baixa</option>
+                </select>
+                <img src={ArrowSelectIcon} alt="" className="select-arrow" />
+              </div>
             </div>
 
-            <div className="modal-details-metaRow">
-              <span className="modal-details-metaLabel">Prazo</span>
+            <div className="tag-container">
+              <span className="tag-label">Prazo</span>
               <input
-                className="task-select modal-details-metaValue"
+                className="tag-select"
                 type="datetime-local"
                 name="dataEntrega"
                 value={formData.dataEntrega}
@@ -128,53 +136,56 @@ export default function ModalTask({ task, onClose, onBack }) {
               />
             </div>
 
-            <div className="modal-details-metaRow">
-              <span className="modal-details-metaLabel">Status</span>
-              <select
-                className={`modal-details-statusSelect status--${formData.status}`}
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-              >
-                <option value="to-do">A fazer</option>
-                <option value="in-progress">Em progresso</option>
-                <option value="in-review">Revisão</option>
-                <option value="rejected">Rejeitado</option>
-                <option value="concluded">Concluído</option>
-              </select>
+            <div className="tag-container">
+              <span className="tag-label">Status</span>
+              <div className="select-wrapper">
+                <select
+                  className="tag-select"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                >
+                  <option value="to-do">A fazer</option>
+                  <option value="in-progress">Em progresso</option>
+                  <option value="in-review">Revisão</option>
+                  <option value="rejected">Rejeitado</option>
+                  <option value="concluded">Concluído</option>
+                </select>
+                <img src={ArrowSelectIcon} alt="" className="select-arrow" />
+              </div>
             </div>
 
-            <div className="modal-details-metaRow">
-              <span className="modal-details-metaLabel">Executor</span>
-              <select
-                className="task-select modal-details-metaValue"
-                name="executor"
-                value={formData.executor}
-                onChange={handleChange}
-              >
-                <option value="">Selecione</option>
-                <option value="Raica">Raica</option>
-                <option value="Wilho">Wilho</option>
-              </select>
+            <div className="tag-container">
+              <span className="tag-label">Executor</span>
+              <div className="select-wrapper">
+                <select className="tag-select" value={formData.executor} onChange={handleChange} name="executor">
+                  <option>Wilho</option>
+                  <option>Raica</option>
+                </select>
+                <img src={ArrowSelectIcon} alt="" className="select-arrow" />
+              </div>
             </div>
 
-            <div className="modal-details-metaRow">
-              <span className="modal-details-metaLabel">Tag</span>
-              <select
-                className="task-select modal-details-metaValue"
-                name="tag"
-                value={formData.tag}
-                onChange={handleChange}
-              >
-                <option value="">Selecione</option>
-                <option value="Bug">Bug</option>
-                <option value="Layout">Layout</option>
-                <option value="Alteração">Alteração</option>
-                <option value="Melhoria">Melhoria</option>
-                <option value="Essencial">Essencial</option>
-                <option value="Remoção">Remoção</option>
-                <option value="Funcionalidade">Funcionalidade</option>
-              </select>
+            <div className="tag-container">
+              <span className="tag-label">Tag</span>
+              <div className="select-wrapper">
+                <select
+                  className="tag-select"
+                  name="tag"
+                  value={formData.tag}
+                  onChange={handleChange}
+                >
+                  <option value="">Selecione</option>
+                  <option value="Bug">Bug</option>
+                  <option value="Layout">Layout</option>
+                  <option value="Alteração">Alteração</option>
+                  <option value="Melhoria">Melhoria</option>
+                  <option value="Essencial">Essencial</option>
+                  <option value="Remoção">Remoção</option>
+                  <option value="Funcionalidade">Funcionalidade</option>
+                </select>
+                <img src={ArrowSelectIcon} alt="" className="select-arrow" />
+              </div>
             </div>
           </div>
 
@@ -182,18 +193,18 @@ export default function ModalTask({ task, onClose, onBack }) {
 
           {/* DESCRIPTION */}
           <textarea
-            className="modal-details-description task-textarea"
+            className="modal-details-description task-input"
             name="descricao"
             value={formData.descricao}
             onChange={handleChange}
-            placeholder="Descrição da tarefa"
+            placeholder="Digite uma descrição da tarefa aqui, cole imagens para facilitar a instrução."
           />
 
           {/* FOOTER */}
-          <div className="modal-details-actions" style={{ justifyContent: 'flex-end' }}>
+          <div className="button-group">
             <button
               type="button"
-              className="modal-details-iconBtn"
+              className="button-cancel"
               onClick={onClose}
             >
               Cancelar
@@ -201,7 +212,7 @@ export default function ModalTask({ task, onClose, onBack }) {
 
             <button
               type="submit"
-              className="modal-details-iconBtn"
+              className="button-confirm"
               disabled={loading}
             >
               {loading ? 'Salvando...' : 'Salvar'}

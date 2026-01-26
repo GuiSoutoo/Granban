@@ -1,0 +1,156 @@
+.tag-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Label "Tag" */
+.tag-label {
+  font-size: 14px;
+  color: #e9d5ff; /* roxo claro */
+}
+
+/* Wrapper para controlar a seta */
+.select-wrapper {
+  position: relative;
+}
+
+/* Select em formato cápsula */
+.tag-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-color: #280d534d; /* roxo */
+  color: #ffffff;
+
+  border: 1px solid rgba(236, 217, 255, 0.4);
+  border-radius: 9999px;
+
+  padding: 6px 40px 6px 16px; /* espaço para seta */
+  font-size: 14px;
+
+  cursor: pointer;
+  outline: none;
+}
+
+/* Focus */
+.tag-select:focus {
+  border-color: #c4b5fd;
+  box-shadow: 0 0 0 1px #c4b5fd;
+}
+
+/* Seta personalizada */
+.select-arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+
+  width: 12px;
+  height: 12px;
+  opacity: 0.9;
+}
+
+/* Input datetime-local com mesmo estilo */
+.tag-select[type="datetime-local"] {
+  padding: 6px 14px;
+  color: #ffffff;
+}
+
+.tag-select[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.2);
+  cursor: pointer;
+}
+
+.task-input {
+  background-color: #2a174569;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  width: 100%;
+  border: 1px solid rgba(236, 217, 255, 0.4);
+}
+
+.task-input:focus {
+  border-color: #c4b5fd;
+  box-shadow: 0 0 0 1px #c4b5fd;
+  outline: none;
+}
+
+.task-input.modal-details-description {
+  min-height: 200px;
+  resize: none;
+  overflow: hidden;
+}
+
+.button-group {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+/* Botão secundário (Cancelar) */
+.button-cancel {
+  background-color: #7c3aed; /* roxo escuro */
+  color: #e9d5ff; /* texto roxo claro */
+
+  border: 1px solid rgba(216, 180, 254, 0.4);
+  border-radius: 12px;
+
+  padding: 10px 20px;
+  min-width: 120px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.button-cancel:hover {
+  background-color: #6d28d9;
+}
+
+/* Botão primário (Salvar) */
+.button-confirm {
+  background-color: #ffffff;
+  color: #5b21b6; /* roxo escuro */
+
+  border: none;
+  border-radius: 12px;
+
+  padding: 10px 32px;
+  min-width: 160px;
+  width: 100%;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.button-confirm:hover {
+  opacity: 0.9;
+}
+
+/* Focus acessível */
+.button-cancel:focus,
+.button-confirm:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(196, 181, 253, 0.6);
+}
+
+/* Placeholder */
+
+.task-input::placeholder {
+  color: #d8b4fe;
+  opacity: 1;
+}
+
+.task-input::-webkit-input-placeholder {
+  color: #d8b4fe7e;
+}
