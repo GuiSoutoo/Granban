@@ -1,13 +1,12 @@
-import { useRef, useState } from 'react';
-import { addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { useEffect, useRef, useState } from 'react';
+import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
-import { getCurrentUser } from '../../services/auth';
 import { slugify } from '../../utils/slugify';
 import { uploadProjectCover } from '../../services/storage';
 import '../../style/Modal.css';
 import '../../style/Forms.css';
 
-export default function ModalNewProject({ onClose }) {
+export default function ModalEditProject({ project, onClose }) {
 	const fileInputRef = useRef(null);
 	const [coverFile, setCoverFile] = useState(null);
 
@@ -17,6 +16,14 @@ export default function ModalNewProject({ onClose }) {
 		title: '',
 		description: '',
 	});
+
+	useEffect(() => {
+		const title = String(project?.name || '').trim();
+		const description = String(project?.description || '').trim();
+		setFormData({ title, description });
+		setCoverFile(null);
+		setError('');
+	}, [project?.id]);
 
 	function handleChange(e) {
 		if (error) setError('');
@@ -46,6 +53,12 @@ export default function ModalNewProject({ onClose }) {
 		if (loading) return;
 		setError('');
 
+		const projectId = project?.id;
+		if (!projectId) {
+			setError('Projeto inválido.');
+			return;
+		}
+
 		const name = String(formData.title || '').trim();
 		const description = String(formData.description || '').trim();
 		const slug = slugify(name);
@@ -54,42 +67,27 @@ export default function ModalNewProject({ onClose }) {
 			return;
 		}
 
-		const user = getCurrentUser();
-		if (!user) {
-			setError('Você precisa estar logado para criar um projeto.');
-			return;
-		}
-
-		const createdByValue = user?.displayName || user?.email || '';
-		// ownerId deve ser o nome de quem criou (conforme pedido)
-		const ownerIdValue = user?.displayName || user?.email || '';
-		const members = user?.email ? [user.email] : [];
-
 		setLoading(true);
 		try {
-			const docRef = await addDoc(collection(db, 'projects'), {
+			const ref = doc(db, 'projects', projectId);
+			await updateDoc(ref, {
 				name,
 				slug,
 				description,
-				members,
-				createdAt: serverTimestamp(),
-				createdBy: createdByValue,
-				ownerId: ownerIdValue,
+				updatedAt: serverTimestamp(),
 			});
 
-			// Upload opcional da capa
 			if (coverFile) {
 				try {
-					const { url, fullPath } = await uploadProjectCover({ projectId: docRef.id, file: coverFile });
-					await updateDoc(docRef, {
+					const { url, fullPath } = await uploadProjectCover({ projectId, file: coverFile });
+					await updateDoc(ref, {
 						coverUrl: url,
 						coverPath: fullPath,
 						updatedAt: serverTimestamp(),
 					});
 				} catch (uploadErr) {
 					console.error('Erro ao enviar capa:', uploadErr);
-					// Não impede a criação do projeto; apenas informa.
-					setError(uploadErr?.message || 'Projeto criado, mas falhou ao enviar a capa.');
+					setError(uploadErr?.message || 'Projeto atualizado, mas falhou ao enviar a capa.');
 					setLoading(false);
 					return;
 				}
@@ -97,8 +95,8 @@ export default function ModalNewProject({ onClose }) {
 
 			onClose?.();
 		} catch (err) {
-			console.error('Erro ao criar projeto:', err);
-			setError(err?.message || 'Não foi possível criar o projeto.');
+			console.error('Erro ao editar projeto:', err);
+			setError(err?.message || 'Não foi possível editar o projeto.');
 		} finally {
 			setLoading(false);
 		}

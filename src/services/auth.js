@@ -242,6 +242,35 @@ export async function updateUserProfile(input) {
   }
 }
 
+/**
+ * Atualiza foto do usuário (Firestore + Auth profile).
+ * @param {{ uid: string, photoURL: string, photoPath?: string }} input
+ */
+export async function updateUserPhoto(input) {
+  const { uid, photoURL, photoPath } = input || {};
+  if (!uid) throw new Error('uid é obrigatório');
+  if (!photoURL) throw new Error('photoURL é obrigatório');
+
+  const updates = {
+    photoURL,
+    updatedAt: serverTimestamp(),
+  };
+  if (typeof photoPath === 'string' && photoPath.trim()) {
+    updates.photoPath = photoPath.trim();
+  }
+
+  await updateDoc(userDocRef(uid), updates);
+
+  const current = auth.currentUser;
+  if (current && current.uid === uid) {
+    try {
+      await updateProfile(current, { photoURL });
+    } catch {
+      // best-effort
+    }
+  }
+}
+
 export const authBackend = {
   createAccount,
   login,
@@ -250,4 +279,5 @@ export const authBackend = {
   onAuthChange,
   getUserProfile,
   updateUserProfile,
+  updateUserPhoto,
 };

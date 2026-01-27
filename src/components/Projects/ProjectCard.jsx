@@ -11,7 +11,7 @@ const STATUS_ORDER = [
   { key: 'concluded', label: 'Concluído' },
 ];
 
-export default function ProjectCard({ project, counts }) {
+export default function ProjectCard({ project, counts, onInfo }) {
   const navigate = useNavigate();
   const coverUrl = project?.coverUrl || project?.cover || project?.imageUrl || '';
   const projectId = project?.id;
@@ -62,6 +62,7 @@ export default function ProjectCard({ project, counts }) {
               title="Informações"
               onClick={(e) => {
                 e.stopPropagation();
+                if (typeof onInfo === 'function') onInfo(project);
               }}
             >
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

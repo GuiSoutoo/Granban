@@ -3,6 +3,8 @@ import { collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/f
 import { Heading } from "../components/Layout/Heading";
 import { Navbar } from "../components/Layout/Navbar";
 import ModalNewProject from '../components/Projects/ModalNewProject';
+import ModalProjectDetails from '../components/Projects/ModalProjectDetails';
+import ModalEditProject from '../components/Projects/ModalEditProject';
 import ProjectCard from '../components/Projects/ProjectCard';
 import { db } from '../services/firebase';
 import { getCurrentUser, onAuthChange } from '../services/auth';
@@ -21,11 +23,19 @@ function emptyCounts() {
 
 export default function Projetos(){
     const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+    const [showProjectDetailsModal, setShowProjectDetailsModal] = useState(false);
+    const [showEditProjectModal, setShowEditProjectModal] = useState(false);
+    const [selectedProjectId, setSelectedProjectId] = useState(null);
 
     const [user, setUser] = useState(() => getCurrentUser());
     const [projects, setProjects] = useState([]);
     const [countsByProject, setCountsByProject] = useState({});
     const [error, setError] = useState('');
+
+    const selectedProject = useMemo(() => {
+        if (!selectedProjectId) return null;
+        return projects.find((p) => p.id === selectedProjectId) || null;
+    }, [projects, selectedProjectId]);
 
     const memberMapRef = useRef(new Map());
     const taskUnsubsRef = useRef(new Map());
@@ -163,6 +173,10 @@ export default function Projetos(){
                                     key={project.id}
                                     project={project}
                                     counts={countsByProject[project.id]}
+                                    onInfo={(p) => {
+                                        setSelectedProjectId(p?.id || null);
+                                        setShowProjectDetailsModal(true);
+                                    }}
                                 />
                             ))}
                         </div>
@@ -173,6 +187,32 @@ export default function Projetos(){
             {showNewProjectModal && (
                 <ModalNewProject onClose={() => setShowNewProjectModal(false)} />
             )}
+
+            {showProjectDetailsModal && selectedProject ? (
+                <ModalProjectDetails
+                    project={selectedProject}
+                    counts={countsByProject[selectedProject.id]}
+                    onEdit={(p) => {
+                        setSelectedProjectId(p?.id || null);
+                        setShowProjectDetailsModal(false);
+                        setShowEditProjectModal(true);
+                    }}
+                    onClose={() => {
+                        setShowProjectDetailsModal(false);
+                        setSelectedProjectId(null);
+                    }}
+                />
+            ) : null}
+
+            {showEditProjectModal && selectedProject ? (
+                <ModalEditProject
+                    project={selectedProject}
+                    onClose={() => {
+                        setShowEditProjectModal(false);
+                        setSelectedProjectId(null);
+                    }}
+                />
+            ) : null}
         </>
     )
 }
