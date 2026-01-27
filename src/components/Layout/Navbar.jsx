@@ -1,4 +1,4 @@
-import logo from '../../assets/GranbanlogoIcon.svg'
+import logo from '../../assets/GranbanLogoIcon.svg'
 import '../../style/Navbar.css'
 import Avatar from './Avatar.jsx';
 import SearchBar from './SearchBar.jsx';
