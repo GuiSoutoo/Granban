@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import { getCurrentUser } from '../../services/auth';
@@ -10,6 +10,7 @@ import '../../style/Forms.css';
 export default function ModalNewProject({ onClose }) {
 	const fileInputRef = useRef(null);
 	const [coverFile, setCoverFile] = useState(null);
+	const [coverPreviewUrl, setCoverPreviewUrl] = useState('');
 
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
@@ -40,6 +41,16 @@ export default function ModalNewProject({ onClose }) {
 		e.target.value = '';
 		setCoverFile(file);
 	}
+
+	useEffect(() => {
+		if (!coverFile) {
+			setCoverPreviewUrl('');
+			return;
+		}
+		const url = URL.createObjectURL(coverFile);
+		setCoverPreviewUrl(url);
+		return () => URL.revokeObjectURL(url);
+	}, [coverFile]);
 
 	async function handleSubmit(e) {
 		e.preventDefault();
@@ -111,6 +122,9 @@ export default function ModalNewProject({ onClose }) {
 
 					{/* TOPO BRANCO */}
 					<div className="modal-project-cover">
+						{coverPreviewUrl ? (
+							<img className="modal-project-coverPreview" src={coverPreviewUrl} alt="" />
+						) : null}
 						<button
 							type="button"
 							className="modal-project-upload"

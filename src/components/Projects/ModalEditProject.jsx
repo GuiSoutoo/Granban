@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import { slugify } from '../../utils/slugify';
@@ -9,6 +9,10 @@ import '../../style/Forms.css';
 export default function ModalEditProject({ project, onClose }) {
 	const fileInputRef = useRef(null);
 	const [coverFile, setCoverFile] = useState(null);
+	const [coverPreviewUrl, setCoverPreviewUrl] = useState('');
+	const existingCoverUrl = useMemo(() => {
+		return project?.coverUrl || project?.cover || project?.imageUrl || '';
+	}, [project?.coverUrl, project?.cover, project?.imageUrl]);
 
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
@@ -22,8 +26,19 @@ export default function ModalEditProject({ project, onClose }) {
 		const description = String(project?.description || '').trim();
 		setFormData({ title, description });
 		setCoverFile(null);
+		setCoverPreviewUrl('');
 		setError('');
 	}, [project?.id]);
+
+	useEffect(() => {
+		if (!coverFile) {
+			setCoverPreviewUrl('');
+			return;
+		}
+		const url = URL.createObjectURL(coverFile);
+		setCoverPreviewUrl(url);
+		return () => URL.revokeObjectURL(url);
+	}, [coverFile]);
 
 	function handleChange(e) {
 		if (error) setError('');
@@ -109,6 +124,9 @@ export default function ModalEditProject({ project, onClose }) {
 
 					{/* TOPO BRANCO */}
 					<div className="modal-project-cover">
+						{(coverPreviewUrl || existingCoverUrl) ? (
+							<img className="modal-project-coverPreview" src={coverPreviewUrl || existingCoverUrl} alt="" />
+						) : null}
 						<button
 							type="button"
 							className="modal-project-upload"
