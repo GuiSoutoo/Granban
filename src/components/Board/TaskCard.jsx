@@ -106,7 +106,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`cardTask ${task.status}Card`}
+      className={`cardTask ${task.status}Card ${task.prioridade}Card`}
     >
       <div className="headTask">
         {getIcon(task.tag) && (

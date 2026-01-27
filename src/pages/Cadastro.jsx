@@ -6,7 +6,10 @@ import logoHome from '../assets/GranbanLogoIcon.svg';
 import '../style/Login.css';
 import registerConcept from'../assets/RegisterConcept.jpg';
 import UserIcon from '../assets/UserIconLogin.svg';
+import NicknameIcon from '../assets/NicknameIcon.svg';
+import EmailIconLogin from '../assets/EmailIconLogin.svg';
 import PasswordIcon from '../assets/PasswordIconLogin.svg';
+
 
 export default function Cadastro() {
   const navigate = useNavigate();
@@ -18,6 +21,7 @@ export default function Cadastro() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -74,7 +78,7 @@ export default function Cadastro() {
 
             <div className="mb-3">
               <label className="form-label">
-                <img src={UserIcon} alt="" /> nome de usuário
+                <img src={NicknameIcon} alt="" /> nome de usuário
               </label>
               <input
                 className="login-input"
@@ -88,7 +92,7 @@ export default function Cadastro() {
 
             <div className="mb-3">
               <label className="form-label">
-                <img src={UserIcon} alt="" /> e-mail
+                <img src={EmailIconLogin} alt="" /> e-mail
               </label>
               <input
                 className="login-input"
@@ -113,6 +117,18 @@ export default function Cadastro() {
                 minLength={6}
                 autoComplete="new-password"
               />
+            </div>
+
+            <div className="check-connected">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                required
+              />
+              <span>
+                Li e aceito os <span className="terms-link">termos de uso</span>
+              </span>
             </div>
 
             <button

@@ -91,9 +91,9 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
-.cardTask:hover{
+/* .cardTask:hover{
     box-shadow: inset 0 0 89px rgba(144, 71, 226, 0.3);
-}
+} */
 
 .cardTask hr{
     margin: 0rem 0 0.5rem 0;
@@ -122,6 +122,19 @@
 .archivedCard {
     background: linear-gradient(to bottom, #5D4386, #324055);
 }
+
+.MédiaCard {
+    box-shadow: inset 1px 19px 0px -10px rgba(252, 255, 52, 0.644);
+}
+
+.AltaCard {
+    box-shadow: inset 1px 19px 0px -10px rgba(255, 159, 15, 0.74);
+}
+
+.UrgenteCard {
+    box-shadow: inset 1px 22px 35px -10px rgba(255, 52, 52, 0.829);
+}
+
 
 .archivedCard.collapsed {
     align-items: center;
