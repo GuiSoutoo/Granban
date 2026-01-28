@@ -173,7 +173,7 @@ export default function Granban() {
       <Navbar page="Granban"/>
       <div className="granban-container dark">
         <Heading
-          page={projectId ? (projectName ? `Projeto: ${projectName}` : 'Projeto') : 'Kanban pessoal'}
+          page={projectId ? (projectName ? `Projeto: ${projectName}` : 'Projeto') : 'Granban pessoal'}
           onFuncClick={handleAddTask}
           onExpandClick={() => setCompactCards((prev) => !prev)}
           isCompact={compactCards}

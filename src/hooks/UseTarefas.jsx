@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import { db } from '../services/firebase';
-import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where } from 'firebase/firestore';
+
+function chunkArray(list, size) {
+  const out = [];
+  for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
+  return out;
+}
 
 export function useTarefa(projectId, projectName) {
   const [tarefas, setTarefas] = useState([]);
@@ -12,16 +18,21 @@ export function useTarefa(projectId, projectName) {
       : collection(db, 'tarefas');
 
     const unsubscribe = onSnapshot(tarefasRef, (snapshot) => {
-      let lista = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        lista.push({
-          id: doc.id,
+      const baseList = [];
+      const executorUsernames = new Set();
+
+      snapshot.forEach((taskDoc) => {
+        const data = taskDoc.data();
+        const executor = typeof data.executor === 'string' ? data.executor.trim() : '';
+        if (executor) executorUsernames.add(executor);
+
+        baseList.push({
+          id: taskDoc.id,
           nome: data.titulo,
           titulo: data.titulo,
           status: data.status,
           tag: data.tag,
-          executor: data.executor,
+          executor,
           dataEntrega: data.dataEntrega,
           descricao: data.descricao,
           criadoEm: data.criadoEm ? data.criadoEm.toDate().toLocaleDateString() : '',
@@ -29,9 +40,46 @@ export function useTarefa(projectId, projectName) {
           prioridade: data.prioridade,
           projectId: projectId ? (data.projectId || projectId) : (data.projectId || ''),
           projectName: projectId ? (data.projectName || projectName || '') : (data.projectName || ''),
-        })
-      })
-      setTarefas(lista); 
+        });
+      });
+
+      if (executorUsernames.size === 0) {
+        setTarefas(baseList);
+        return;
+      }
+
+      (async () => {
+        try {
+          const usernames = Array.from(executorUsernames);
+          const usernameToName = new Map();
+          const usersCol = collection(db, 'users');
+          const batches = chunkArray(usernames, 10);
+
+          const snaps = await Promise.all(
+            batches.map((batch) => getDocs(query(usersCol, where('username', 'in', batch))))
+          );
+
+          snaps.forEach((snap) => {
+            snap.forEach((userDoc) => {
+              const userData = userDoc.data();
+              const username = typeof userData?.username === 'string' ? userData.username.trim() : '';
+              if (!username) return;
+              const name = typeof userData?.name === 'string' ? userData.name.trim() : '';
+              usernameToName.set(username, name || username);
+            });
+          });
+
+          const listWithNames = baseList.map((task) => ({
+            ...task,
+            executorName: usernameToName.get(task.executor) || task.executor,
+          }));
+
+          setTarefas(listWithNames);
+        } catch (error) {
+          console.error('Erro ao carregar nomes dos executores:', error);
+          setTarefas(baseList);
+        }
+      })();
     })
     
     return () => unsubscribe(); 

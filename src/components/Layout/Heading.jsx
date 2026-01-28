@@ -19,7 +19,7 @@ export function Heading({
     onSearchChange,
     searchValue = '',
 }) {
-    const isGranban = page === 'Kanban pessoal';
+    const isGranban = page === 'Granban pessoal';
 
     const pageIcon = page === 'Projetos' ? ProjectsIco : GranbanIco;
     const funcIcon = page === 'Projetos' ? NewProjectIco : NewTaskIco;

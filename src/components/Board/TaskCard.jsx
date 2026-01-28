@@ -29,6 +29,14 @@ const getIcon = (tag) => {
   return foundKey ? tagIcons[foundKey] : null;
 };
 
+function getShortName(fullName = '') {
+  const trimmed = fullName.trim();
+  if (!trimmed) return '-';
+  const parts = trimmed.split(/\s+/);
+  if (parts.length <= 2) return trimmed;
+  return `${parts[0]} ${parts[1]}`;
+}
+
 // Formata a data de criação para exibição relativa (Hoje, Há X dias)
 function formatarTempoDecorrido(dataString) {
   if (!dataString) return '-';
@@ -132,7 +140,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
       <hr></hr>
       <div className="bottomTask">
         <p className={task.prioridade}>{task.prioridade} prioridade</p>
-        <p><a>Executor</a> {task.executor}</p>
+        <p><a>Executor</a> {getShortName(task.executorName || task.executor)}</p>
       </div>
       
       <div className="buttonTask">
