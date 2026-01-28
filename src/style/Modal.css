@@ -525,6 +525,19 @@
   gap: 12px;
 }
 
+.modal-project-closeBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(0, 0, 0, 0.20);
+}
+
+.modal-project-closeBtn:hover {
+  background: rgba(0, 0, 0, 0.28);
+}
+
 .modal-project-coverPreview {
   position: absolute;
   inset: 0;
@@ -603,6 +616,551 @@
   padding: 8px 10px;
   border-radius: 10px;
   font-size: 13px;
+}
+
+/* ==================== MODAL MANAGE TEAM (GERENCIAR EQUIPE) ==================== */
+.modal-team-wrap {
+  width: min(860px, 94vw);
+}
+
+/* ==================== MODAL INVITE MEMBER (CONVIDAR AO PROJETO) ==================== */
+.modal-invite-wrap {
+  width: min(640px, 94vw);
+}
+
+.modal-invite-card {
+  position: relative;
+  padding: 24px 26px 22px;
+  overflow: hidden;
+}
+
+.modal-invite-closeBtn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+.modal-invite-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-right: 44px;
+}
+
+.modal-invite-headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.modal-invite-bigIcon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.modal-invite-bigIcon img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  display: block;
+}
+
+.modal-invite-headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.modal-invite-projectName {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modal-invite-subtitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.modal-invite-headerRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.modal-invite-memberCount {
+  font-weight: 900;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.modal-invite-memberIcon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  display: block;
+  opacity: 0.95;
+}
+
+.modal-invite-body {
+  margin-top: 18px;
+}
+
+.modal-invite-label {
+  font-size: 16px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 10px;
+}
+
+.modal-invite-label--spaced {
+  margin-top: 18px;
+}
+
+.modal-invite-row {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 14px;
+  align-items: center;
+}
+
+.modal-invite-input {
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.14);
+  color: rgba(255, 255, 255, 0.96);
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+.modal-invite-input:focus,
+.modal-invite-input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.22);
+}
+
+.modal-invite-inviteBtn {
+  height: 44px;
+  border: none;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #4c2a86;
+  font-weight: 900;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.modal-invite-inviteBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.modal-invite-inviteBtn:hover {
+  filter: brightness(0.98);
+}
+
+.modal-invite-linkBtn {
+  width: 68px;
+  height: 56px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.modal-invite-linkBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.modal-invite-feedback {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.modal-invite-feedback--error {
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.modal-invite-feedback--success {
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(34, 197, 94, 0.16);
+  border: 1px solid rgba(34, 197, 94, 0.32);
+}
+
+@media (max-width: 520px) {
+  .modal-invite-card {
+    padding: 20px 18px 18px;
+  }
+
+  .modal-invite-row {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-invite-inviteBtn {
+    width: 100%;
+  }
+}
+
+.modal-team-card {
+  padding: 18px 18px 16px;
+  overflow: hidden;
+}
+
+.modal-team-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.modal-team-headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.modal-team-cover {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.14);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  flex: 0 0 auto;
+}
+
+.modal-team-coverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.modal-team-coverFallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-team-coverFallback img {
+  width: 26px;
+  height: 30px;
+  object-fit: contain;
+  opacity: 0.95;
+  display: block;
+  transform: translateY(1px);
+}
+
+.modal-team-headerInfo {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.modal-team-projectName {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.modal-team-metrics {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 0;
+  flex: 0 0 auto;
+}
+
+.modal-team-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.modal-team-metricValue {
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.modal-team-metricIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+.modal-team-titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 2px 12px;
+}
+
+.modal-team-titleIcon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.modal-team-titleText {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.modal-team-table {
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.modal-team-row {
+  display: grid;
+  grid-template-columns: 42px minmax(140px, 1fr) minmax(200px, 1.2fr) 110px 46px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px;
+  border-radius: 12px;
+}
+
+.modal-team-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.modal-team-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.16);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-team-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.modal-team-avatarFallback {
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.modal-team-cell {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.modal-team-cell--email {
+  opacity: 0.9;
+}
+
+.modal-team-role {
+  font-weight: 800;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: left;
+}
+
+.modal-team-role--owner {
+  color: #25bd60;
+}
+
+.modal-team-rowDots {
+  width: 40px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+}
+
+.modal-team-rowDots:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.modal-team-rowDots:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ==================== MODAL TEAM: MEMBER OPTIONS MENU ==================== */
+.modal-team-optionsMenu {
+  position: fixed;
+  width: 260px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #3b1f62 0%, #2e174f 100%);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+  z-index: 13000;
+}
+
+.modal-team-optionsMenu__item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  padding: 16px 14px;
+  cursor: pointer;
+}
+
+.modal-team-optionsMenu__item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.modal-team-optionsMenu__item:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.modal-team-optionsMenu__divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.modal-team-optionsMenu__item--danger {
+  color: #ff7b7b;
+}
+
+/* ==================== MODAL TEAM: CONFIRM OVERLAY ==================== */
+.modal-team-confirmOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 14000;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.modal-team-confirmCard {
+  position: relative;
+  width: 420px;
+  max-width: 92vw;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #3b1f62 0%, #2e174f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.65);
+  padding: 18px 16px 14px;
+}
+
+.modal-team-confirmCloseBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.modal-team-confirmTitle {
+  color: rgba(255, 255, 255, 0.96);
+  font-weight: 900;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.modal-team-confirmText {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 14px;
+  line-height: 1.35;
+  margin-bottom: 14px;
+}
+
+.modal-team-confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-team-confirmBtn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-team-confirmBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.modal-team-confirmBtn:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.modal-team-confirmBtn--danger {
+  background: rgba(255, 72, 72, 0.20);
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.modal-team-confirmBtn--danger:hover {
+  background: rgba(255, 72, 72, 0.28);
+}
+
+.modal-team-empty {
+  padding: 14px 10px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+@media (max-width: 720px) {
+  .modal-team-row {
+    grid-template-columns: 42px minmax(130px, 1fr) 0 90px 46px;
+  }
+  .modal-team-cell--email {
+    display: none;
+  }
 }
 
 @media (max-width: 520px) {

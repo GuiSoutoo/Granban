@@ -41,10 +41,6 @@
 
 /* Column.jsx */
 
-.col {
-    /* flex: 0 !important; Removed to allow growth via column-wrapper */
-}
-
 .col-status {
     border: 1px solid #8A70B3;
     min-height: 75vh !important;
@@ -114,4 +110,277 @@
 .archived {
     color: #A0A0A0;
     text-align: center;
+}
+
+/* ==================== PROJECT HERO (KANBAN DE PROJETO) ==================== */
+.project-hero {
+    position: relative;
+    width: calc(100% + 40px);
+    height: 290px;
+    border-radius: 0;
+    overflow: hidden;
+    margin: -20px -20px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+}
+
+.project-hero__bg {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    filter: blur(18px);
+    transform: scale(1.08);
+    opacity: 0.85;
+}
+
+.project-hero__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center top;
+}
+
+.project-hero__fallback {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(109, 40, 217, 0.9) 0%, rgba(139, 92, 246, 0.85) 60%, rgba(58, 35, 95, 0.85) 100%);
+}
+
+.project-hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.10) 0%, rgba(0, 0, 0, 0.35) 55%, rgba(0, 0, 0, 0.62) 100%);
+}
+
+.project-hero__inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 18px 18px;
+}
+
+.project-hero__title {
+    font-size: 40px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+    color: rgba(255, 255, 255, 0.98);
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+}
+
+@media (max-width: 900px) {
+    .project-hero {
+        height: 240px;
+    }
+    .project-hero__title {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 640px) {
+    .project-hero {
+        height: 210px;
+    }
+    .project-hero__title {
+        font-size: 26px;
+    }
+}
+
+/* ==================== MEMBERS ROW (KANBAN DE PROJETO) ==================== */
+.project-membersRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 2px 0 14px;
+}
+
+.project-membersRow__addBtn {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.project-membersRow__addBtn img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    display: block;
+}
+
+.project-membersRow__addBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.project-membersRow__avatars {
+    display: flex;
+    align-items: center;
+}
+
+.project-memberAvatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.10);
+    border: 3px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -14px;
+}
+
+.project-memberAvatar:first-child {
+    margin-left: 0;
+}
+
+.project-memberAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ==================== PROJECT OPTIONS MENU (3 PONTINHOS) ==================== */
+.project-optionsMenu {
+    position: fixed;
+    width: 260px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #3b1f62 0%, #2e174f 100%);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    overflow: hidden;
+    z-index: 1200;
+}
+
+.project-optionsMenu__item {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    padding: 16px 14px;
+    cursor: pointer;
+}
+
+.project-optionsMenu__item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.project-optionsMenu__divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.project-optionsMenu__item--danger {
+    color: #ff7b7b;
+}
+
+/* ==================== LEAVE PROJECT CONFIRM MODAL ==================== */
+.project-leaveConfirmOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1250;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+}
+
+.project-leaveConfirmCard {
+    position: relative;
+    width: 360px;
+    max-width: 92vw;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #3b1f62 0%, #2e174f 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.65);
+    padding: 18px 16px 14px;
+}
+
+.project-leaveConfirmCloseBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.project-leaveConfirmTitle {
+    color: rgba(255, 255, 255, 0.96);
+    font-weight: 900;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.project-leaveConfirmText {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 14px;
+    line-height: 1.35;
+    margin-bottom: 14px;
+}
+
+.project-leaveConfirmActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.project-leaveConfirmBtn {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.project-leaveConfirmBtn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.project-leaveConfirmBtn:disabled {
+    opacity: 0.65;
+    cursor: default;
+}
+
+.project-leaveConfirmBtn--danger {
+    background: rgba(255, 72, 72, 0.20);
+    color: #ffd1d1;
+}
+
+.project-leaveConfirmBtn--danger:hover {
+    background: rgba(255, 72, 72, 0.28);
+}
+
+.project-memberAvatar__fallback {
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.92);
+    background: rgba(109, 40, 217, 0.55);
+    width: 100%;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Three dots inside heading button */
+.heading-threeDots {
+    font-size: 22px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.92);
+    display: inline-block;
+    transform: translateY(-1px);
 }

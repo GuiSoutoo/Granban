@@ -152,6 +152,12 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
       <p className="dateTask">
         {shortId &&<span className="inline-id">#{shortId} </span>}
         <span>· {formatarTempoDecorrido(task.criadoEm)}</span>
+        <span>
+          {' '}·{' '}
+          {String(task.criador || task.criadorEmail || '').trim()
+            ? `Criado por ${getShortName(task.criador || task.criadorEmail || '')}`
+            : 'Criador não registrado'}
+        </span>
         
       </p>
       <h4>{task.titulo}</h4>

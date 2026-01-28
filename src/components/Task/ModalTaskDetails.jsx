@@ -45,21 +45,10 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
     }
   }, [task?.status]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') onClose?.();
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isOpen, onClose]);
-
   if (!isOpen) return null;
 
   const createdLabel = task.criadoEm || '-';
-  const creatorLabel = task.criador || 'Nome do Criador';
+  const creatorLabel = String(task.criador || task.criadorEmail || '').trim();
   const deliveryLabel = task.dataEntrega
     ? (() => {
         const date = new Date(task.dataEntrega);
@@ -81,7 +70,7 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
   };
 
   return (
-    <div className="modal-overlay" onClick={() => onClose?.()}>
+    <div className="modal-overlay">
       <div className="modal-details-wrap" onClick={(e) => e.stopPropagation()}>
         <div className="modal-details-card">
           <div className="modal-details-header">
@@ -112,7 +101,10 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
 
               <div className="modal-details-tagWrap">
                 <div className="modal-details-tag">{task.tag || '—'}</div>
-                <div className="modal-details-created">Criado em {createdLabel} por {creatorLabel}</div>
+                <div className="modal-details-created">
+                  Criado em {createdLabel}
+                  {creatorLabel ? ` por ${creatorLabel}` : ' · Criador não registrado'}
+                </div>
               </div>
             </div>
 

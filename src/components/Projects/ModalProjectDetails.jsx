@@ -102,7 +102,7 @@ export default function ModalProjectDetails({ project, counts, onClose, onEdit }
   }, [membersKey]);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="modal-details-wrap modal-projectDetails-wrap" onClick={(e) => e.stopPropagation()}>
         <div className="modal-details-card modal-projectDetails-card">
           <button type="button" className="modal-details-closeBtn modal-projectDetails-closeBtn" onClick={onClose} aria-label="Fechar">

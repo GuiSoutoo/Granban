@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
+import { arrayUnion, collection, deleteDoc, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import { Heading } from "../components/Layout/Heading";
 import { Navbar } from "../components/Layout/Navbar";
 import ModalNewProject from '../components/Projects/ModalNewProject';
 import ModalProjectDetails from '../components/Projects/ModalProjectDetails';
 import ModalEditProject from '../components/Projects/ModalEditProject';
 import ProjectCard from '../components/Projects/ProjectCard';
+import ProjectInviteCard from '../components/Projects/ProjectInviteCard';
 import { db } from '../services/firebase';
 import { getCurrentUser, onAuthChange } from '../services/auth';
 import { slugify } from '../utils/slugify';
@@ -29,6 +30,7 @@ export default function Projetos(){
 
     const [user, setUser] = useState(() => getCurrentUser());
     const [projects, setProjects] = useState([]);
+    const [invites, setInvites] = useState([]);
     const [countsByProject, setCountsByProject] = useState({});
     const [error, setError] = useState('');
 
@@ -51,6 +53,7 @@ export default function Projetos(){
         setError('');
         memberMapRef.current = new Map();
         setProjects([]);
+        setInvites([]);
 
         if (!user?.uid) return;
 
@@ -100,6 +103,61 @@ export default function Projetos(){
             try { unsubMember(); } catch {}
         };
     }, [user?.uid, user?.email, canQueryMembers]);
+
+    useEffect(() => {
+        setInvites([]);
+        if (!user?.email) return;
+
+        const emailLower = String(user.email).trim().toLowerCase();
+        const invitesCol = collection(db, 'projectInvites');
+        const qInvites = query(invitesCol, where('inviteeEmailLower', '==', emailLower));
+
+        const unsub = onSnapshot(
+            qInvites,
+            (snap) => {
+                const list = [];
+                snap.forEach((d) => {
+                    const data = d.data() || {};
+                    if (data?.status && data.status !== 'pending') return;
+                    list.push({ id: d.id, ...data });
+                });
+                // mais recente primeiro
+                list.sort((a, b) => {
+                    const at = a?.createdAt?.toMillis?.() || 0;
+                    const bt = b?.createdAt?.toMillis?.() || 0;
+                    return bt - at;
+                });
+                setInvites(list);
+            },
+            (err) => {
+                console.error('Erro ao carregar convites:', err);
+            }
+        );
+
+        return () => {
+            try { unsub(); } catch {}
+        };
+    }, [user?.email]);
+
+    const handleAcceptInvite = async (invite) => {
+        if (!user?.email) return;
+        const projectId = invite?.projectId;
+        if (!projectId) return;
+
+        await updateDoc(doc(db, 'projects', projectId), {
+            members: arrayUnion(user.email),
+        });
+
+        if (invite?.id) {
+            await deleteDoc(doc(db, 'projectInvites', invite.id));
+        }
+    };
+
+    const handleDeclineInvite = async (invite) => {
+        if (invite?.id) {
+            await deleteDoc(doc(db, 'projectInvites', invite.id));
+        }
+    };
 
     useEffect(() => {
         // Remove listeners de projetos que saíram da lista
@@ -160,6 +218,22 @@ export default function Projetos(){
                 <div className="projects-page">
                     {error ? (
                         <div className="projects-error">{error}</div>
+                    ) : null}
+
+                    {!error && invites.length > 0 ? (
+                        <div className="project-invites">
+                            <div className="project-invites-title">Convites</div>
+                            <div className="project-invites-list">
+                                {invites.map((invite) => (
+                                    <ProjectInviteCard
+                                        key={invite.id}
+                                        invite={invite}
+                                        onAccept={handleAcceptInvite}
+                                        onDecline={handleDeclineInvite}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                     ) : null}
 
                     {!error && projects.length === 0 ? (

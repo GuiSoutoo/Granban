@@ -72,8 +72,8 @@ export default function ModalNewProject({ onClose }) {
 		}
 
 		const createdByValue = user?.displayName || user?.email || '';
-		// ownerId deve ser o nome de quem criou (conforme pedido)
-		const ownerIdValue = user?.displayName || user?.email || '';
+		// ownerEmail é a fonte de verdade para permissões (e-mail do criador)
+		const ownerEmailValue = user?.email || '';
 		const members = user?.email ? [user.email] : [];
 
 		setLoading(true);
@@ -85,7 +85,7 @@ export default function ModalNewProject({ onClose }) {
 				members,
 				createdAt: serverTimestamp(),
 				createdBy: createdByValue,
-				ownerId: ownerIdValue,
+				ownerEmail: ownerEmailValue,
 			});
 
 			// Upload opcional da capa
@@ -116,12 +116,24 @@ export default function ModalNewProject({ onClose }) {
 	}
 
 	return (
-		<div className="modal-overlay" onClick={onClose}>
+		<div className="modal-overlay">
 			<div className="modal-details-wrap" onClick={(e) => e.stopPropagation()}>
 				<form className="modal-details-card modal-project-card" onSubmit={handleSubmit}>
 
 					{/* TOPO BRANCO */}
 					<div className="modal-project-cover">
+						<button
+							type="button"
+							className="modal-details-closeBtn modal-project-closeBtn"
+							onClick={onClose}
+							aria-label="Fechar"
+							title="Fechar"
+						>
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+								<path d="M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+								<path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+							</svg>
+						</button>
 						{coverPreviewUrl ? (
 							<img className="modal-project-coverPreview" src={coverPreviewUrl} alt="" />
 						) : null}

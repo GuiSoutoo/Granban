@@ -18,21 +18,30 @@ export function Heading({
     isCompact = false,
     onSearchChange,
     searchValue = '',
+    titleActions,
 }) {
-    const isGranban = page === 'Granban pessoal';
+    const isProjects = page === 'Projetos';
+    const isGranban = !isProjects;
     const showExpandButton = typeof onExpandClick === 'function';
 
-    const pageIcon = page === 'Projetos' ? ProjectsIco : GranbanIco;
-    const funcIcon = page === 'Projetos' ? NewProjectIco : NewTaskIco;
+    const hasTitle = typeof page === 'string' && page.trim().length > 0;
+
+    const pageIcon = isProjects ? ProjectsIco : GranbanIco;
+    const funcIcon = isProjects ? NewProjectIco : NewTaskIco;
     const showActionButton = typeof onFuncClick === 'function';
 
     return (
         <div className="heading-bar">
-            <div className="heading-title">
-                <button className="heading-title__icon" aria-hidden="true">
-                    <img src={pageIcon} alt="" />
-                </button>
-                <h1>{page}</h1>
+            <div className={`heading-title${hasTitle ? '' : ' heading-title--noTitle'}`}>
+                {hasTitle ? (
+                    <button className="heading-title__icon" aria-hidden="true">
+                        <img src={pageIcon} alt="" />
+                    </button>
+                ) : null}
+                {hasTitle ? <h1>{page}</h1> : null}
+                {titleActions ? (
+                    <div className="heading-titleActions">{titleActions}</div>
+                ) : null}
             </div>
 
             <div className="heading-actions">

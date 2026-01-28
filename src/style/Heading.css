@@ -13,6 +13,31 @@
     gap: 12px;
 }
 
+.heading-title--noTitle {
+    gap: 0;
+}
+
+.heading-title--noTitle .heading-titleActions {
+    margin-left: 0;
+}
+
+.heading-titleActions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 6px;
+}
+
+.heading-titleActions .heading-btn {
+    padding: 6px;
+}
+
+.heading-titleActions .heading-btn img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
 .heading-title h1 {
     margin: 0;
     font-size: 32px;

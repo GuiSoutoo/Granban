@@ -50,6 +50,10 @@
   width: 40px;
   height: 40px;
   filter: brightness(1.1);
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  transform: translateX(1.5px);
 }
 
 .navbar-title {

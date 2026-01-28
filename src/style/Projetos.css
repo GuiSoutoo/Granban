@@ -2,6 +2,155 @@
   margin-top: 18px;
 }
 
+/* ==================== PROJECT INVITES ==================== */
+.project-invites {
+  padding: 10px 6px 0;
+}
+
+.project-invites-title {
+  color: rgba(255, 255, 255, 0.86);
+  font-weight: 800;
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+
+.project-invites-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.project-invite-card {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  width: 100%;
+  max-width: 860px;
+}
+
+.project-invite-card__cover {
+  position: relative;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.project-invite-card__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(10px);
+  transform: scale(1.08);
+  opacity: 0.55;
+}
+
+.project-invite-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0.85;
+}
+
+.project-invite-card__placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.project-invite-card__placeholder img {
+  width: 84px;
+  height: 84px;
+  opacity: 0.9;
+}
+
+.project-invite-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 6, 24, 0.18) 0%, rgba(10, 6, 24, 0.55) 100%);
+}
+
+.project-invite-card__content {
+  background: linear-gradient(180deg, #3a235f 0%, #6a35d7 100%);
+  padding: 16px 18px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.project-invite-card__text {
+  min-width: 0;
+}
+
+.project-invite-card__inviter {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.project-invite-card__projectName {
+  color: rgba(255, 255, 255, 0.98);
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  line-height: 1.05;
+}
+
+.project-invite-card__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  flex: 0 0 auto;
+}
+
+.project-invite-card__btn {
+  min-width: 164px;
+  height: 52px;
+  border-radius: 14px;
+  border: none;
+  font-weight: 900;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.96);
+  cursor: pointer;
+}
+
+.project-invite-card__btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.project-invite-card__btn--decline {
+  background: rgba(239, 68, 68, 0.55);
+}
+
+.project-invite-card__btn--accept {
+  background: rgba(34, 197, 94, 0.55);
+}
+
+@media (max-width: 720px) {
+  .project-invite-card__content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .project-invite-card__actions {
+    width: 100%;
+  }
+  .project-invite-card__btn {
+    flex: 1;
+    min-width: 0;
+  }
+  .project-invite-card__projectName {
+    font-size: 26px;
+  }
+}
+
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(0, 440px));

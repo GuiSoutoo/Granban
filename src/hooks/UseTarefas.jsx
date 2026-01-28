@@ -60,6 +60,17 @@ export function useTarefa(projectId, projectName, currentUser) {
       const parentProjectId = fallbackProjectId || taskDoc.ref.parent?.parent?.id || data.projectId || '';
       const parentProjectName = fallbackProjectName || data.projectName || '';
 
+      const creatorValue =
+        (typeof data?.criador === 'string' && data.criador.trim())
+          ? data.criador.trim()
+          : (typeof data?.createdBy === 'string' && data.createdBy.trim())
+            ? data.createdBy.trim()
+            : (typeof data?.createdByName === 'string' && data.createdByName.trim())
+              ? data.createdByName.trim()
+              : (typeof data?.createdByEmail === 'string' && data.createdByEmail.trim())
+                ? data.createdByEmail.trim()
+                : '';
+
       return {
         id: taskDoc.id,
         uniqueKey: `${parentProjectId || 'personal'}::${taskDoc.id}`,
@@ -71,7 +82,9 @@ export function useTarefa(projectId, projectName, currentUser) {
         dataEntrega: data.dataEntrega,
         descricao: data.descricao,
         criadoEm: data.criadoEm ? data.criadoEm.toDate().toLocaleDateString() : '',
-        criador: data.criador,
+        criador: creatorValue,
+        criadorUid: typeof data?.criadorUid === 'string' ? data.criadorUid : (typeof data?.createdByUid === 'string' ? data.createdByUid : ''),
+        criadorEmail: typeof data?.criadorEmail === 'string' ? data.criadorEmail : (typeof data?.createdByEmail === 'string' ? data.createdByEmail : ''),
         prioridade: data.prioridade,
         projectId: parentProjectId,
         projectName: parentProjectName,
@@ -216,6 +229,13 @@ export function useTarefa(projectId, projectName, currentUser) {
         ? collection(db, 'projects', targetProjectId, 'tasks')
         : collection(db, 'tarefas');
 
+      const creatorName = typeof currentUser?.name === 'string' ? currentUser.name.trim() : '';
+      const creatorUsername = typeof currentUser?.username === 'string' ? currentUser.username.trim() : '';
+      const creatorEmail = typeof currentUser?.email === 'string' ? currentUser.email.trim() : '';
+      const creatorUid = typeof currentUser?.uid === 'string' ? currentUser.uid.trim() : '';
+
+      const creatorLabel = creatorName || creatorUsername || creatorEmail;
+
       await addDoc(tarefasRef, {
         titulo: dados.titulo,
         status: dados.status || 'to-do',
@@ -224,6 +244,9 @@ export function useTarefa(projectId, projectName, currentUser) {
         dataEntrega: dados.dataEntrega || '',
         descricao: dados.descricao || '',
         criadoEm: new Date(),
+        criador: creatorLabel || '',
+        criadorUid: creatorUid || '',
+        criadorEmail: creatorEmail || '',
         prioridade: dados.prioridade || '',
         ...(targetProjectId ? { projectId: targetProjectId, projectName: targetProjectName } : {}),
       });

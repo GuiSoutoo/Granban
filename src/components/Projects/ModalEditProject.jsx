@@ -118,12 +118,24 @@ export default function ModalEditProject({ project, onClose }) {
 	}
 
 	return (
-		<div className="modal-overlay" onClick={onClose}>
+		<div className="modal-overlay">
 			<div className="modal-details-wrap" onClick={(e) => e.stopPropagation()}>
 				<form className="modal-details-card modal-project-card" onSubmit={handleSubmit}>
 
 					{/* TOPO BRANCO */}
 					<div className="modal-project-cover">
+						<button
+							type="button"
+							className="modal-details-closeBtn modal-project-closeBtn"
+							onClick={onClose}
+							aria-label="Fechar"
+							title="Fechar"
+						>
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+								<path d="M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+								<path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+							</svg>
+						</button>
 						{(coverPreviewUrl || existingCoverUrl) ? (
 							<img className="modal-project-coverPreview" src={coverPreviewUrl || existingCoverUrl} alt="" />
 						) : null}

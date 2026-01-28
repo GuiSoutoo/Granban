@@ -160,7 +160,7 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
   );
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="modal-details-wrap" onClick={(e) => e.stopPropagation()}>
         <form className="modal-details-card" onSubmit={handleSubmit}>
 
@@ -194,6 +194,19 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
                 )}
               </div>
             </div>
+
+            <button
+              type="button"
+              className="modal-details-closeBtn"
+              onClick={() => onClose?.()}
+              aria-label="Fechar"
+              title="Fechar"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
           </div>
 
           {/* TITLE */}

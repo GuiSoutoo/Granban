@@ -29,17 +29,6 @@ const getTagIcon = (tag) => {
 export default function ModalTaskReview({ task, onClose, onStatusChange }) {
   const isOpen = !!task;
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') onClose?.();
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isOpen, onClose]);
-
   if (!isOpen) return null;
 
   const createdLabel = task.criadoEm || '-';
@@ -76,7 +65,7 @@ export default function ModalTaskReview({ task, onClose, onStatusChange }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={() => onClose?.()}>
+    <div className="modal-overlay">
       <div className="modal-details-wrap" onClick={(e) => e.stopPropagation()}>
         <div className="modal-details-card">
           <div className="modal-details-header">
