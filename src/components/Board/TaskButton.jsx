@@ -25,7 +25,7 @@ export function TaskButton({ status, taskId, onStatusChange, task, onReview }) {
       }
       const { proximoStatus } = botaoStatus(status);
         if (onStatusChange && proximoStatus) {
-          onStatusChange(taskId, proximoStatus);
+          onStatusChange(taskId, proximoStatus, { projectId: task?.projectId });
         }
     };
     const botaoInfo = botaoStatus(status);

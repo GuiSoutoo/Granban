@@ -13,6 +13,7 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { collection, doc, getDoc, getDocs, limit, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../services/firebase';
+import { getCurrentUser, getUserProfile, onAuthChange } from '../services/auth';
 
 export default function Granban() {
   const { projectKey } = useParams();
@@ -22,6 +23,54 @@ export default function Granban() {
   const initialProjectName = location?.state?.projectName || '';
   const [projectId, setProjectId] = useState(initialProjectId);
   const [projectName, setProjectName] = useState(initialProjectName);
+  const [currentUserProfile, setCurrentUserProfile] = useState(null);
+  const [modalProjectId, setModalProjectId] = useState(initialProjectId);
+  const [modalProjectName, setModalProjectName] = useState(initialProjectName);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const applyUser = async (user) => {
+      if (cancelled) return;
+      if (!user) {
+        setCurrentUserProfile(null);
+        return;
+      }
+
+      try {
+        const profile = await getUserProfile(user.uid);
+        if (cancelled) return;
+
+        const username = typeof profile?.username === 'string' ? profile.username.trim() : '';
+        const name = typeof profile?.name === 'string' ? profile.name.trim() : (user.displayName || user.email || '');
+
+        setCurrentUserProfile({
+          uid: user.uid,
+          email: user.email || '',
+          username,
+          name,
+        });
+      } catch (error) {
+        if (cancelled) return;
+        setCurrentUserProfile({
+          uid: user.uid,
+          email: user.email || '',
+          username: '',
+          name: user.displayName || user.email || '',
+        });
+      }
+    };
+
+    applyUser(getCurrentUser());
+    const unsubscribe = onAuthChange((user) => {
+      applyUser(user);
+    });
+
+    return () => {
+      cancelled = true;
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     // Ao sair do kanban de projeto e voltar para o pessoal, limpa o nome.
@@ -79,7 +128,7 @@ export default function Granban() {
     excluirTarefa,
     atualizarStatusTarefa,
     getTarefasPorColuna
-  } = useTarefa(projectId, projectName);
+  } = useTarefa(projectId, projectName, currentUserProfile);
 
   const [editingTask, setEditingTask] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -88,6 +137,12 @@ export default function Granban() {
   const [returnToDetailsTask, setReturnToDetailsTask] = useState(null);
   const [movingTaskId, setMovingTaskId] = useState(null);
   const [compactCards, setCompactCards] = useState(false);
+
+  useEffect(() => {
+    if (showEditModal) return;
+    setModalProjectId(projectId);
+    setModalProjectName(projectName);
+  }, [projectId, projectName, showEditModal]);
 
   // Mantém o nome do projeto atualizado (caso não venha por state)
   // e também permite refletir renomes no header.
@@ -108,7 +163,14 @@ export default function Granban() {
     };
   }, [projectId]);
 
-  const handleEdit = (task) => { setEditingTask(task); setShowEditModal(true); };
+  const handleEdit = (task) => {
+    const targetProjectId = task?.projectId || projectId || '';
+    const targetProjectName = task?.projectName || projectName || '';
+    setModalProjectId(targetProjectId);
+    setModalProjectName(targetProjectName);
+    setEditingTask(task);
+    setShowEditModal(true);
+  };
   const handleOpenDetails = (task) => { setDetailsTask(task); };
   const handleOpenReview = (task) => { setReviewTask(task); };
   const handleAddTask = () => {
@@ -116,6 +178,8 @@ export default function Granban() {
     setReviewTask(null);
     setReturnToDetailsTask(null);
     setEditingTask(null);
+    setModalProjectId(projectId);
+    setModalProjectName(projectName);
     setShowEditModal(true);
   };
 
@@ -131,6 +195,9 @@ export default function Granban() {
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     setReturnToDetailsTask(null);
+    setEditingTask(null);
+    setModalProjectId(projectId);
+    setModalProjectName(projectName);
   };
 
   const handleBackToDetails = () => {
@@ -148,21 +215,26 @@ export default function Granban() {
     })
   );
 
+  const canAddTask = Boolean(projectId);
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
     
     if (!over) return;
     
-    const taskId = active.id;
+    const taskId = active.data?.current?.docId;
+    const taskProjectId = active.data?.current?.projectId || '';
+    const dragId = active.id;
     const newStatus = over.id;
+    if (!taskId) return;
     
     // Verifica se o over.id é uma coluna válida
     const isValidColumn = COLUNAS.some(col => col.id === newStatus);
     if (!isValidColumn) return;
     
     // Esconde o card temporariamente para evitar o "fantasma"
-    setMovingTaskId(taskId);
-    atualizarStatusTarefa(taskId, newStatus);
+    setMovingTaskId(dragId);
+    atualizarStatusTarefa(taskId, newStatus, { projectId: taskProjectId });
     
     // Limpa após um pequeno delay para garantir que o estado atualizou
     setTimeout(() => setMovingTaskId(null), 100);
@@ -174,7 +246,7 @@ export default function Granban() {
       <div className="granban-container dark">
         <Heading
           page={projectId ? (projectName ? `Projeto: ${projectName}` : 'Projeto') : 'Granban pessoal'}
-          onFuncClick={handleAddTask}
+          onFuncClick={canAddTask ? handleAddTask : undefined}
           onExpandClick={() => setCompactCards((prev) => !prev)}
           isCompact={compactCards}
         />
@@ -186,8 +258,9 @@ export default function Granban() {
             task={editingTask}
             onClose={handleCloseEditModal}
             onBack={returnToDetailsTask ? handleBackToDetails : undefined}
-            projectId={projectId}
-            projectName={projectName}
+            projectId={modalProjectId}
+            projectName={modalProjectName}
+            currentUser={currentUserProfile}
           />
         )}
 
@@ -200,8 +273,8 @@ export default function Granban() {
               setDetailsTask(null);
               handleEdit(task);
             }}
-            onDelete={(task) => excluirTarefa(task.id)}
-            onStatusChange={atualizarStatusTarefa}
+            onDelete={(task) => excluirTarefa(task.id, { projectId: task.projectId })}
+            onStatusChange={(id, status, options) => atualizarStatusTarefa(id, status, options)}
           />
         )}
 

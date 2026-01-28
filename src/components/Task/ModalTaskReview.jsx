@@ -55,16 +55,23 @@ export default function ModalTaskReview({ task, onClose, onStatusChange }) {
     : '-';
 
   const tagIcon = getTagIcon(task.tag);
+  const getShortName = (fullName = '') => {
+    const trimmed = fullName.trim();
+    if (!trimmed) return '-';
+    const parts = trimmed.split(/\s+/);
+    if (parts.length <= 2) return trimmed;
+    return `${parts[0]} ${parts[1]}`;
+  };
 
   const handleReject = async () => {
     if (!task?.id) return;
-    await onStatusChange?.(task.id, 'rejected');
+    await onStatusChange?.(task.id, 'rejected', { projectId: task.projectId });
     onClose?.();
   };
 
   const handleConclude = async () => {
     if (!task?.id) return;
-    await onStatusChange?.(task.id, 'concluded');
+    await onStatusChange?.(task.id, 'concluded', { projectId: task.projectId });
     onClose?.();
   };
 
@@ -145,7 +152,7 @@ export default function ModalTaskReview({ task, onClose, onStatusChange }) {
 
             <div className="modal-details-metaRow modal-details-metaRow--executor">
               <span className="modal-details-metaLabel">Executor</span>
-              <span className="modal-details-metaValue">{task.executor || '-'}</span>
+              <span className="modal-details-metaValue">{getShortName(task.executorName || task.executor)}</span>
             </div>
           </div>
 

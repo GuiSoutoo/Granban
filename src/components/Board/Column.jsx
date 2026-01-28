@@ -37,14 +37,14 @@ export function Column({ title, tasks, id, onDelete, onEdit, onOpenDetails, onOp
       >
         {tasks && tasks.map((task, index) => (
           <TaskCard 
-            key={task.id} 
+            key={task.uniqueKey || task.id} 
             task={task} 
             index={index} 
             onDelete={onDelete}
             onEdit={onEdit}
             onOpenDetails={onOpenDetails}
             onOpenReview={onOpenReview}
-            isMoving={task.id === movingTaskId}
+            isMoving={(task.uniqueKey || task.id) === movingTaskId}
             isExpanded={id === 'archived' ? isExpanded : true}
             showOnlyTitle={showOnlyTitle}
           />

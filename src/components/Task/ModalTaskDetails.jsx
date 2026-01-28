@@ -27,6 +27,14 @@ const getTagIcon = (tag) => {
   return foundKey ? tagIcons[foundKey] : null;
 };
 
+const getShortName = (fullName = '') => {
+  const trimmed = fullName.trim();
+  if (!trimmed) return '-';
+  const parts = trimmed.split(/\s+/);
+  if (parts.length <= 2) return trimmed;
+  return `${parts[0]} ${parts[1]}`;
+};
+
 export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onStatusChange }) {
   const isOpen = !!task;
   const [currentStatus, setCurrentStatus] = useState(task?.status || 'to-do');
@@ -143,7 +151,7 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
                 onChange={(e) => {
                   const newStatus = e.target.value;
                   setCurrentStatus(newStatus);
-                  onStatusChange?.(task.id, newStatus);
+                  onStatusChange?.(task.id, newStatus, { projectId: task.projectId });
                 }}
               >
                 <option value="to-do">A fazer</option>
@@ -157,7 +165,7 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
 
             <div className="modal-details-metaRow modal-details-metaRow--executor">
               <span className="modal-details-metaLabel">Executor</span>
-              <span className="modal-details-metaValue">{task.executor || '-'}</span>
+              <span className="modal-details-metaValue">{getShortName(task.executorName || task.executor || '')}</span>
 
               <div className="modal-details-actions">
               

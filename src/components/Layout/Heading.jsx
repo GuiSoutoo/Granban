@@ -20,9 +20,11 @@ export function Heading({
     searchValue = '',
 }) {
     const isGranban = page === 'Granban pessoal';
+    const showExpandButton = typeof onExpandClick === 'function';
 
     const pageIcon = page === 'Projetos' ? ProjectsIco : GranbanIco;
     const funcIcon = page === 'Projetos' ? NewProjectIco : NewTaskIco;
+    const showActionButton = typeof onFuncClick === 'function';
 
     return (
         <div className="heading-bar">
@@ -66,7 +68,7 @@ export function Heading({
                     <img src={OrderByIcon} alt="Ordenar" />
                 </button>
 
-                {isGranban && (
+                {showExpandButton && (
                     <button
                         type="button"
                         className={`heading-btn heading-btn--expand${isCompact ? ' is-compact' : ''}`}
@@ -79,15 +81,17 @@ export function Heading({
                     </button>
                 )}
 
-                <button
-                    type="button"
-                    className={`heading-btn heading-btn--primary${isGranban ? ' heading-btn--granban' : ''}`}
-                    onClick={onFuncClick}
-                    aria-label={isGranban ? 'Adicionar tarefa' : 'Ação'}
-                    title={isGranban ? 'Adicionar tarefa' : 'Ação'}
-                >
-                    <img src={funcIcon} alt="Ação" />
-                </button>
+                {showActionButton && (
+                    <button
+                        type="button"
+                        className={`heading-btn heading-btn--primary${isGranban ? ' heading-btn--granban' : ''}`}
+                        onClick={onFuncClick}
+                        aria-label={isGranban ? 'Adicionar tarefa' : 'Ação'}
+                        title={isGranban ? 'Adicionar tarefa' : 'Ação'}
+                    >
+                        <img src={funcIcon} alt="Ação" />
+                    </button>
+                )}
             </div>
         </div>
     );

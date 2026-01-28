@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from '../services/firebase';
-import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where, collectionGroup } from 'firebase/firestore';
 
 function chunkArray(list, size) {
   const out = [];
@@ -8,84 +8,200 @@ function chunkArray(list, size) {
   return out;
 }
 
-export function useTarefa(projectId, projectName) {
+export function useTarefa(projectId, projectName, currentUser) {
   const [tarefas, setTarefas] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const tarefasRef = projectId
-      ? collection(db, 'projects', projectId, 'tasks')
-      : collection(db, 'tarefas');
+    let cancelled = false;
+    let requestToken = 0;
 
-    const unsubscribe = onSnapshot(tarefasRef, (snapshot) => {
-      const baseList = [];
-      const executorUsernames = new Set();
+    const resolveExecutorNames = async (executorsSet) => {
+      const namesMap = new Map();
+      if (executorsSet.size === 0) return namesMap;
 
-      snapshot.forEach((taskDoc) => {
-        const data = taskDoc.data();
-        const executor = typeof data.executor === 'string' ? data.executor.trim() : '';
-        if (executor) executorUsernames.add(executor);
+      const usernames = Array.from(executorsSet);
+      const usersCol = collection(db, 'users');
+      const batches = chunkArray(usernames, 10);
 
-        baseList.push({
-          id: taskDoc.id,
-          nome: data.titulo,
-          titulo: data.titulo,
-          status: data.status,
-          tag: data.tag,
-          executor,
-          dataEntrega: data.dataEntrega,
-          descricao: data.descricao,
-          criadoEm: data.criadoEm ? data.criadoEm.toDate().toLocaleDateString() : '',
-          criador: data.criador,
-          prioridade: data.prioridade,
-          projectId: projectId ? (data.projectId || projectId) : (data.projectId || ''),
-          projectName: projectId ? (data.projectName || projectName || '') : (data.projectName || ''),
+      const snaps = await Promise.all(
+        batches.map((batch) => getDocs(query(usersCol, where('username', 'in', batch))))
+      );
+
+      snaps.forEach((snap) => {
+        snap.forEach((userDoc) => {
+          const userData = userDoc.data();
+          const username = typeof userData?.username === 'string' ? userData.username.trim() : '';
+          if (!username) return;
+          const name = typeof userData?.name === 'string' ? userData.name.trim() : '';
+          namesMap.set(username, name || username);
         });
       });
 
-      if (executorUsernames.size === 0) {
-        setTarefas(baseList);
+      return namesMap;
+    };
+
+    const matchesCurrentUser = (executor) => {
+      const comparableExecutor = typeof executor === 'string' ? executor.trim() : '';
+      if (!currentUser) return true;
+      const username = typeof currentUser.username === 'string' ? currentUser.username.trim() : '';
+      const name = typeof currentUser.name === 'string' ? currentUser.name.trim() : '';
+      const email = typeof currentUser.email === 'string' ? currentUser.email.trim() : '';
+
+      if (!username && !name && !email) return true;
+      if (!comparableExecutor) return false;
+
+      return [username, name, email].some((value) => value && value === comparableExecutor);
+    };
+
+    const buildTask = (taskDoc, fallbackProjectId = '', fallbackProjectName = '') => {
+      const data = taskDoc.data();
+      const executor = typeof data.executor === 'string' ? data.executor.trim() : '';
+      const parentProjectId = fallbackProjectId || taskDoc.ref.parent?.parent?.id || data.projectId || '';
+      const parentProjectName = fallbackProjectName || data.projectName || '';
+
+      return {
+        id: taskDoc.id,
+        uniqueKey: `${parentProjectId || 'personal'}::${taskDoc.id}`,
+        nome: data.titulo,
+        titulo: data.titulo,
+        status: data.status,
+        tag: data.tag,
+        executor,
+        dataEntrega: data.dataEntrega,
+        descricao: data.descricao,
+        criadoEm: data.criadoEm ? data.criadoEm.toDate().toLocaleDateString() : '',
+        criador: data.criador,
+        prioridade: data.prioridade,
+        projectId: parentProjectId,
+        projectName: parentProjectName,
+        sourceCollection: parentProjectId ? 'project' : 'personal',
+      };
+    };
+
+    const applyList = async (list, executors) => {
+      if (cancelled) return;
+      if (executors.size === 0) {
+        setTarefas(list);
         return;
       }
 
-      (async () => {
-        try {
-          const usernames = Array.from(executorUsernames);
-          const usernameToName = new Map();
-          const usersCol = collection(db, 'users');
-          const batches = chunkArray(usernames, 10);
+      const currentToken = ++requestToken;
 
-          const snaps = await Promise.all(
-            batches.map((batch) => getDocs(query(usersCol, where('username', 'in', batch))))
-          );
+      try {
+        const namesMap = await resolveExecutorNames(executors);
+        if (cancelled || currentToken !== requestToken) return;
 
-          snaps.forEach((snap) => {
-            snap.forEach((userDoc) => {
-              const userData = userDoc.data();
-              const username = typeof userData?.username === 'string' ? userData.username.trim() : '';
-              if (!username) return;
-              const name = typeof userData?.name === 'string' ? userData.name.trim() : '';
-              usernameToName.set(username, name || username);
-            });
-          });
-
-          const listWithNames = baseList.map((task) => ({
+        setTarefas(
+          list.map((task) => ({
             ...task,
-            executorName: usernameToName.get(task.executor) || task.executor,
-          }));
-
-          setTarefas(listWithNames);
-        } catch (error) {
-          console.error('Erro ao carregar nomes dos executores:', error);
-          setTarefas(baseList);
+            executorName: namesMap.get(task.executor) || task.executor,
+          }))
+        );
+      } catch (error) {
+        console.error('Erro ao carregar nomes dos executores:', error);
+        if (!cancelled && currentToken === requestToken) {
+          setTarefas(list);
         }
-      })();
-    })
-    
-    return () => unsubscribe(); 
-  }, [projectId, projectName])
+      }
+    };
 
-  const adicionarTarefa = async (dados) => {
+    if (projectId) {
+      const tarefasRef = collection(db, 'projects', projectId, 'tasks');
+
+      const unsubscribe = onSnapshot(tarefasRef, (snapshot) => {
+        const executors = new Set();
+        const list = [];
+
+        snapshot.forEach((taskDoc) => {
+          const task = buildTask(taskDoc, projectId, projectName || '');
+          list.push(task);
+          if (task.executor) executors.add(task.executor);
+        });
+
+        applyList(list, executors);
+      });
+
+      return () => {
+        cancelled = true;
+        unsubscribe();
+      };
+    }
+
+    const personalRef = collection(db, 'tarefas');
+    let personalTasks = [];
+    let personalExecutors = new Set();
+    let projectTasks = [];
+    let projectExecutors = new Set();
+
+    const updateCombined = () => {
+      const combined = [...personalTasks, ...projectTasks];
+      const executors = new Set([...personalExecutors, ...projectExecutors]);
+      applyList(combined, executors);
+    };
+
+    const unsubscribePersonal = onSnapshot(personalRef, (snapshot) => {
+      const list = [];
+      const executors = new Set();
+
+      snapshot.forEach((taskDoc) => {
+        const task = buildTask(taskDoc);
+        if (!matchesCurrentUser(task.executor)) return;
+        list.push(task);
+        if (task.executor) executors.add(task.executor);
+      });
+
+      personalTasks = list;
+      personalExecutors = executors;
+      updateCombined();
+    });
+
+    let unsubscribeProjectTasks = () => {};
+
+    if (currentUser?.username) {
+      const tasksQuery = query(collectionGroup(db, 'tasks'), where('executor', '==', currentUser.username));
+
+      unsubscribeProjectTasks = onSnapshot(tasksQuery, (snapshot) => {
+        const list = [];
+        const executors = new Set();
+
+        snapshot.forEach((taskDoc) => {
+          const task = buildTask(taskDoc);
+          if (!matchesCurrentUser(task.executor)) return;
+          list.push(task);
+          if (task.executor) executors.add(task.executor);
+        });
+
+        projectTasks = list;
+        projectExecutors = executors;
+        updateCombined();
+      });
+    } else {
+      projectTasks = [];
+      projectExecutors = new Set();
+      updateCombined();
+    }
+
+    return () => {
+      cancelled = true;
+      unsubscribePersonal();
+      unsubscribeProjectTasks();
+    };
+  }, [projectId, projectName, currentUser?.username, currentUser?.name, currentUser?.email]);
+
+  const resolveProjectId = (override) => {
+    if (typeof override === 'string') return override;
+    if (override && typeof override.projectId === 'string') return override.projectId;
+    return projectId || '';
+  };
+
+  const resolveProjectName = (targetProjectId, override) => {
+    if (!targetProjectId) return '';
+    if (override && typeof override.projectName === 'string') return override.projectName;
+    return projectName || '';
+  };
+
+  const adicionarTarefa = async (dados, options) => {
     if (!dados.titulo.trim()) {
       alert("Por favor, digite um título");
       return;
@@ -93,8 +209,11 @@ export function useTarefa(projectId, projectName) {
     
     setLoading(true);
     try {
-      const tarefasRef = projectId
-        ? collection(db, 'projects', projectId, 'tasks')
+      const targetProjectId = resolveProjectId(options);
+      const targetProjectName = resolveProjectName(targetProjectId, options);
+
+      const tarefasRef = targetProjectId
+        ? collection(db, 'projects', targetProjectId, 'tasks')
         : collection(db, 'tarefas');
 
       await addDoc(tarefasRef, {
@@ -106,7 +225,7 @@ export function useTarefa(projectId, projectName) {
         descricao: dados.descricao || '',
         criadoEm: new Date(),
         prioridade: dados.prioridade || '',
-        ...(projectId ? { projectId, projectName: projectName || '' } : {}),
+        ...(targetProjectId ? { projectId: targetProjectId, projectName: targetProjectName } : {}),
       });
     } catch (error) {
       console.error("Erro ao adicionar tarefa:", error);
@@ -115,7 +234,7 @@ export function useTarefa(projectId, projectName) {
     setLoading(false);
   };
 
-  const atualizarTarefa = async (id, dados) => {
+  const atualizarTarefa = async (id, dados, options) => {
     if (!dados.titulo.trim()) {
       alert("Por favor, digite um título");
       return;
@@ -123,8 +242,11 @@ export function useTarefa(projectId, projectName) {
 
     setLoading(true);
     try {
-      const docRef = projectId
-        ? doc(db, 'projects', projectId, 'tasks', id)
+      const targetProjectId = resolveProjectId(options);
+      const targetProjectName = resolveProjectName(targetProjectId, options);
+
+      const docRef = targetProjectId
+        ? doc(db, 'projects', targetProjectId, 'tasks', id)
         : doc(db, 'tarefas', id);
       await updateDoc(docRef, {
         titulo: dados.titulo,
@@ -135,7 +257,7 @@ export function useTarefa(projectId, projectName) {
         descricao: dados.descricao || '',
         atualizadoEm: new Date(),
         prioridade: dados.prioridade || '',
-        ...(projectId ? { projectId, projectName: projectName || '' } : {}),
+        ...(targetProjectId ? { projectId: targetProjectId, projectName: targetProjectName } : {}),
       });
     } catch (error) {
       console.error("Erro ao atualizar tarefa:", error);
@@ -144,10 +266,12 @@ export function useTarefa(projectId, projectName) {
     setLoading(false);
   };
   
-  const excluirTarefa = async (id) => {
+  const excluirTarefa = async (id, options) => {
     try {
-      const docRef = projectId
-        ? doc(db, 'projects', projectId, 'tasks', id)
+      const targetProjectId = resolveProjectId(options);
+
+      const docRef = targetProjectId
+        ? doc(db, 'projects', targetProjectId, 'tasks', id)
         : doc(db, 'tarefas', id);
       await deleteDoc(docRef);
     } catch (error) {
@@ -155,10 +279,12 @@ export function useTarefa(projectId, projectName) {
     }
   };
 
-  const atualizarStatusTarefa = async (id, status) => {
+  const atualizarStatusTarefa = async (id, status, options) => {
     try {
-      const docRef = projectId
-        ? doc(db, 'projects', projectId, 'tasks', id)
+      const targetProjectId = resolveProjectId(options);
+
+      const docRef = targetProjectId
+        ? doc(db, 'projects', targetProjectId, 'tasks', id)
         : doc(db, 'tarefas', id);
       await updateDoc(docRef, { status });
     } catch (error) {

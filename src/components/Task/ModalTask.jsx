@@ -22,8 +22,8 @@ function getShortName(fullName = '') {
   return `${parts[0]} ${parts[1]}`;
 }
 
-export default function ModalTask({ task, onClose, onBack, projectId, projectName }) {
-  const { adicionarTarefa, atualizarTarefa, loading } = useTarefa(projectId, projectName);
+export default function ModalTask({ task, onClose, onBack, projectId, projectName, currentUser }) {
+  const { adicionarTarefa, atualizarTarefa, loading } = useTarefa(projectId, projectName, currentUser);
   const isEditing = !!task;
 
   const [formData, setFormData] = useState({
@@ -144,9 +144,9 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
     e.preventDefault();
 
     if (isEditing) {
-      await atualizarTarefa(task.id, formData);
+      await atualizarTarefa(task.id, formData, { projectId, projectName });
     } else {
-      await adicionarTarefa(formData);
+      await adicionarTarefa(formData, { projectId, projectName });
     }
 
     onClose();

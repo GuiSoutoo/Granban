@@ -64,9 +64,23 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
     if (typeof onOpenDetails === 'function') onOpenDetails(task);
   };
 
+  const dragId = task.uniqueKey || `${task.projectId || 'personal'}::${task.id}`;
+
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: task.id,
+    id: dragId,
+    data: {
+      docId: task.id,
+      projectId: task.projectId || '',
+      source: task.sourceCollection || (task.projectId ? 'project' : 'personal'),
+    },
   });
+
+  const dragStyle = transform
+    ? {
+        transform: CSS.Translate.toString(transform),
+        transition: isDragging ? 'none' : undefined,
+      }
+    : undefined;
 
   // Esconde o card se está sendo movido (evita o "fantasma")
   if (isMoving) {
@@ -85,6 +99,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
         {...attributes}
         className={`cardTask ${task.status}Card archivedCodeOnly`}
         title={task.titulo}
+        style={dragStyle}
       >
         <span className="archivedCodeOnly-text">{shortId ? `#${shortId}` : '#----'}</span>
       </div>
@@ -93,13 +108,15 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
 
   // Modo compacto (recolher global): título + id curto
   if (showOnlyTitle) {
+    const priorityClass = task.prioridade ? `${task.prioridade}Card` : '';
     return (
       <div
         ref={setNodeRef}
         {...listeners}
         {...attributes}
-        className={`cardTask ${task.status}Card titleOnly`}
+        className={`cardTask ${task.status}Card titleOnly ${priorityClass}`.trim()}
         title={task.titulo}
+        style={dragStyle}
       >
         <h4 className="titleOnly-text">
           {shortId && <span className="titleOnly-id">#{shortId}</span>}
@@ -115,6 +132,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
       {...listeners}
       {...attributes}
       className={`cardTask ${task.status}Card ${task.prioridade}Card`}
+      style={dragStyle}
     >
       <div className="headTask">
         {getIcon(task.tag) && (
@@ -169,7 +187,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
           status={task.status}
           taskId={task.id}
           onReview={onOpenReview}
-          onStatusChange={(id, newStatus) => atualizarStatusTarefa(id, newStatus)}
+          onStatusChange={atualizarStatusTarefa}
         />
         )}
       </div>
