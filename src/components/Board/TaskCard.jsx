@@ -91,6 +91,9 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
   const shortId = task.id ? String(task.id).slice(0, 4).toUpperCase() : '';
   const creatorRaw = String(task.criadorName || task.criador || task.criadorEmail || '').trim();
   const creatorDisplay = creatorRaw ? getShortName(creatorRaw) : '';
+  const priorityText = task.prioridade
+    ? (task.prioridade === 'Urgente' ? 'Urgente' : `${task.prioridade} prioridade`)
+    : '-';
 
   // Coluna Arquivado recolhida: mostra apenas o código
   if (isArchived && !isExpanded) {
@@ -163,7 +166,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
       <h4>{task.titulo}</h4>
       <hr></hr>
       <div className="bottomTask">
-        <p className={task.prioridade}>{task.prioridade} prioridade</p>
+        <p className={task.prioridade}>{priorityText}</p>
         <p><a>Executor</a> {getShortName(task.executorName || task.executor)}</p>
       </div>
       
