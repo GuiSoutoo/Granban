@@ -1,5 +1,6 @@
 import GranbanLogoIcon from '../../assets/GranbanLogoIcon.svg';
 import NovaTarefaIcon from '../../assets/NovaTarefaIcon.svg';
+import InfoIcon from '../../assets/InfoIcon.svg';
 import { useNavigate } from 'react-router-dom';
 import '../../style/Projetos.css';
 
@@ -65,11 +66,7 @@ export default function ProjectCard({ project, counts, onInfo }) {
                 if (typeof onInfo === 'function') onInfo(project);
               }}
             >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" fill="currentColor"/>
-                <path d="M12 11v6" stroke="#1D0D32" strokeWidth="2.4" strokeLinecap="round"/>
-                <path d="M12 7.25h.01" stroke="#1D0D32" strokeWidth="3.4" strokeLinecap="round"/>
-              </svg>
+              <img className="project-card__iconImg" src={InfoIcon} alt="" />
             </button>
 
             <button

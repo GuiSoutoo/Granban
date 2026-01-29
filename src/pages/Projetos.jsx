@@ -12,6 +12,7 @@ import { getCurrentUser, onAuthChange } from '../services/auth';
 import { slugify } from '../utils/slugify';
 import '../style/Granban.css';
 import '../style/Projetos.css';
+import IsEmptyIcon from "../assets/IsEmpty.svg";
 
 const STATUS_KEYS = ['to-do', 'in-progress', 'in-review', 'rejected', 'concluded'];
 
@@ -237,7 +238,11 @@ export default function Projetos(){
                     ) : null}
 
                     {!error && projects.length === 0 ? (
-                        <div className="projects-empty">Nenhum projeto encontrado para este usuário.</div>
+                        <div className="projects-empty">
+                            <img src={IsEmptyIcon} alt="Sem projetos" className="projects-empty__art" />
+                            <p className="projects-empty__title">Sem projetos por aqui!</p>
+                            <p className="projects-empty__subtitle">Crie um novo ou solicite um convite :)</p>
+                        </div>
                     ) : null}
 
                     {projects.length > 0 ? (

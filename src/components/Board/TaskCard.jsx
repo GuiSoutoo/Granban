@@ -88,7 +88,8 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
   }
 
   const isArchived = task.status === 'archived';
-  const shortId = task.id ? String(task.id).slice(0, 4).toUpperCase() : '';
+  const explicitTaskId = typeof task.TaskId === 'string' && task.TaskId.trim() ? task.TaskId.trim().toUpperCase() : (typeof task.taskId === 'string' && task.taskId.trim() ? task.taskId.trim().toUpperCase() : '');
+  const shortId = explicitTaskId || (task.id ? String(task.id).slice(0, 4).toUpperCase() : '');
   const creatorRaw = String(task.creatorDisplayName || '').trim();
   const creatorDisplay = creatorRaw ? getShortName(creatorRaw) : '';
   const priorityText = task.prioridade
@@ -155,13 +156,12 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
       </div>
 
       <p className="dateTask">
-        {shortId &&<span className="inline-id">#{shortId} </span>}
-        <span>· {formatarTempoDecorrido(task.criadoEm)}</span>
-        <span>
+        {shortId && <span className="inline-id">#{shortId} </span>}
+        <span className="dateTask-meta">· {formatarTempoDecorrido(task.criadoEm)}</span>
+        <span className="dateTask-meta">
           {' '}·{' '}
           {creatorDisplay ? `Criado por ${creatorDisplay}` : 'Criador não registrado'}
         </span>
-        
       </p>
       <h4>{task.titulo}</h4>
       <hr></hr>

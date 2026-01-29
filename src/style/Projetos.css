@@ -314,3 +314,32 @@
   padding: 18px 6px;
   color: rgba(255, 255, 255, 0.88);
 }
+
+.projects-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 36px 12px;
+}
+
+.projects-empty__art {
+  width: min(320px, 85vw);
+  height: auto;
+  opacity: 0.5;
+}
+
+.projects-empty__title {
+  margin: 12px 0 0 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.projects-empty__subtitle {
+  margin: 0;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+}

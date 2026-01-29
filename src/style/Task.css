@@ -211,13 +211,16 @@
 }
 
 .dateTask{
-    font-family: "Noto Sans Lao", sans-serif;
     font-size: small;
 }
 
 .dateTask .inline-id {
-    opacity: 0.7;
+    opacity: 0.5;
     font-size: 0.9em;
+}
+
+.dateTask-meta {
+    opacity: 0.5;
 }
 
 .buttonTask {
