@@ -93,7 +93,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
   const creatorDisplay = creatorRaw ? getShortName(creatorRaw) : '';
   const priorityText = task.prioridade
     ? (task.prioridade === 'Urgente' ? 'Urgente' : `${task.prioridade} prioridade`)
-    : '-';
+    : 'Sem prioridade';
 
   // Coluna Arquivado recolhida: mostra apenas o código
   if (isArchived && !isExpanded) {
