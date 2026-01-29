@@ -40,7 +40,7 @@ export default function ModalTaskReview({ task, onClose, onStatusChange }) {
   if (!isOpen) return null;
 
   const createdLabel = task.criadoEm || '-';
-  const rawCreator = String(task.criadorName || task.criador || task.criadorEmail || '').trim();
+  const rawCreator = String(task.creatorDisplayName || '').trim();
   const creatorLabel = rawCreator ? getShortName(rawCreator) : 'Nome do Criador';
   const deliveryLabel = task.dataEntrega
     ? (() => {

@@ -89,7 +89,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
 
   const isArchived = task.status === 'archived';
   const shortId = task.id ? String(task.id).slice(0, 4).toUpperCase() : '';
-  const creatorRaw = String(task.criadorName || task.criador || task.criadorEmail || '').trim();
+  const creatorRaw = String(task.creatorDisplayName || '').trim();
   const creatorDisplay = creatorRaw ? getShortName(creatorRaw) : '';
   const priorityText = task.prioridade
     ? (task.prioridade === 'Urgente' ? 'Urgente' : `${task.prioridade} prioridade`)

@@ -8,6 +8,15 @@ function chunkArray(list, size) {
   return out;
 }
 
+const normalizeValue = (value) => (typeof value === 'string' ? value.trim() : '');
+
+const sanitizePublicLabel = (value) => {
+  const normalized = normalizeValue(value);
+  if (!normalized) return '';
+  if (normalized.includes('@')) return '';
+  return normalized;
+};
+
 export function useTarefa(projectId, projectName, currentUser) {
   const [tarefas, setTarefas] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,8 +24,6 @@ export function useTarefa(projectId, projectName, currentUser) {
   useEffect(() => {
     let cancelled = false;
     let requestToken = 0;
-
-    const normalizeValue = (value) => (typeof value === 'string' ? value.trim() : '');
 
     const createEmptyMeta = () => ({
       list: [],
@@ -29,9 +36,10 @@ export function useTarefa(projectId, projectName, currentUser) {
     const collectMetaForTask = (task, meta) => {
       if (!meta) return;
       if (task.executor) meta.executors.add(task.executor);
-      if (task.criador) meta.creatorUsernames.add(task.criador);
-      if (task.criadorEmail) meta.creatorEmails.add(task.criadorEmail);
-      if (task.criadorUid) meta.creatorUids.add(task.criadorUid);
+      const rawCreator = task.rawCreator || {};
+      if (rawCreator.username) meta.creatorUsernames.add(rawCreator.username);
+      if (rawCreator.email) meta.creatorEmails.add(rawCreator.email);
+      if (rawCreator.uid) meta.creatorUids.add(rawCreator.uid);
     };
 
     const resolveUserMaps = async (meta) => {
@@ -136,14 +144,19 @@ export function useTarefa(projectId, projectName, currentUser) {
       const parentProjectId = fallbackProjectId || taskDoc.ref.parent?.parent?.id || normalizeValue(data.projectId) || '';
       const parentProjectName = fallbackProjectName || normalizeValue(data.projectName) || '';
 
-      const creatorValue =
-        normalizeValue(data?.criador) ||
-        normalizeValue(data?.createdBy) ||
-        normalizeValue(data?.createdByName) ||
-        normalizeValue(data?.createdByEmail);
+      const rawCreator = {
+        username:
+          normalizeValue(data?.criador) ||
+          normalizeValue(data?.createdBy) ||
+          normalizeValue(data?.createdByName) ||
+          '',
+        email: normalizeValue(data?.criadorEmail) || normalizeValue(data?.createdByEmail) || '',
+        uid: normalizeValue(data?.criadorUid) || normalizeValue(data?.createdByUid) || '',
+      };
 
-      const creatorUid = normalizeValue(data?.criadorUid) || normalizeValue(data?.createdByUid);
-      const creatorEmail = normalizeValue(data?.criadorEmail) || normalizeValue(data?.createdByEmail);
+      const storedCreatorDisplayName =
+        sanitizePublicLabel(data?.creatorDisplayName) ||
+        sanitizePublicLabel(rawCreator.username);
 
       return {
         id: taskDoc.id,
@@ -156,13 +169,42 @@ export function useTarefa(projectId, projectName, currentUser) {
         dataEntrega: data.dataEntrega,
         descricao: data.descricao,
         criadoEm: data.criadoEm ? data.criadoEm.toDate().toLocaleDateString() : '',
-        criador: creatorValue,
-        criadorUid: creatorUid,
-        criadorEmail: creatorEmail,
         prioridade: data.prioridade,
         projectId: parentProjectId,
         projectName: parentProjectName,
         sourceCollection: parentProjectId ? 'project' : 'personal',
+        rawCreator,
+        storedCreatorDisplayName,
+      };
+    };
+
+    const toPublicTask = (task, executorLabel, creatorLabel) => {
+      const { rawCreator, storedCreatorDisplayName, ...rest } = task;
+      const safeExecutorName = sanitizePublicLabel(executorLabel) || executorLabel || '';
+
+      const creatorCandidates = [
+        creatorLabel,
+        storedCreatorDisplayName,
+        rawCreator?.username,
+      ];
+
+      let creatorDisplayName = '';
+      for (const candidate of creatorCandidates) {
+        const sanitized = sanitizePublicLabel(candidate);
+        if (sanitized) {
+          creatorDisplayName = sanitized;
+          break;
+        }
+      }
+
+      if (!creatorDisplayName) {
+        creatorDisplayName = 'Usuário não identificado';
+      }
+
+      return {
+        ...rest,
+        executorName: safeExecutorName,
+        creatorDisplayName,
       };
     };
 
@@ -179,11 +221,9 @@ export function useTarefa(projectId, projectName, currentUser) {
 
       if (!requiresLookup) {
         setTarefas(
-          list.map((task) => ({
-            ...task,
-            executorName: task.executor,
-            criadorName: task.criador || task.criadorEmail || '',
-          }))
+          list.map((task) =>
+            toPublicTask(task, task.executor, task.storedCreatorDisplayName)
+          )
         );
         return;
       }
@@ -198,29 +238,22 @@ export function useTarefa(projectId, projectName, currentUser) {
           list.map((task) => {
             const executorName = nameByUsername.get(task.executor) || task.executor;
             const creatorName =
-              (task.criadorUid && nameByUid.get(task.criadorUid)) ||
-              (task.criadorEmail && nameByEmail.get(task.criadorEmail)) ||
-              (task.criador && nameByUsername.get(task.criador)) ||
-              task.criador ||
-              task.criadorEmail ||
+              (task.rawCreator?.uid && nameByUid.get(task.rawCreator.uid)) ||
+              (task.rawCreator?.email && nameByEmail.get(task.rawCreator.email)) ||
+              (task.rawCreator?.username && nameByUsername.get(task.rawCreator.username)) ||
+              task.storedCreatorDisplayName ||
               '';
 
-            return {
-              ...task,
-              executorName,
-              criadorName: creatorName,
-            };
+            return toPublicTask(task, executorName, creatorName);
           })
         );
       } catch (error) {
         console.error('Erro ao carregar nomes dos usuários:', error);
         if (!cancelled && currentToken === requestToken) {
           setTarefas(
-            list.map((task) => ({
-              ...task,
-              executorName: task.executor,
-              criadorName: task.criador || task.criadorEmail || '',
-            }))
+            list.map((task) =>
+              toPublicTask(task, task.executor, task.storedCreatorDisplayName)
+            )
           );
         }
       }
@@ -337,10 +370,9 @@ export function useTarefa(projectId, projectName, currentUser) {
 
       const creatorName = typeof currentUser?.name === 'string' ? currentUser.name.trim() : '';
       const creatorUsername = typeof currentUser?.username === 'string' ? currentUser.username.trim() : '';
-      const creatorEmail = typeof currentUser?.email === 'string' ? currentUser.email.trim() : '';
       const creatorUid = typeof currentUser?.uid === 'string' ? currentUser.uid.trim() : '';
 
-      const creatorLabel = creatorName || creatorUsername || creatorEmail;
+      const creatorLabel = sanitizePublicLabel(creatorName) || sanitizePublicLabel(creatorUsername) || 'Usuário não identificado';
 
       await addDoc(tarefasRef, {
         titulo: dados.titulo,
@@ -352,7 +384,7 @@ export function useTarefa(projectId, projectName, currentUser) {
         criadoEm: new Date(),
         criador: creatorLabel || '',
         criadorUid: creatorUid || '',
-        criadorEmail: creatorEmail || '',
+        creatorDisplayName: creatorLabel,
         prioridade: dados.prioridade || '',
         ...(targetProjectId ? { projectId: targetProjectId, projectName: targetProjectName } : {}),
       });

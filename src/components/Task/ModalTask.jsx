@@ -153,7 +153,7 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
   }
 
   const createdLabel = task?.criadoEm || '-';
-  const rawCreator = task ? (task.criadorName || task.criador || task.criadorEmail || '') : '';
+  const rawCreator = task ? task.creatorDisplayName || '' : '';
   const creatorShort = rawCreator ? getShortName(rawCreator) : '';
   const creatorLabel = creatorShort || 'Nome do Criador';
   const projectLabel = projectName || task?.projectName || '';
