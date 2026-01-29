@@ -153,7 +153,9 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
   }
 
   const createdLabel = task?.criadoEm || '-';
-  const creatorLabel = task?.criador || 'Nome do Criador';
+  const rawCreator = task ? (task.criadorName || task.criador || task.criadorEmail || '') : '';
+  const creatorShort = rawCreator ? getShortName(rawCreator) : '';
+  const creatorLabel = creatorShort || 'Nome do Criador';
   const projectLabel = projectName || task?.projectName || '';
   const hasExecutorOption = Boolean(
     formData.executor && teamMembers.some((member) => member.username === formData.executor)

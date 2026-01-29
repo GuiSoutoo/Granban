@@ -48,7 +48,8 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
   if (!isOpen) return null;
 
   const createdLabel = task.criadoEm || '-';
-  const creatorLabel = String(task.criador || task.criadorEmail || '').trim();
+  const rawCreator = String(task.criadorName || task.criador || task.criadorEmail || '').trim();
+  const creatorLabel = rawCreator ? getShortName(rawCreator) : '';
   const deliveryLabel = task.dataEntrega
     ? (() => {
         const date = new Date(task.dataEntrega);

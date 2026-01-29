@@ -89,6 +89,8 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
 
   const isArchived = task.status === 'archived';
   const shortId = task.id ? String(task.id).slice(0, 4).toUpperCase() : '';
+  const creatorRaw = String(task.criadorName || task.criador || task.criadorEmail || '').trim();
+  const creatorDisplay = creatorRaw ? getShortName(creatorRaw) : '';
 
   // Coluna Arquivado recolhida: mostra apenas o código
   if (isArchived && !isExpanded) {
@@ -154,9 +156,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
         <span>· {formatarTempoDecorrido(task.criadoEm)}</span>
         <span>
           {' '}·{' '}
-          {String(task.criador || task.criadorEmail || '').trim()
-            ? `Criado por ${getShortName(task.criador || task.criadorEmail || '')}`
-            : 'Criador não registrado'}
+          {creatorDisplay ? `Criado por ${creatorDisplay}` : 'Criador não registrado'}
         </span>
         
       </p>

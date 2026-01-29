@@ -26,13 +26,22 @@ const getTagIcon = (tag) => {
   return foundKey ? tagIcons[foundKey] : null;
 };
 
+const getShortName = (fullName = '') => {
+  const trimmed = fullName.trim();
+  if (!trimmed) return '-';
+  const parts = trimmed.split(/\s+/);
+  if (parts.length <= 2) return trimmed;
+  return `${parts[0]} ${parts[1]}`;
+};
+
 export default function ModalTaskReview({ task, onClose, onStatusChange }) {
   const isOpen = !!task;
 
   if (!isOpen) return null;
 
   const createdLabel = task.criadoEm || '-';
-  const creatorLabel = task.criador || 'Nome do Criador';
+  const rawCreator = String(task.criadorName || task.criador || task.criadorEmail || '').trim();
+  const creatorLabel = rawCreator ? getShortName(rawCreator) : 'Nome do Criador';
   const deliveryLabel = task.dataEntrega
     ? (() => {
         const date = new Date(task.dataEntrega);
@@ -44,13 +53,6 @@ export default function ModalTaskReview({ task, onClose, onStatusChange }) {
     : '-';
 
   const tagIcon = getTagIcon(task.tag);
-  const getShortName = (fullName = '') => {
-    const trimmed = fullName.trim();
-    if (!trimmed) return '-';
-    const parts = trimmed.split(/\s+/);
-    if (parts.length <= 2) return trimmed;
-    return `${parts[0]} ${parts[1]}`;
-  };
 
   const handleReject = async () => {
     if (!task?.id) return;

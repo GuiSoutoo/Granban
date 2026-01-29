@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from '../services/firebase';
-import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where, collectionGroup } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where, collectionGroup, getDoc } from 'firebase/firestore';
 
 function chunkArray(list, size) {
   const out = [];
@@ -16,29 +16,105 @@ export function useTarefa(projectId, projectName, currentUser) {
     let cancelled = false;
     let requestToken = 0;
 
-    const resolveExecutorNames = async (executorsSet) => {
-      const namesMap = new Map();
-      if (executorsSet.size === 0) return namesMap;
+    const normalizeValue = (value) => (typeof value === 'string' ? value.trim() : '');
 
-      const usernames = Array.from(executorsSet);
+    const createEmptyMeta = () => ({
+      list: [],
+      executors: new Set(),
+      creatorUsernames: new Set(),
+      creatorEmails: new Set(),
+      creatorUids: new Set(),
+    });
+
+    const collectMetaForTask = (task, meta) => {
+      if (!meta) return;
+      if (task.executor) meta.executors.add(task.executor);
+      if (task.criador) meta.creatorUsernames.add(task.criador);
+      if (task.criadorEmail) meta.creatorEmails.add(task.criadorEmail);
+      if (task.criadorUid) meta.creatorUids.add(task.criadorUid);
+    };
+
+    const resolveUserMaps = async (meta) => {
+      const nameByUsername = new Map();
+      const nameByEmail = new Map();
+      const nameByUid = new Map();
+
+      if (!meta) {
+        return { nameByUsername, nameByEmail, nameByUid };
+      }
+
+      const usernamesToFetch = new Set([
+        ...meta.executors,
+        ...meta.creatorUsernames,
+      ]);
+      const emailsToFetch = new Set(meta.creatorEmails);
+      const uidsToFetch = new Set(meta.creatorUids);
+
+      if (
+        usernamesToFetch.size === 0 &&
+        emailsToFetch.size === 0 &&
+        uidsToFetch.size === 0
+      ) {
+        return { nameByUsername, nameByEmail, nameByUid };
+      }
+
       const usersCol = collection(db, 'users');
-      const batches = chunkArray(usernames, 10);
+      const seenDocs = new Map();
 
-      const snaps = await Promise.all(
-        batches.map((batch) => getDocs(query(usersCol, where('username', 'in', batch))))
-      );
+      const pushDoc = (docSnap) => {
+        if (!docSnap?.exists?.()) return;
+        const data = docSnap.data() || {};
+        seenDocs.set(docSnap.id, data);
+      };
 
-      snaps.forEach((snap) => {
-        snap.forEach((userDoc) => {
-          const userData = userDoc.data();
-          const username = typeof userData?.username === 'string' ? userData.username.trim() : '';
-          if (!username) return;
-          const name = typeof userData?.name === 'string' ? userData.name.trim() : '';
-          namesMap.set(username, name || username);
+      const fetchByField = async (field, valuesSet) => {
+        if (!valuesSet || valuesSet.size === 0) return;
+        const values = Array.from(valuesSet).map(normalizeValue).filter(Boolean);
+        if (values.length === 0) return;
+
+        const batches = chunkArray(values, 10);
+        const snaps = await Promise.all(
+          batches.map((batch) => getDocs(query(usersCol, where(field, 'in', batch))))
+        );
+
+        snaps.forEach((snap) => {
+          snap.forEach((docSnap) => {
+            pushDoc(docSnap);
+          });
         });
+      };
+
+      await fetchByField('username', usernamesToFetch);
+      await fetchByField('email', emailsToFetch);
+
+      if (uidsToFetch.size > 0) {
+        const uidList = Array.from(uidsToFetch).map(normalizeValue).filter(Boolean);
+        if (uidList.length > 0) {
+          await Promise.all(
+            uidList.map(async (uid) => {
+              try {
+                const docRef = doc(db, 'users', uid);
+                const snap = await getDoc(docRef);
+                pushDoc(snap);
+              } catch (error) {
+                console.error('Erro ao buscar usuário por UID:', error);
+              }
+            })
+          );
+        }
+      }
+
+      seenDocs.forEach((data, docId) => {
+        const displayName = normalizeValue(data.name) || normalizeValue(data.username) || normalizeValue(data.email) || docId;
+        const username = normalizeValue(data.username);
+        const email = normalizeValue(data.email);
+
+        if (username) nameByUsername.set(username, displayName);
+        if (email) nameByEmail.set(email, displayName);
+        nameByUid.set(docId, displayName);
       });
 
-      return namesMap;
+      return { nameByUsername, nameByEmail, nameByUid };
     };
 
     const matchesCurrentUser = (executor) => {
@@ -56,20 +132,18 @@ export function useTarefa(projectId, projectName, currentUser) {
 
     const buildTask = (taskDoc, fallbackProjectId = '', fallbackProjectName = '') => {
       const data = taskDoc.data();
-      const executor = typeof data.executor === 'string' ? data.executor.trim() : '';
-      const parentProjectId = fallbackProjectId || taskDoc.ref.parent?.parent?.id || data.projectId || '';
-      const parentProjectName = fallbackProjectName || data.projectName || '';
+      const executor = normalizeValue(data.executor);
+      const parentProjectId = fallbackProjectId || taskDoc.ref.parent?.parent?.id || normalizeValue(data.projectId) || '';
+      const parentProjectName = fallbackProjectName || normalizeValue(data.projectName) || '';
 
       const creatorValue =
-        (typeof data?.criador === 'string' && data.criador.trim())
-          ? data.criador.trim()
-          : (typeof data?.createdBy === 'string' && data.createdBy.trim())
-            ? data.createdBy.trim()
-            : (typeof data?.createdByName === 'string' && data.createdByName.trim())
-              ? data.createdByName.trim()
-              : (typeof data?.createdByEmail === 'string' && data.createdByEmail.trim())
-                ? data.createdByEmail.trim()
-                : '';
+        normalizeValue(data?.criador) ||
+        normalizeValue(data?.createdBy) ||
+        normalizeValue(data?.createdByName) ||
+        normalizeValue(data?.createdByEmail);
+
+      const creatorUid = normalizeValue(data?.criadorUid) || normalizeValue(data?.createdByUid);
+      const creatorEmail = normalizeValue(data?.criadorEmail) || normalizeValue(data?.createdByEmail);
 
       return {
         id: taskDoc.id,
@@ -83,8 +157,8 @@ export function useTarefa(projectId, projectName, currentUser) {
         descricao: data.descricao,
         criadoEm: data.criadoEm ? data.criadoEm.toDate().toLocaleDateString() : '',
         criador: creatorValue,
-        criadorUid: typeof data?.criadorUid === 'string' ? data.criadorUid : (typeof data?.createdByUid === 'string' ? data.createdByUid : ''),
-        criadorEmail: typeof data?.criadorEmail === 'string' ? data.criadorEmail : (typeof data?.createdByEmail === 'string' ? data.createdByEmail : ''),
+        criadorUid: creatorUid,
+        criadorEmail: creatorEmail,
         prioridade: data.prioridade,
         projectId: parentProjectId,
         projectName: parentProjectName,
@@ -92,29 +166,62 @@ export function useTarefa(projectId, projectName, currentUser) {
       };
     };
 
-    const applyList = async (list, executors) => {
+    const applyList = async (list, meta) => {
       if (cancelled) return;
-      if (executors.size === 0) {
-        setTarefas(list);
+
+      const effectiveMeta = meta || createEmptyMeta();
+      const requiresLookup = Boolean(
+        (effectiveMeta.executors && effectiveMeta.executors.size) ||
+        (effectiveMeta.creatorUsernames && effectiveMeta.creatorUsernames.size) ||
+        (effectiveMeta.creatorEmails && effectiveMeta.creatorEmails.size) ||
+        (effectiveMeta.creatorUids && effectiveMeta.creatorUids.size)
+      );
+
+      if (!requiresLookup) {
+        setTarefas(
+          list.map((task) => ({
+            ...task,
+            executorName: task.executor,
+            criadorName: task.criador || task.criadorEmail || '',
+          }))
+        );
         return;
       }
 
       const currentToken = ++requestToken;
 
       try {
-        const namesMap = await resolveExecutorNames(executors);
+        const { nameByUsername, nameByEmail, nameByUid } = await resolveUserMaps(effectiveMeta);
         if (cancelled || currentToken !== requestToken) return;
 
         setTarefas(
-          list.map((task) => ({
-            ...task,
-            executorName: namesMap.get(task.executor) || task.executor,
-          }))
+          list.map((task) => {
+            const executorName = nameByUsername.get(task.executor) || task.executor;
+            const creatorName =
+              (task.criadorUid && nameByUid.get(task.criadorUid)) ||
+              (task.criadorEmail && nameByEmail.get(task.criadorEmail)) ||
+              (task.criador && nameByUsername.get(task.criador)) ||
+              task.criador ||
+              task.criadorEmail ||
+              '';
+
+            return {
+              ...task,
+              executorName,
+              criadorName: creatorName,
+            };
+          })
         );
       } catch (error) {
-        console.error('Erro ao carregar nomes dos executores:', error);
+        console.error('Erro ao carregar nomes dos usuários:', error);
         if (!cancelled && currentToken === requestToken) {
-          setTarefas(list);
+          setTarefas(
+            list.map((task) => ({
+              ...task,
+              executorName: task.executor,
+              criadorName: task.criador || task.criadorEmail || '',
+            }))
+          );
         }
       }
     };
@@ -123,16 +230,15 @@ export function useTarefa(projectId, projectName, currentUser) {
       const tarefasRef = collection(db, 'projects', projectId, 'tasks');
 
       const unsubscribe = onSnapshot(tarefasRef, (snapshot) => {
-        const executors = new Set();
-        const list = [];
+        const meta = createEmptyMeta();
 
         snapshot.forEach((taskDoc) => {
           const task = buildTask(taskDoc, projectId, projectName || '');
-          list.push(task);
-          if (task.executor) executors.add(task.executor);
+          meta.list.push(task);
+          collectMetaForTask(task, meta);
         });
 
-        applyList(list, executors);
+        applyList(meta.list, meta);
       });
 
       return () => {
@@ -142,30 +248,33 @@ export function useTarefa(projectId, projectName, currentUser) {
     }
 
     const personalRef = collection(db, 'tarefas');
-    let personalTasks = [];
-    let personalExecutors = new Set();
-    let projectTasks = [];
-    let projectExecutors = new Set();
+    let personalMeta = createEmptyMeta();
+    let projectMeta = createEmptyMeta();
 
     const updateCombined = () => {
-      const combined = [...personalTasks, ...projectTasks];
-      const executors = new Set([...personalExecutors, ...projectExecutors]);
-      applyList(combined, executors);
+      const combinedList = [...personalMeta.list, ...projectMeta.list];
+      const combinedMeta = {
+        list: combinedList,
+        executors: new Set([...personalMeta.executors, ...projectMeta.executors]),
+        creatorUsernames: new Set([...personalMeta.creatorUsernames, ...projectMeta.creatorUsernames]),
+        creatorEmails: new Set([...personalMeta.creatorEmails, ...projectMeta.creatorEmails]),
+        creatorUids: new Set([...personalMeta.creatorUids, ...projectMeta.creatorUids]),
+      };
+
+      applyList(combinedList, combinedMeta);
     };
 
     const unsubscribePersonal = onSnapshot(personalRef, (snapshot) => {
-      const list = [];
-      const executors = new Set();
+      const meta = createEmptyMeta();
 
       snapshot.forEach((taskDoc) => {
         const task = buildTask(taskDoc);
         if (!matchesCurrentUser(task.executor)) return;
-        list.push(task);
-        if (task.executor) executors.add(task.executor);
+        meta.list.push(task);
+        collectMetaForTask(task, meta);
       });
 
-      personalTasks = list;
-      personalExecutors = executors;
+      personalMeta = meta;
       updateCombined();
     });
 
@@ -175,23 +284,20 @@ export function useTarefa(projectId, projectName, currentUser) {
       const tasksQuery = query(collectionGroup(db, 'tasks'), where('executor', '==', currentUser.username));
 
       unsubscribeProjectTasks = onSnapshot(tasksQuery, (snapshot) => {
-        const list = [];
-        const executors = new Set();
+        const meta = createEmptyMeta();
 
         snapshot.forEach((taskDoc) => {
           const task = buildTask(taskDoc);
           if (!matchesCurrentUser(task.executor)) return;
-          list.push(task);
-          if (task.executor) executors.add(task.executor);
+          meta.list.push(task);
+          collectMetaForTask(task, meta);
         });
 
-        projectTasks = list;
-        projectExecutors = executors;
+        projectMeta = meta;
         updateCombined();
       });
     } else {
-      projectTasks = [];
-      projectExecutors = new Set();
+      projectMeta = createEmptyMeta();
       updateCombined();
     }
 
