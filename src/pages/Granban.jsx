@@ -11,7 +11,7 @@ import ModalTaskReview from '../components/Task/ModalTaskReview';
 
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, limit, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { getCurrentUser, getUserProfile, onAuthChange } from '../services/auth';
 import AddMemberIcon from '../assets/DetalhesProjeto/AdicionarMembro.png';
@@ -24,6 +24,9 @@ export default function Granban() {
   const navigate = useNavigate();
   const initialProjectId = location?.state?.projectId || '';
   const initialProjectName = location?.state?.projectName || '';
+  const openTaskKey = location?.state?.openTaskKey || '';
+  const openTaskId = location?.state?.openTaskId || '';
+  const openTaskProjectId = location?.state?.openTaskProjectId || '';
   const [projectId, setProjectId] = useState(initialProjectId);
   const [projectName, setProjectName] = useState(initialProjectName);
   const [currentUserProfile, setCurrentUserProfile] = useState(null);
@@ -154,6 +157,36 @@ export default function Granban() {
   const [returnToDetailsTask, setReturnToDetailsTask] = useState(null);
   const [movingTaskId, setMovingTaskId] = useState(null);
   const [compactCards, setCompactCards] = useState(false);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!openTaskKey && !openTaskId) return;
+    if (detailsTask) return;
+
+    const allTasks = COLUNAS.flatMap((col) => getTarefasPorColuna?.(col.id) || []);
+    const found = allTasks.find((task) => {
+      if (openTaskKey) return task.uniqueKey === openTaskKey;
+      if (openTaskProjectId) return task.id === openTaskId && task.projectId === openTaskProjectId;
+      return task.id === openTaskId;
+    });
+
+    if (found) {
+      setDetailsTask(found);
+      const nextState = projectId ? { projectId, projectName } : {};
+      navigate(location.pathname, { replace: true, state: nextState });
+    }
+  }, [
+    loading,
+    openTaskKey,
+    openTaskId,
+    openTaskProjectId,
+    detailsTask,
+    getTarefasPorColuna,
+    projectId,
+    projectName,
+    location.pathname,
+    navigate,
+  ]);
 
   useEffect(() => {
     if (showEditModal) return;
@@ -479,12 +512,19 @@ export default function Granban() {
     if (!projectId) return;
     const email = currentUserProfile?.email || '';
     if (!email) return;
+    const isLastMember = (Array.isArray(projectMembers) ? projectMembers.filter(Boolean).length : 0) <= 1;
 
     setLeaveLoading(true);
     try {
-      await updateDoc(doc(db, 'projects', projectId), {
-        members: arrayRemove(email),
-      });
+      if (isLastMember) {
+        const tasksSnap = await getDocs(collection(db, 'projects', projectId, 'tasks'));
+        await Promise.all(tasksSnap.docs.map((d) => deleteDoc(d.ref)));
+        await deleteDoc(doc(db, 'projects', projectId));
+      } else {
+        await updateDoc(doc(db, 'projects', projectId), {
+          members: arrayRemove(email),
+        });
+      }
       setConfirmLeaveOpen(false);
       setProjectOptionsOpen(false);
       navigate('/Projetos');
@@ -660,7 +700,13 @@ export default function Granban() {
               </button>
               <div className="project-leaveConfirmTitle">Sair do projeto?</div>
               <div className="project-leaveConfirmText">
-                Você tem certeza que deseja se retirar deste projeto?
+                {(() => {
+                  const memberCount = Array.isArray(projectMembers) ? projectMembers.filter(Boolean).length : 0;
+                  if (memberCount <= 1) {
+                    return 'Você é o último membro. Ao sair, este projeto será apagado do sistema.';
+                  }
+                  return 'Você tem certeza que deseja se retirar deste projeto?';
+                })()}
               </div>
               <div className="project-leaveConfirmActions">
                 <button

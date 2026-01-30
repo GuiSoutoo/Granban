@@ -56,7 +56,7 @@ function formatarTempoDecorrido(dataString) {
   return `Há ${dias} dias`;
 }
 
-export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenReview, isMoving, isExpanded = true, showOnlyTitle = false }) {
+export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenReview, isMoving, isExpanded = true, showOnlyTitle = false, onCardClick, hideDetailsButton = false }) {
   const { atualizarStatusTarefa } = useTarefa();
 
   const openDetails = (e) => {
@@ -139,6 +139,9 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
       {...attributes}
       className={`cardTask ${task.status}Card ${task.priority}Card`}
       style={dragStyle}
+      onClick={(e) => {
+        if (typeof onCardClick === 'function') onCardClick(task, e);
+      }}
     >
       <div className="headTask">
         {getIcon(task.tag) && (
@@ -171,24 +174,26 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
       </div>
       
       <div className="buttonTask">
-        <button
-          type="button"
-          className="task-details-btn"
-          aria-label="Abrir detalhes"
-          title="Detalhes"
-          onPointerDown={(e) => {
-            e.stopPropagation();
-          }}
-          onPointerUp={openDetails}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              openDetails(e);
-            }
-          }}
-        >
-          ...
-        </button>
+        {!hideDetailsButton && (
+          <button
+            type="button"
+            className="task-details-btn"
+            aria-label="Abrir detalhes"
+            title="Detalhes"
+            onPointerDown={(e) => {
+              e.stopPropagation();
+            }}
+            onPointerUp={openDetails}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openDetails(e);
+              }
+            }}
+          >
+            ...
+          </button>
+        )}
 
         {!isArchived && (
         <TaskButton

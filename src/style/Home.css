@@ -1,98 +1,119 @@
 /* ==================== HOME (INÍCIO) ==================== */
 
-.home-hero {
-  height: calc(100vh - 64px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  text-align: center;
-  padding: 2rem 1rem 1rem;
+.home-main {
+  min-height: calc(100vh - 64px);
+  padding: 2rem 3rem;
   color: #ffffff;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.home-title {
-  font-size: 3.2rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
+/* Header com saudação */
+.home-header {
+  margin-bottom: 2.5rem;
 }
 
-.home-title span {
-  font-weight: 700;
-}
-
-.home-subtitle {
-  font-size: 1.8rem;
+.home-greeting {
+  display: block;
+  font-size: 1.1rem;
   font-weight: 400;
-  opacity: 0.85;
-  margin-bottom: 1.75rem;
+  opacity: 0.8;
+  margin-bottom: 0.25rem;
 }
 
-.home-actions {
-  display: flex;
-  justify-content: center;
-  gap: 3rem;
-  flex-wrap: wrap;
-  margin-top: 1.75rem;
+.home-username {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
 }
 
-.home-action-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  width: 130px;
-  min-height: 150px;
-  gap: 12px;
-  text-decoration: none;
-  color: rgba(255, 255, 255, 0.8);
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: transform 0.2s ease, color 0.2s ease;
+/* Seções */
+.home-section {
+  margin-bottom: 3rem;
 }
 
-/* O botão (Nova tarefa) precisa herdar a mesma cor dos Links */
-.home-actions button.home-action-link {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.home-actions button.home-action-link:hover {
-  color: #ffffff;
-}
-
-.home-action-link img {
-  width: 100px;
-  height: 100px;
-  object-fit: contain;
-}
-
-/* O SVG de 'Nova tarefa' é visualmente mais fino: aumenta um pouco para igualar */
-.home-action-link--newtask img {
-  transform: none;
-}
-
-.home-action-link span {
+.home-section__title {
+  font-size: 1.4rem;
   font-weight: 600;
+  color: #8b5cf6;
+  margin-bottom: 1.25rem;
 }
 
-/* O ícone de 'Nova tarefa' ocupa mais a base do SVG; dá um respiro igual aos outros */
-.home-action-link--newtask span {
-  margin-top: 12px;
+.home-loading,
+.home-empty {
+  font-size: 1rem;
+  opacity: 0.7;
+  padding: 1rem 0;
 }
 
-.home-action-link:hover {
-  transform: translateY(-4px);
+/* Grupos de tarefas por data */
+.home-tasks-groups {
+  display: flex;
+  gap: 2rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.home-tasks-group {
+  flex-shrink: 0;
+}
+
+.home-tasks-group__date {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
   color: #ffffff;
 }
 
+.home-tasks-group__cards {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Grid de projetos */
+.home-projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.home-see-all {
+  display: inline-block;
+  margin-top: 1.25rem;
+  color: #8b5cf6;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.home-see-all:hover {
+  color: #a78bfa;
+  text-decoration: underline;
+}
+
+/* Responsivo */
 @media (max-width: 768px) {
-  .home-title {
-    font-size: 2.2rem;
+  .home-main {
+    padding: 1.5rem 1rem;
   }
 
-  .home-subtitle {
-    font-size: 1.3rem;
+  .home-username {
+    font-size: 1.8rem;
+  }
+
+  .home-section__title {
+    font-size: 1.2rem;
+  }
+
+  .home-tasks-groups {
+    gap: 1.5rem;
+  }
+
+  .home-task-card {
+    width: 200px;
+  }
+
+  .home-projects-grid {
+    grid-template-columns: 1fr;
   }
 }

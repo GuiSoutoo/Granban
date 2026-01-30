@@ -1,52 +1,25 @@
-import { useState } from 'react';
-import { Link } from "react-router-dom";
-import { Navbar } from "../components/Layout/Navbar";
-import NovoProjetoIcon from "../assets/NovoProjetoIcon.svg";
-import GranbanIcon from "../assets/GranbanIcon.svg";
-import ProjetosIcon from "../assets/ProjetosIcon.svg";
-import "../style/Home.css";
-import ModalNewTask from "../components/Task/ModalNewTask";
-import ModalNewProject from '../components/Projects/ModalNewProject';
+import { Navbar } from '../components/Layout/Navbar';
+import { useCurrentUser } from '../hooks/useCurrentUser';
+import { useTarefa } from '../hooks/UseTarefas';
+import { useProjects } from '../hooks/UseProjects';
+import HomeHeader from '../components/Home/HomeHeader';
+import HomeTasksSection from '../components/Home/HomeTasksSection';
+import HomeProjectsSection from '../components/Home/HomeProjectsSection';
+import '../style/Home.css';
 
 export default function Home() {
-    const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const { userProfile } = useCurrentUser();
+  const { tarefas, loading: loadingTasks } = useTarefa(null, null, userProfile);
+  const { projects, loading: loadingProjects } = useProjects(userProfile);
 
-    return (
-        <>
-            <Navbar />
-            <main className="home-hero">
-                <h1 className="home-title">
-                    Bem vindo(a), <span>Nome</span>
-                </h1>
-                <h2 className="home-subtitle">O que deseja fazer?</h2>
-
-                <div className="home-actions">
-                    <button
-                        type="button"
-                        className="home-action-link"
-                        onClick={() => setShowNewProjectModal(true)}
-                    >
-                        <img src={NovoProjetoIcon} alt="Novo projeto" />
-                        <span>Novo projeto</span>
-                    </button>
-
-                    <ModalNewTask className="home-action-link home-action-link--newtask" />
-                        
-                    <Link to="/Granban" className="home-action-link">
-                        <img src={GranbanIcon} alt="Granban" />
-                        <span>Granban</span>
-                    </Link>
-
-                    <Link to="/Projetos" className="home-action-link">
-                        <img src={ProjetosIcon} alt="Projetos" />
-                        <span>Projetos</span>
-                    </Link>
-                </div>
-            </main>
-
-            {showNewProjectModal && (
-                <ModalNewProject onClose={() => setShowNewProjectModal(false)} />
-            )}
-        </>
-    );
+  return (
+    <>
+      <Navbar />
+      <main className="home-main">
+        <HomeHeader userName={userProfile?.name} />
+        <HomeTasksSection tarefas={tarefas} loading={loadingTasks} />
+        <HomeProjectsSection projects={projects} loading={loadingProjects} />
+      </main>
+    </>
+  );
 }
