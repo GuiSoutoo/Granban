@@ -17,6 +17,11 @@ const sanitizePublicLabel = (value) => {
   return normalized;
 };
 
+const normalizeComparable = (value) => {
+  const normalized = normalizeValue(value);
+  return normalized ? normalized.toLowerCase() : '';
+};
+
 const deriveTaskPrefix = (nameSource, idSource) => {
   const fallback = 'TAS';
   const rawName = normalizeValue(nameSource);
@@ -73,6 +78,14 @@ export function useTarefa(projectId, projectName, currentUser) {
   useEffect(() => {
     let cancelled = false;
     let requestToken = 0;
+
+    setLoading(true);
+
+    const markLoaded = () => {
+      if (!cancelled) {
+        setLoading(false);
+      }
+    };
 
     const createEmptyMeta = () => ({
       list: [],
@@ -174,17 +187,32 @@ export function useTarefa(projectId, projectName, currentUser) {
       return { nameByUsername, nameByEmail, nameByUid };
     };
 
-    const matchesCurrentUser = (executor) => {
-      const comparableExecutor = typeof executor === 'string' ? executor.trim() : '';
-      if (!currentUser) return true;
-      const username = typeof currentUser.username === 'string' ? currentUser.username.trim() : '';
-      const name = typeof currentUser.name === 'string' ? currentUser.name.trim() : '';
-      const email = typeof currentUser.email === 'string' ? currentUser.email.trim() : '';
+    const executorCandidates = new Set();
+    const executorComparable = new Set();
 
-      if (!username && !name && !email) return true;
-      if (!comparableExecutor) return false;
+    const registerCandidate = (value) => {
+      const normalized = normalizeValue(value);
+      if (!normalized) return;
+      const normalizedLower = normalized.toLowerCase();
+      executorCandidates.add(normalized);
+      executorComparable.add(normalizedLower);
+      if (normalizedLower !== normalized) {
+        executorCandidates.add(normalizedLower);
+      }
+    };
 
-      return [username, name, email].some((value) => value && value === comparableExecutor);
+    if (currentUser) {
+      registerCandidate(currentUser.username);
+      registerCandidate(currentUser.name);
+      registerCandidate(currentUser.email);
+    }
+
+    const matchesCurrentUserTask = (task) => {
+      if (!task) return false;
+      if (executorComparable.size === 0) return false;
+      const executorKey = normalizeComparable(task.executor);
+      if (!executorKey) return false;
+      return executorComparable.has(executorKey);
     };
 
     const buildTask = (taskDoc, fallbackProjectId = '', fallbackProjectName = '') => {
@@ -230,7 +258,7 @@ export function useTarefa(projectId, projectName, currentUser) {
 
     const toPublicTask = (task, executorLabel, creatorLabel) => {
       const { rawCreator, storedCreatorDisplayName, ...rest } = task;
-      const safeExecutorName = sanitizePublicLabel(executorLabel) || executorLabel || '';
+      const safeExecutorName = sanitizePublicLabel(executorLabel) || 'Responsável não identificado';
 
       const creatorCandidates = [
         creatorLabel,
@@ -275,6 +303,7 @@ export function useTarefa(projectId, projectName, currentUser) {
             toPublicTask(task, task.executor, task.storedCreatorDisplayName)
           )
         );
+        markLoaded();
         return;
       }
 
@@ -297,6 +326,7 @@ export function useTarefa(projectId, projectName, currentUser) {
             return toPublicTask(task, executorName, creatorName);
           })
         );
+        markLoaded();
       } catch (error) {
         console.error('Erro ao carregar nomes dos usuários:', error);
         if (!cancelled && currentToken === requestToken) {
@@ -305,6 +335,7 @@ export function useTarefa(projectId, projectName, currentUser) {
               toPublicTask(task, task.executor, task.storedCreatorDisplayName)
             )
           );
+          markLoaded();
         }
       }
     };
@@ -312,17 +343,24 @@ export function useTarefa(projectId, projectName, currentUser) {
     if (projectId) {
       const tarefasRef = collection(db, 'projects', projectId, 'tasks');
 
-      const unsubscribe = onSnapshot(tarefasRef, (snapshot) => {
-        const meta = createEmptyMeta();
+      const unsubscribe = onSnapshot(
+        tarefasRef,
+        (snapshot) => {
+          const meta = createEmptyMeta();
 
-        snapshot.forEach((taskDoc) => {
-          const task = buildTask(taskDoc, projectId, projectName || '');
-          meta.list.push(task);
-          collectMetaForTask(task, meta);
-        });
+          snapshot.forEach((taskDoc) => {
+            const task = buildTask(taskDoc, projectId, projectName || '');
+            meta.list.push(task);
+            collectMetaForTask(task, meta);
+          });
 
-        applyList(meta.list, meta);
-      });
+          applyList(meta.list, meta);
+        },
+        (error) => {
+          console.error('Erro ao observar tarefas do projeto:', error);
+          markLoaded();
+        }
+      );
 
       return () => {
         cancelled = true;
@@ -347,38 +385,85 @@ export function useTarefa(projectId, projectName, currentUser) {
       applyList(combinedList, combinedMeta);
     };
 
-    const unsubscribePersonal = onSnapshot(personalRef, (snapshot) => {
-      const meta = createEmptyMeta();
-
-      snapshot.forEach((taskDoc) => {
-        const task = buildTask(taskDoc);
-        if (!matchesCurrentUser(task.executor)) return;
-        meta.list.push(task);
-        collectMetaForTask(task, meta);
-      });
-
-      personalMeta = meta;
-      updateCombined();
-    });
-
-    let unsubscribeProjectTasks = () => {};
-
-    if (currentUser?.username) {
-      const tasksQuery = query(collectionGroup(db, 'tasks'), where('executor', '==', currentUser.username));
-
-      unsubscribeProjectTasks = onSnapshot(tasksQuery, (snapshot) => {
+    const unsubscribePersonal = onSnapshot(
+      personalRef,
+      (snapshot) => {
         const meta = createEmptyMeta();
 
         snapshot.forEach((taskDoc) => {
           const task = buildTask(taskDoc);
-          if (!matchesCurrentUser(task.executor)) return;
+          if (!matchesCurrentUserTask(task)) return;
           meta.list.push(task);
           collectMetaForTask(task, meta);
         });
 
+        personalMeta = meta;
+        updateCombined();
+      },
+      (error) => {
+        console.error('Erro ao observar tarefas pessoais:', error);
+        markLoaded();
+      }
+    );
+
+    let unsubscribeProjectTasks = () => {};
+
+    const candidateValues = Array.from(executorCandidates).filter(Boolean).slice(0, 10);
+
+    if (candidateValues.length > 0) {
+      const buckets = new Map();
+      const unsubscribers = [];
+
+      const rebuildProjectMeta = () => {
+        const meta = createEmptyMeta();
+        buckets.forEach((list) => {
+          list.forEach((task) => {
+            meta.list.push(task);
+            collectMetaForTask(task, meta);
+          });
+        });
         projectMeta = meta;
         updateCombined();
+      };
+
+      candidateValues.forEach((value) => {
+        try {
+          const tasksQuery = query(collectionGroup(db, 'tasks'), where('executor', '==', value));
+          const unsubscribe = onSnapshot(
+            tasksQuery,
+            (snapshot) => {
+              const list = [];
+
+              snapshot.forEach((taskDoc) => {
+                const task = buildTask(taskDoc);
+                if (!matchesCurrentUserTask(task)) return;
+                list.push(task);
+              });
+
+              buckets.set(value, list);
+              rebuildProjectMeta();
+            },
+            (error) => {
+              console.error('Erro ao observar tarefas de projetos:', error);
+              buckets.delete(value);
+              rebuildProjectMeta();
+              markLoaded();
+            }
+          );
+          unsubscribers.push(unsubscribe);
+        } catch (error) {
+          console.error('Erro ao registrar observador de tarefas:', error);
+          markLoaded();
+        }
       });
+
+      unsubscribeProjectTasks = () => {
+        unsubscribers.forEach((fn) => {
+          try {
+            fn();
+          } catch {}
+        });
+      };
     } else {
       projectMeta = createEmptyMeta();
       updateCombined();
@@ -389,7 +474,7 @@ export function useTarefa(projectId, projectName, currentUser) {
       unsubscribePersonal();
       unsubscribeProjectTasks();
     };
-  }, [projectId, projectName, currentUser?.username, currentUser?.name, currentUser?.email]);
+  }, [projectId, projectName, currentUser?.username, currentUser?.name, currentUser?.email, currentUser?.uid]);
 
   const resolveProjectId = (override) => {
     if (typeof override === 'string') return override;

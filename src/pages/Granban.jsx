@@ -141,6 +141,7 @@ export default function Granban() {
   }, [projectKey, initialProjectId, projectId]);
 
   const {
+    loading,
     excluirTarefa,
     atualizarStatusTarefa,
     getTarefasPorColuna
@@ -738,20 +739,27 @@ export default function Granban() {
           onDragEnd={handleDragEnd}
         >
           <div className="board-granban">
-            {COLUNAS.map(coluna => (
-              <Column
-                key={coluna.id}
-                id={coluna.id}
-                title={coluna.titulo}
-                tasks={getTarefasPorColuna(coluna.id)}
-                onDelete={excluirTarefa}
-                onEdit={handleEdit}
-                onOpenDetails={handleOpenDetails}
-                onOpenReview={handleOpenReview}
-                movingTaskId={movingTaskId}
-                showOnlyTitle={compactCards}
-              />
-            ))}
+            {!projectId && loading ? (
+              <div className="board-loading" role="status" aria-live="polite">
+                <span className="board-loading__spinner" aria-hidden="true" />
+                <span className="board-loading__label">Carregando suas tarefas...</span>
+              </div>
+            ) : (
+              COLUNAS.map(coluna => (
+                <Column
+                  key={coluna.id}
+                  id={coluna.id}
+                  title={coluna.titulo}
+                  tasks={getTarefasPorColuna(coluna.id)}
+                  onDelete={excluirTarefa}
+                  onEdit={handleEdit}
+                  onOpenDetails={handleOpenDetails}
+                  onOpenReview={handleOpenReview}
+                  movingTaskId={movingTaskId}
+                  showOnlyTitle={compactCards}
+                />
+              ))
+            )}
           </div>
         </DndContext>
       </div>
