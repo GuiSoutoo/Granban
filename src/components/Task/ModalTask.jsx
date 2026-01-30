@@ -7,6 +7,7 @@ import EditIcon from '../../assets/EditTaskIcon.svg';
 import AddTaskIcon from '../../assets/NovaTarefaIcon.svg';
 import { db } from '../../services/firebase';
 import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import ModalBulkCreateTasks from './ModalBulkCreateTasks';
 
 function chunkArray(list, size) {
   const out = [];
@@ -25,6 +26,7 @@ function getShortName(fullName = '') {
 export default function ModalTask({ task, onClose, onBack, projectId, projectName, currentUser }) {
   const { adicionarTarefa, atualizarTarefa, loading } = useTarefa(projectId, projectName, currentUser);
   const isEditing = !!task;
+  const [showBulkModal, setShowBulkModal] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -183,10 +185,38 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
 
               <div className="modal-details-tagWrap">
                 
-                  {isEditing ? <div className="modal-details-tag">Editar tarefa</div> : <div className="modal-details-tag"><h4>Nova tarefa</h4></div>}
+                  {isEditing ? (
+                    <div className="modal-details-tag">Editar tarefa</div>
+                  ) : (
+                    <div className="modal-details-tag">
+                      <h4>Nova tarefa</h4>
+                      {!projectId && (
+                        <button
+                          type="button"
+                          className="modal-bulk-trigger"
+                          onClick={() => setShowBulkModal(true)}
+                          title="Criar múltiplas tarefas"
+                        >
+                          Criar em massa
+                        </button>
+                      )}
+                    </div>
+                  )}
 
                 {projectLabel ? (
-                  <div className="modal-details-project">Projeto: {projectLabel}</div>
+                  <div className="modal-details-project">
+                    Projeto: {projectLabel}
+                    {!isEditing && (
+                      <button
+                        type="button"
+                        className="modal-bulk-trigger-inline"
+                        onClick={() => setShowBulkModal(true)}
+                        title="Criar múltiplas tarefas"
+                      >
+                        Criar em massa
+                      </button>
+                    )}
+                  </div>
                 ) : null}
                 
                 {isEditing && (
@@ -335,7 +365,7 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
             name="description"
             value={formData.description}
             onChange={handleChange}
-            placeholder="Digite uma descrição da tarefa aqui, cole imagens para facilitar a instrução."
+            placeholder="Digite uma descrição da tarefa aqui, fornecendo instruções e detalhes a partir do título."
           />
 
           {/* FOOTER */}
@@ -359,6 +389,19 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
 
         </form>
       </div>
+
+      {showBulkModal && (
+        <ModalBulkCreateTasks
+          onClose={() => {
+            setShowBulkModal(false);
+            onClose?.();
+          }}
+          projectId={projectId}
+          projectName={projectName}
+          currentUser={currentUser}
+          teamMembers={teamMembers}
+        />
+      )}
     </div>
   );
 }
