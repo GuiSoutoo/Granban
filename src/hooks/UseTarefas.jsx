@@ -1,345 +1,144 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { db } from '../services/firebase';
-import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where, collectionGroup, getDoc } from 'firebase/firestore';
-
-function chunkArray(list, size) {
-  const out = [];
-  for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
-  return out;
-}
-
-const normalizeValue = (value) => (typeof value === 'string' ? value.trim() : '');
-
-const sanitizePublicLabel = (value) => {
-  const normalized = normalizeValue(value);
-  if (!normalized) return '';
-  if (normalized.includes('@')) return '';
-  return normalized;
-};
-
-const normalizeComparable = (value) => {
-  const normalized = normalizeValue(value);
-  return normalized ? normalized.toLowerCase() : '';
-};
-
-const deriveTaskPrefix = (nameSource, idSource) => {
-  const fallback = 'TAS';
-  const rawName = normalizeValue(nameSource);
-
-  if (rawName) {
-    const asciiName = rawName.normalize ? rawName.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : rawName;
-    const condensed = asciiName.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-    if (condensed) {
-      return condensed.length >= 3 ? condensed.slice(0, 3) : (condensed + 'XXX').slice(0, 3);
-    }
-  }
-
-  const rawId = normalizeValue(idSource);
-  const asciiId = rawId.normalize ? rawId.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : rawId;
-  const fallbackId = asciiId.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-  if (fallbackId) {
-    return fallbackId.length >= 3 ? fallbackId.slice(0, 3) : (fallbackId + 'XXX').slice(0, 3);
-  }
-
-  return fallback;
-};
-
-const computeNextTaskId = async (tarefasRef, prefix) => {
-  try {
-    const snapshot = await getDocs(tarefasRef);
-    const totalDocs = snapshot.size;
-    let highest = 0;
-
-    snapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      const existing = normalizeValue(data?.TaskId).toUpperCase();
-      if (existing.startsWith(prefix)) {
-        const suffix = existing.slice(prefix.length);
-        const parsed = parseInt(suffix, 10);
-        if (!Number.isNaN(parsed) && parsed > highest) {
-          highest = parsed;
-        }
-      }
-    });
-
-    const nextNumber = highest > 0 ? highest + 1 : totalDocs + 1;
-    return `${prefix}${String(nextNumber).padStart(2, '0')}`;
-  } catch (error) {
-    console.error('Erro ao calcular TaskId:', error);
-    const fallbackSuffix = String(Date.now()).slice(-2);
-    return `${prefix}${fallbackSuffix}`;
-  }
-};
+import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { createEmptyMeta, collectMetaForTask } from './useTarefas/taskMetaUtils';
+import { buildTask, toPublicTask } from './useTarefas/taskMapper';
+import { resolveUserMaps } from './useTarefas/userLookup';
+import { deriveTaskPrefix, computeNextTaskId } from './useTarefas/taskIdGenerator';
+import { sanitizePublicLabel, buildExecutorComparableSet, createTaskMatcher } from './useTarefas/taskUtils';
+import { resolveProjectId, resolveProjectName } from './useTarefas/projectResolver';
+import { useProjectTasksObserver } from './UseProjects';
 
 export function useTarefa(projectId, projectName, currentUser) {
   const [tarefas, setTarefas] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    let requestToken = 0;
+  // Memoiza funções para o observer de projetos
+  const executorComparable = buildExecutorComparableSet(currentUser);
+  const matchesCurrentUserTask = useCallback(
+    createTaskMatcher(executorComparable),
+    [currentUser?.username, currentUser?.name, currentUser?.email]
+  );
 
-    setLoading(true);
+  // Refs para combinar tarefas pessoais e de projetos
+  const personalMetaRef = useRef(createEmptyMeta());
+  const projectTasksRef = useRef([]);
+  const requestTokenRef = useRef(0);
+  const cancelledRef = useRef(false);
 
-    const markLoaded = () => {
-      if (!cancelled) {
-        setLoading(false);
-      }
-    };
+  // Função para aplicar lista de tarefas com resolução de nomes
+  const applyList = useCallback(async (list, meta, markLoaded) => {
+    if (cancelledRef.current) return;
 
-    const createEmptyMeta = () => ({
-      list: [],
-      executors: new Set(),
-      creatorUsernames: new Set(),
-      creatorEmails: new Set(),
-      creatorUids: new Set(),
-    });
+    const effectiveMeta = meta || createEmptyMeta();
+    const requiresLookup = Boolean(
+      (effectiveMeta.executors && effectiveMeta.executors.size) ||
+      (effectiveMeta.creatorUsernames && effectiveMeta.creatorUsernames.size) ||
+      (effectiveMeta.creatorEmails && effectiveMeta.creatorEmails.size) ||
+      (effectiveMeta.creatorUids && effectiveMeta.creatorUids.size)
+    );
 
-    const collectMetaForTask = (task, meta) => {
-      if (!meta) return;
-      if (task.executor) meta.executors.add(task.executor);
-      const rawCreator = task.rawCreator || {};
-      if (rawCreator.username) meta.creatorUsernames.add(rawCreator.username);
-      if (rawCreator.email) meta.creatorEmails.add(rawCreator.email);
-      if (rawCreator.uid) meta.creatorUids.add(rawCreator.uid);
-    };
-
-    const resolveUserMaps = async (meta) => {
-      const nameByUsername = new Map();
-      const nameByEmail = new Map();
-      const nameByUid = new Map();
-
-      if (!meta) {
-        return { nameByUsername, nameByEmail, nameByUid };
-      }
-
-      const usernamesToFetch = new Set([
-        ...meta.executors,
-        ...meta.creatorUsernames,
-      ]);
-      const emailsToFetch = new Set(meta.creatorEmails);
-      const uidsToFetch = new Set(meta.creatorUids);
-
-      if (
-        usernamesToFetch.size === 0 &&
-        emailsToFetch.size === 0 &&
-        uidsToFetch.size === 0
-      ) {
-        return { nameByUsername, nameByEmail, nameByUid };
-      }
-
-      const usersCol = collection(db, 'users');
-      const seenDocs = new Map();
-
-      const pushDoc = (docSnap) => {
-        if (!docSnap?.exists?.()) return;
-        const data = docSnap.data() || {};
-        seenDocs.set(docSnap.id, data);
-      };
-
-      const fetchByField = async (field, valuesSet) => {
-        if (!valuesSet || valuesSet.size === 0) return;
-        const values = Array.from(valuesSet).map(normalizeValue).filter(Boolean);
-        if (values.length === 0) return;
-
-        const batches = chunkArray(values, 10);
-        const snaps = await Promise.all(
-          batches.map((batch) => getDocs(query(usersCol, where(field, 'in', batch))))
-        );
-
-        snaps.forEach((snap) => {
-          snap.forEach((docSnap) => {
-            pushDoc(docSnap);
-          });
-        });
-      };
-
-      await fetchByField('username', usernamesToFetch);
-      await fetchByField('email', emailsToFetch);
-
-      if (uidsToFetch.size > 0) {
-        const uidList = Array.from(uidsToFetch).map(normalizeValue).filter(Boolean);
-        if (uidList.length > 0) {
-          await Promise.all(
-            uidList.map(async (uid) => {
-              try {
-                const docRef = doc(db, 'users', uid);
-                const snap = await getDoc(docRef);
-                pushDoc(snap);
-              } catch (error) {
-                console.error('Erro ao buscar usuário por UID:', error);
-              }
-            })
-          );
-        }
-      }
-
-      seenDocs.forEach((data, docId) => {
-        const displayName = normalizeValue(data.name) || normalizeValue(data.username) || normalizeValue(data.email) || docId;
-        const username = normalizeValue(data.username);
-        const email = normalizeValue(data.email);
-
-        if (username) nameByUsername.set(username, displayName);
-        if (email) nameByEmail.set(email, displayName);
-        nameByUid.set(docId, displayName);
-      });
-
-      return { nameByUsername, nameByEmail, nameByUid };
-    };
-
-    const executorCandidates = new Set();
-    const executorComparable = new Set();
-
-    const registerCandidate = (value) => {
-      const normalized = normalizeValue(value);
-      if (!normalized) return;
-      const normalizedLower = normalized.toLowerCase();
-      executorCandidates.add(normalized);
-      executorComparable.add(normalizedLower);
-      if (normalizedLower !== normalized) {
-        executorCandidates.add(normalizedLower);
-      }
-    };
-
-    if (currentUser) {
-      registerCandidate(currentUser.username);
-      registerCandidate(currentUser.name);
-      registerCandidate(currentUser.email);
+    if (!requiresLookup) {
+      setTarefas(
+        list.map((task) =>
+          toPublicTask(task, task.executor, task.storedCreatorDisplayName)
+        )
+      );
+      markLoaded?.();
+      return;
     }
 
-    const matchesCurrentUserTask = (task) => {
-      if (!task) return false;
-      if (executorComparable.size === 0) return false;
-      const executorKey = normalizeComparable(task.executor);
-      if (!executorKey) return false;
-      return executorComparable.has(executorKey);
-    };
+    const currentToken = ++requestTokenRef.current;
 
-    const buildTask = (taskDoc, fallbackProjectId = '', fallbackProjectName = '') => {
-      const data = taskDoc.data();
-      const executor = normalizeValue(data.executor);
-      const parentProjectId = fallbackProjectId || taskDoc.ref.parent?.parent?.id || normalizeValue(data.projectId) || '';
-      const parentProjectName = fallbackProjectName || normalizeValue(data.projectName) || '';
+    try {
+      const { nameByUsername, nameByEmail, nameByUid } = await resolveUserMaps(effectiveMeta);
+      if (cancelledRef.current || currentToken !== requestTokenRef.current) return;
 
-      const rawCreator = {
-        username:
-          normalizeValue(data?.criador) ||
-          normalizeValue(data?.createdBy) ||
-          normalizeValue(data?.createdByName) ||
-          '',
-        email: normalizeValue(data?.criadorEmail) || normalizeValue(data?.createdByEmail) || '',
-        uid: normalizeValue(data?.criadorUid) || normalizeValue(data?.createdByUid) || '',
-      };
+      setTarefas(
+        list.map((task) => {
+          const executorName = nameByUsername.get(task.executor) || task.executor;
+          const creatorName =
+            (task.rawCreator?.uid && nameByUid.get(task.rawCreator.uid)) ||
+            (task.rawCreator?.email && nameByEmail.get(task.rawCreator.email)) ||
+            (task.rawCreator?.username && nameByUsername.get(task.rawCreator.username)) ||
+            task.storedCreatorDisplayName ||
+            '';
 
-      const storedCreatorDisplayName =
-        sanitizePublicLabel(data?.creatorDisplayName) ||
-        sanitizePublicLabel(rawCreator.username);
-
-      return {
-        id: taskDoc.id,
-        uniqueKey: `${parentProjectId || 'personal'}::${taskDoc.id}`,
-        nome: data.titulo,
-        titulo: data.titulo,
-        status: data.status,
-        tag: data.tag,
-        executor,
-        dataEntrega: data.dataEntrega,
-        descricao: data.descricao,
-        criadoEm: data.criadoEm ? data.criadoEm.toDate().toLocaleDateString() : '',
-        prioridade: data.prioridade,
-        projectId: parentProjectId,
-        projectName: parentProjectName,
-        sourceCollection: parentProjectId ? 'project' : 'personal',
-        TaskId: normalizeValue(data?.TaskId),
-        rawCreator,
-        storedCreatorDisplayName,
-      };
-    };
-
-    const toPublicTask = (task, executorLabel, creatorLabel) => {
-      const { rawCreator, storedCreatorDisplayName, ...rest } = task;
-      const safeExecutorName = sanitizePublicLabel(executorLabel) || 'Responsável não identificado';
-
-      const creatorCandidates = [
-        creatorLabel,
-        storedCreatorDisplayName,
-        rawCreator?.username,
-      ];
-
-      let creatorDisplayName = '';
-      for (const candidate of creatorCandidates) {
-        const sanitized = sanitizePublicLabel(candidate);
-        if (sanitized) {
-          creatorDisplayName = sanitized;
-          break;
-        }
-      }
-
-      if (!creatorDisplayName) {
-        creatorDisplayName = 'Usuário não identificado';
-      }
-
-      return {
-        ...rest,
-        executorName: safeExecutorName,
-        creatorDisplayName,
-      };
-    };
-
-    const applyList = async (list, meta) => {
-      if (cancelled) return;
-
-      const effectiveMeta = meta || createEmptyMeta();
-      const requiresLookup = Boolean(
-        (effectiveMeta.executors && effectiveMeta.executors.size) ||
-        (effectiveMeta.creatorUsernames && effectiveMeta.creatorUsernames.size) ||
-        (effectiveMeta.creatorEmails && effectiveMeta.creatorEmails.size) ||
-        (effectiveMeta.creatorUids && effectiveMeta.creatorUids.size)
+          return toPublicTask(task, executorName, creatorName);
+        })
       );
-
-      if (!requiresLookup) {
+      markLoaded?.();
+    } catch (error) {
+      console.error('Erro ao carregar nomes dos usuários:', error);
+      if (!cancelledRef.current && currentToken === requestTokenRef.current) {
         setTarefas(
           list.map((task) =>
             toPublicTask(task, task.executor, task.storedCreatorDisplayName)
           )
         );
-        markLoaded();
-        return;
+        markLoaded?.();
       }
+    }
+  }, []);
 
-      const currentToken = ++requestToken;
+  // Função para combinar tarefas pessoais e de projetos
+  const updateCombined = useCallback(() => {
+    const personalMeta = personalMetaRef.current;
+    const projectTasks = projectTasksRef.current;
 
-      try {
-        const { nameByUsername, nameByEmail, nameByUid } = await resolveUserMaps(effectiveMeta);
-        if (cancelled || currentToken !== requestToken) return;
+    // Coleta meta das tarefas de projetos
+    const projectMeta = createEmptyMeta();
+    projectTasks.forEach((task) => {
+      projectMeta.list.push(task);
+      collectMetaForTask(task, projectMeta);
+    });
 
-        setTarefas(
-          list.map((task) => {
-            const executorName = nameByUsername.get(task.executor) || task.executor;
-            const creatorName =
-              (task.rawCreator?.uid && nameByUid.get(task.rawCreator.uid)) ||
-              (task.rawCreator?.email && nameByEmail.get(task.rawCreator.email)) ||
-              (task.rawCreator?.username && nameByUsername.get(task.rawCreator.username)) ||
-              task.storedCreatorDisplayName ||
-              '';
+    const combinedList = [...personalMeta.list, ...projectMeta.list];
+    const combinedMeta = {
+      list: combinedList,
+      executors: new Set([...personalMeta.executors, ...projectMeta.executors]),
+      creatorUsernames: new Set([...personalMeta.creatorUsernames, ...projectMeta.creatorUsernames]),
+      creatorEmails: new Set([...personalMeta.creatorEmails, ...projectMeta.creatorEmails]),
+      creatorUids: new Set([...personalMeta.creatorUids, ...projectMeta.creatorUids]),
+    };
 
-            return toPublicTask(task, executorName, creatorName);
-          })
-        );
-        markLoaded();
-      } catch (error) {
-        console.error('Erro ao carregar nomes dos usuários:', error);
-        if (!cancelled && currentToken === requestToken) {
-          setTarefas(
-            list.map((task) =>
-              toPublicTask(task, task.executor, task.storedCreatorDisplayName)
-            )
-          );
-          markLoaded();
-        }
+    applyList(combinedList, combinedMeta, () => setLoading(false));
+  }, [applyList]);
+
+  // Callback para quando tarefas de projetos são atualizadas
+  const handleProjectTasksUpdate = useCallback((tasks) => {
+    projectTasksRef.current = tasks;
+    updateCombined();
+  }, [updateCombined]);
+
+  // Observer de tarefas de projetos (só ativo quando não tem projectId específico)
+  useProjectTasksObserver(
+    projectId ? null : currentUser,
+    buildTask,
+    matchesCurrentUserTask,
+    handleProjectTasksUpdate
+  );
+
+  // Effect para projeto específico ou tarefas pessoais
+  useEffect(() => {
+    cancelledRef.current = false;
+
+    setLoading(true);
+
+    const markLoaded = () => {
+      if (!cancelledRef.current) {
+        setLoading(false);
       }
     };
 
+    // Se não temos projectId e também não temos nenhum identificador do usuário,
+    // aguardamos até ter informações para buscar tarefas
+    if (!projectId && executorComparable.size === 0) {
+      markLoaded();
+      return () => { cancelledRef.current = true; };
+    }
+
+    // Modo projeto específico
     if (projectId) {
       const tarefasRef = collection(db, 'projects', projectId, 'tasks');
 
@@ -354,7 +153,7 @@ export function useTarefa(projectId, projectName, currentUser) {
             collectMetaForTask(task, meta);
           });
 
-          applyList(meta.list, meta);
+          applyList(meta.list, meta, markLoaded);
         },
         (error) => {
           console.error('Erro ao observar tarefas do projeto:', error);
@@ -363,27 +162,14 @@ export function useTarefa(projectId, projectName, currentUser) {
       );
 
       return () => {
-        cancelled = true;
+        cancelledRef.current = true;
         unsubscribe();
       };
     }
 
+    // Modo board pessoal - observa tarefas pessoais
     const personalRef = collection(db, 'tarefas');
-    let personalMeta = createEmptyMeta();
-    let projectMeta = createEmptyMeta();
-
-    const updateCombined = () => {
-      const combinedList = [...personalMeta.list, ...projectMeta.list];
-      const combinedMeta = {
-        list: combinedList,
-        executors: new Set([...personalMeta.executors, ...projectMeta.executors]),
-        creatorUsernames: new Set([...personalMeta.creatorUsernames, ...projectMeta.creatorUsernames]),
-        creatorEmails: new Set([...personalMeta.creatorEmails, ...projectMeta.creatorEmails]),
-        creatorUids: new Set([...personalMeta.creatorUids, ...projectMeta.creatorUids]),
-      };
-
-      applyList(combinedList, combinedMeta);
-    };
+    personalMetaRef.current = createEmptyMeta();
 
     const unsubscribePersonal = onSnapshot(
       personalRef,
@@ -397,7 +183,7 @@ export function useTarefa(projectId, projectName, currentUser) {
           collectMetaForTask(task, meta);
         });
 
-        personalMeta = meta;
+        personalMetaRef.current = meta;
         updateCombined();
       },
       (error) => {
@@ -406,87 +192,11 @@ export function useTarefa(projectId, projectName, currentUser) {
       }
     );
 
-    let unsubscribeProjectTasks = () => {};
-
-    const candidateValues = Array.from(executorCandidates).filter(Boolean).slice(0, 10);
-
-    if (candidateValues.length > 0) {
-      const buckets = new Map();
-      const unsubscribers = [];
-
-      const rebuildProjectMeta = () => {
-        const meta = createEmptyMeta();
-        buckets.forEach((list) => {
-          list.forEach((task) => {
-            meta.list.push(task);
-            collectMetaForTask(task, meta);
-          });
-        });
-        projectMeta = meta;
-        updateCombined();
-      };
-
-      candidateValues.forEach((value) => {
-        try {
-          const tasksQuery = query(collectionGroup(db, 'tasks'), where('executor', '==', value));
-          const unsubscribe = onSnapshot(
-            tasksQuery,
-            (snapshot) => {
-              const list = [];
-
-              snapshot.forEach((taskDoc) => {
-                const task = buildTask(taskDoc);
-                if (!matchesCurrentUserTask(task)) return;
-                list.push(task);
-              });
-
-              buckets.set(value, list);
-              rebuildProjectMeta();
-            },
-            (error) => {
-              console.error('Erro ao observar tarefas de projetos:', error);
-              buckets.delete(value);
-              rebuildProjectMeta();
-              markLoaded();
-            }
-          );
-          unsubscribers.push(unsubscribe);
-        } catch (error) {
-          console.error('Erro ao registrar observador de tarefas:', error);
-          markLoaded();
-        }
-      });
-
-      unsubscribeProjectTasks = () => {
-        unsubscribers.forEach((fn) => {
-          try {
-            fn();
-          } catch {}
-        });
-      };
-    } else {
-      projectMeta = createEmptyMeta();
-      updateCombined();
-    }
-
     return () => {
-      cancelled = true;
+      cancelledRef.current = true;
       unsubscribePersonal();
-      unsubscribeProjectTasks();
     };
-  }, [projectId, projectName, currentUser?.username, currentUser?.name, currentUser?.email, currentUser?.uid]);
-
-  const resolveProjectId = (override) => {
-    if (typeof override === 'string') return override;
-    if (override && typeof override.projectId === 'string') return override.projectId;
-    return projectId || '';
-  };
-
-  const resolveProjectName = (targetProjectId, override) => {
-    if (!targetProjectId) return '';
-    if (override && typeof override.projectName === 'string') return override.projectName;
-    return projectName || '';
-  };
+  }, [projectId, projectName, executorComparable.size, matchesCurrentUserTask, applyList, updateCombined]);
 
   const adicionarTarefa = async (dados, options) => {
     if (!dados.titulo.trim()) {
@@ -496,8 +206,8 @@ export function useTarefa(projectId, projectName, currentUser) {
     
     setLoading(true);
     try {
-      const targetProjectId = resolveProjectId(options);
-      const targetProjectName = resolveProjectName(targetProjectId, options);
+      const targetProjectId = resolveProjectId(projectId, options);
+      const targetProjectName = resolveProjectName(targetProjectId, projectName, options);
 
       const tarefasRef = targetProjectId
         ? collection(db, 'projects', targetProjectId, 'tasks')
@@ -544,8 +254,8 @@ export function useTarefa(projectId, projectName, currentUser) {
 
     setLoading(true);
     try {
-      const targetProjectId = resolveProjectId(options);
-      const targetProjectName = resolveProjectName(targetProjectId, options);
+      const targetProjectId = resolveProjectId(projectId, options);
+      const targetProjectName = resolveProjectName(targetProjectId, projectName, options);
 
       const docRef = targetProjectId
         ? doc(db, 'projects', targetProjectId, 'tasks', id)
@@ -570,7 +280,7 @@ export function useTarefa(projectId, projectName, currentUser) {
   
   const excluirTarefa = async (id, options) => {
     try {
-      const targetProjectId = resolveProjectId(options);
+      const targetProjectId = resolveProjectId(projectId, options);
 
       const docRef = targetProjectId
         ? doc(db, 'projects', targetProjectId, 'tasks', id)
@@ -583,7 +293,7 @@ export function useTarefa(projectId, projectName, currentUser) {
 
   const atualizarStatusTarefa = async (id, status, options) => {
     try {
-      const targetProjectId = resolveProjectId(options);
+      const targetProjectId = resolveProjectId(projectId, options);
 
       const docRef = targetProjectId
         ? doc(db, 'projects', targetProjectId, 'tasks', id)
