@@ -26,7 +26,10 @@ export function Column({ title, tasks, id, onDelete, onEdit, onOpenDetails, onOp
         style={{ cursor: id === 'archived' ? 'pointer' : 'default' }}
       >
         {title === 'Arquivado' ? (
-          <img src={ArcIcon} alt="Archived Icon" width='25px'/>
+          <>
+            <img src={ArcIcon} alt="Archived Icon" width='25px'/>
+            {isExpanded && <span className="column-count">{taskCount}</span>}
+          </>
         ) : (
           <>
             {title}
