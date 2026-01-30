@@ -1,5 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { useNavigate } from 'react-router-dom';
 import { TaskButton } from './TaskButton';
 import { useTarefa } from '../../hooks/UseTarefas';
 import '../../style/Task.css';
@@ -58,10 +59,18 @@ function formatarTempoDecorrido(dataString) {
 
 export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenReview, isMoving, isExpanded = true, showOnlyTitle = false, onCardClick, hideDetailsButton = false }) {
   const { atualizarStatusTarefa } = useTarefa();
+  const navigate = useNavigate();
 
   const openDetails = (e) => {
     e?.stopPropagation?.();
     if (typeof onOpenDetails === 'function') onOpenDetails(task);
+  };
+
+  const handleProjectClick = (e) => {
+    e.stopPropagation();
+    if (task.projectId) {
+      navigate(`/granban/${task.projectId}`);
+    }
   };
 
   const dragId = task.uniqueKey || `${task.projectId || 'personal'}::${task.id}`;
@@ -154,7 +163,14 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
             <p className="tagName">{task.tag}</p>
             <p className="deliveryDate">{task.dueDate ? new Date(task.dueDate).toLocaleDateString('pt-BR') : '-'}</p>
           </div>
-          <h5 className="projectName">{task.projectName || 'Sem projeto'}</h5>
+          <h5 
+            className="projectName" 
+            onClick={handleProjectClick}
+            style={{ cursor: task.projectId ? 'pointer' : 'default' }}
+            title={task.projectId ? `Ir para ${task.projectName || 'projeto'}` : undefined}
+          >
+            {task.projectName || 'Sem projeto'}
+          </h5>
         </div>
       </div>
 
