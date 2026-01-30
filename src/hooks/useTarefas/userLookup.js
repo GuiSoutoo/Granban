@@ -11,18 +11,11 @@ export const resolveUserMaps = async (meta) => {
     return { nameByUsername, nameByEmail, nameByUid };
   }
 
-  const usernamesToFetch = new Set([
-    ...meta.executors,
-    ...meta.creatorUsernames,
-  ]);
-  const emailsToFetch = new Set(meta.creatorEmails);
-  const uidsToFetch = new Set(meta.creatorUids);
+  // Executores são usernames que precisamos buscar
+  const usernamesToFetch = new Set(meta.executors || []);
+  const uidsToFetch = new Set(meta.creatorUids || []);
 
-  if (
-    usernamesToFetch.size === 0 &&
-    emailsToFetch.size === 0 &&
-    uidsToFetch.size === 0
-  ) {
+  if (usernamesToFetch.size === 0 && uidsToFetch.size === 0) {
     return { nameByUsername, nameByEmail, nameByUid };
   }
 
@@ -52,9 +45,10 @@ export const resolveUserMaps = async (meta) => {
     });
   };
 
+  // Busca usuários por username (para resolver nomes de executores)
   await fetchByField('username', usernamesToFetch);
-  await fetchByField('email', emailsToFetch);
 
+  // Busca usuários por UID (para resolver nomes de criadores, se necessário)
   if (uidsToFetch.size > 0) {
     const uidList = Array.from(uidsToFetch).map(normalizeValue).filter(Boolean);
     if (uidList.length > 0) {
@@ -73,15 +67,21 @@ export const resolveUserMaps = async (meta) => {
   }
 
   seenDocs.forEach((data, docId) => {
+    // Prioriza o campo 'name' para nome de exibição
     const displayName =
       normalizeValue(data.name) ||
       normalizeValue(data.username) ||
       normalizeValue(data.email) ||
       docId;
     const username = normalizeValue(data.username);
+    const usernameLower = username.toLowerCase();
     const email = normalizeValue(data.email);
 
-    if (username) nameByUsername.set(username, displayName);
+    // Mapeia tanto o username original quanto em minúsculas para o displayName
+    if (username) {
+      nameByUsername.set(username, displayName);
+      nameByUsername.set(usernameLower, displayName);
+    }
     if (email) nameByEmail.set(email, displayName);
     nameByUid.set(docId, displayName);
   });

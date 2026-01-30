@@ -51,7 +51,11 @@ export function useTarefa(projectId, projectName, currentUser) {
 
       setTarefas(
         list.map((task) => {
-          const executorName = nameByUsername.get(task.executor) || task.executor;
+          // Busca pelo username original ou em lowercase
+          const executorKey = task.executor || '';
+          const executorName = nameByUsername.get(executorKey) || 
+                               nameByUsername.get(executorKey.toLowerCase()) || 
+                               task.executor;
           return toPublicTask(task, executorName, task.createdByName);
         })
       );
