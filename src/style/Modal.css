@@ -1395,6 +1395,12 @@
   font-weight: 900;
 }
 
+.modal-projectDetails-archivedIcon {
+  width: 12px;
+  height: 12px;
+  opacity: 0.9;
+}
+
 .modal-projectDetails-divider {
   margin: 18px 0 14px;
 }

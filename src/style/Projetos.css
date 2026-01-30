@@ -254,6 +254,12 @@
   background: #22c55e;
 }
 
+.project-card__archivedIcon {
+  width: 12px;
+  height: 12px;
+  opacity: 0.9;
+}
+
 .project-card__footer {
   display: flex;
   align-items: center;

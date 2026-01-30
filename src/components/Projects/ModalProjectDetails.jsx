@@ -5,6 +5,7 @@ import EditProjetoIcon from '../../assets/DetalhesProjeto/EditProjeto.png';
 import ArquivarProjetoIcon from '../../assets/DetalhesProjeto/ArquivarProjeto.png';
 import TasksProjetosIcon from '../../assets/DetalhesProjeto/TasksProjetos.png';
 import MembrosProjetosIcon from '../../assets/DetalhesProjeto/MembrosProjetos.png';
+import ArchivedIcon from '../../assets/ArchivedIcon.svg';
 import { db } from '../../services/firebase';
 import '../../style/Modal.css';
 import '../../style/Projetos.css';
@@ -15,6 +16,7 @@ const STATUS_ORDER = [
   { key: 'in-review', label: 'Em revisão' },
   { key: 'rejected', label: 'Rejeitado' },
   { key: 'concluded', label: 'Concluído' },
+  { key: 'archived', label: 'Arquivado', isArchived: true },
 ];
 
 function formatTimestamp(ts) {
@@ -178,9 +180,13 @@ export default function ModalProjectDetails({ project, counts, onClose, onEdit }
             <div className="modal-projectDetails-section">
               <div className="modal-projectDetails-sectionTitle">Status</div>
               <div className="modal-projectDetails-statusList">
-                {STATUS_ORDER.map(({ key, label }) => (
+                {STATUS_ORDER.map(({ key, label, isArchived }) => (
                   <div key={key} className="modal-projectDetails-statusItem">
-                    <span className={`project-card__dot dot--${key}`} aria-hidden="true" />
+                    {isArchived ? (
+                      <img className="modal-projectDetails-archivedIcon" src={ArchivedIcon} alt="" aria-hidden="true" />
+                    ) : (
+                      <span className={`project-card__dot dot--${key}`} aria-hidden="true" />
+                    )}
                     <span className="modal-projectDetails-statusLabel">{label}</span>
                     <span className="modal-projectDetails-statusCount">{counts?.[key] ?? 0}</span>
                   </div>

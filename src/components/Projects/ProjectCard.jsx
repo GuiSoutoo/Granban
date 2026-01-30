@@ -1,6 +1,7 @@
 import GranbanLogoIcon from '../../assets/GranbanLogoIcon.svg';
 import NovaTarefaIcon from '../../assets/NovaTarefaIcon.svg';
 import InfoIcon from '../../assets/InfoIcon.svg';
+import ArchivedIcon from '../../assets/ArchivedIcon.svg';
 import { useNavigate } from 'react-router-dom';
 import '../../style/Projetos.css';
 
@@ -10,6 +11,7 @@ const STATUS_ORDER = [
   { key: 'in-review', label: 'Revisão' },
   { key: 'rejected', label: 'Rejeitado' },
   { key: 'concluded', label: 'Concluído' },
+  { key: 'archived', label: 'Arquivado', isArchived: true },
 ];
 
 export default function ProjectCard({ project, counts, onInfo }) {
@@ -44,9 +46,13 @@ export default function ProjectCard({ project, counts, onInfo }) {
 
       <div className="project-card__body">
         <div className="project-card__statusRow" aria-label="Resumo de tarefas por status">
-          {STATUS_ORDER.map(({ key, label }) => (
+          {STATUS_ORDER.map(({ key, label, isArchived }) => (
             <div key={key} className="project-card__statusItem" title={label}>
-              <span className={`project-card__dot dot--${key}`} aria-hidden="true" />
+              {isArchived ? (
+                <img className="project-card__archivedIcon" src={ArchivedIcon} alt="" aria-hidden="true" />
+              ) : (
+                <span className={`project-card__dot dot--${key}`} aria-hidden="true" />
+              )}
               <span className="project-card__count">{counts?.[key] ?? 0}</span>
             </div>
           ))}

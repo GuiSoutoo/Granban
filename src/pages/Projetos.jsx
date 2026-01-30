@@ -14,7 +14,7 @@ import '../style/Granban.css';
 import '../style/Projetos.css';
 import IsEmptyIcon from "../assets/IsEmpty.svg";
 
-const STATUS_KEYS = ['to-do', 'in-progress', 'in-review', 'rejected', 'concluded'];
+const STATUS_KEYS = ['to-do', 'in-progress', 'in-review', 'rejected', 'concluded', 'archived'];
 
 function emptyCounts() {
     return STATUS_KEYS.reduce((acc, key) => {

@@ -16,6 +16,8 @@ export function Column({ title, tasks, id, onDelete, onEdit, onOpenDetails, onOp
     }
   };
 
+  const taskCount = tasks?.length || 0;
+
   return (
     <div className={`column-wrapper ${id === 'archived' ? 'archived-wrapper' : ''} ${isExpanded ? 'expanded' : ''}`}>
       <h3 
@@ -23,7 +25,14 @@ export function Column({ title, tasks, id, onDelete, onEdit, onOpenDetails, onOp
         onClick={toggleColumn}
         style={{ cursor: id === 'archived' ? 'pointer' : 'default' }}
       >
-        {title == 'Arquivado' ? <img src={ArcIcon} alt="Archived Icon"  width='25px'/> : title}
+        {title === 'Arquivado' ? (
+          <img src={ArcIcon} alt="Archived Icon" width='25px'/>
+        ) : (
+          <>
+            {title}
+            <span className="column-count">{taskCount}</span>
+          </>
+        )}
       </h3>
       <div 
         ref={setNodeRef}
