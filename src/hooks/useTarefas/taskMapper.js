@@ -1,89 +1,68 @@
 import { normalizeValue, sanitizePublicLabel } from './taskUtils';
 
-const resolveCreatorLabel = (rawCreator) => {
-  const creatorCandidates = [
-    normalizeValue(rawCreator?.username),
-    normalizeValue(rawCreator?.email),
-    normalizeValue(rawCreator?.uid),
-  ];
-
-  for (const candidate of creatorCandidates) {
-    const sanitized = sanitizePublicLabel(candidate);
-    if (sanitized) {
-      return sanitized;
-    }
-  }
-
-  return '';
-};
-
+/**
+ * Converte um documento do Firestore para objeto de tarefa interno
+ * Estrutura esperada do Firestore:
+ * - title, taskId, status, executor, description, priority, tag, dueDate, createdAt, createdByUid, createdByName
+ */
 export const buildTask = (taskDoc, fallbackProjectId = '', fallbackProjectName = '') => {
   const data = taskDoc.data();
   const executor = normalizeValue(data.executor);
   const parentProjectId =
-    fallbackProjectId || taskDoc.ref.parent?.parent?.id || normalizeValue(data.projectId) || '';
-  const parentProjectName = fallbackProjectName || normalizeValue(data.projectName) || '';
+    fallbackProjectId || taskDoc.ref.parent?.parent?.id || '';
+  const parentProjectName = fallbackProjectName || '';
 
-  const rawCreator = {
-    username:
-      normalizeValue(data?.criador) ||
-      normalizeValue(data?.createdBy) ||
-      normalizeValue(data?.createdByName) ||
-      '',
-    email: normalizeValue(data?.criadorEmail) || normalizeValue(data?.createdByEmail) || '',
-    uid: normalizeValue(data?.criadorUid) || normalizeValue(data?.createdByUid) || '',
-  };
+  // Suporte a campos antigos para migração gradual
+  const title = normalizeValue(data.title) || normalizeValue(data.titulo) || '';
+  const description = normalizeValue(data.description) || normalizeValue(data.descricao) || '';
+  const priority = normalizeValue(data.priority) || normalizeValue(data.prioridade) || '';
+  const taskId = normalizeValue(data.taskId) || normalizeValue(data.TaskId) || '';
+  const dueDate = data.dueDate || data.dataEntrega || '';
+  const createdByUid = normalizeValue(data.createdByUid) || normalizeValue(data.criadorUid) || '';
+  const createdByName = normalizeValue(data.createdByName) || normalizeValue(data.criador) || normalizeValue(data.creatorDisplayName) || '';
 
-  const storedCreatorDisplayName =
-    sanitizePublicLabel(data?.creatorDisplayName) || sanitizePublicLabel(rawCreator.username);
+  // Formata data de criação
+  let createdAt = '';
+  const rawCreatedAt = data.createdAt || data.criadoEm;
+  if (rawCreatedAt) {
+    try {
+      const date = typeof rawCreatedAt.toDate === 'function' ? rawCreatedAt.toDate() : new Date(rawCreatedAt);
+      createdAt = date.toLocaleDateString();
+    } catch {
+      createdAt = '';
+    }
+  }
 
   return {
     id: taskDoc.id,
     uniqueKey: `${parentProjectId || 'personal'}::${taskDoc.id}`,
-    nome: data.titulo,
-    titulo: data.titulo,
-    status: data.status,
-    tag: data.tag,
+    title,
+    status: data.status || 'to-do',
+    tag: data.tag || '',
     executor,
-    dataEntrega: data.dataEntrega,
-    descricao: data.descricao,
-    criadoEm: data.criadoEm ? data.criadoEm.toDate().toLocaleDateString() : '',
-    prioridade: data.prioridade,
+    description,
+    priority,
+    taskId,
+    dueDate,
+    createdAt,
+    createdByUid,
+    createdByName,
     projectId: parentProjectId,
     projectName: parentProjectName,
     sourceCollection: parentProjectId ? 'project' : 'personal',
-    TaskId: normalizeValue(data?.TaskId),
-    rawCreator,
-    storedCreatorDisplayName,
   };
 };
 
+/**
+ * Converte tarefa interna para formato público (exibição)
+ */
 export const toPublicTask = (task, executorLabel, creatorLabel) => {
-  const { rawCreator, storedCreatorDisplayName, ...rest } = task;
-  const safeExecutorName = sanitizePublicLabel(executorLabel) || 'Responsável não identificado';
-
-  const creatorCandidates = [
-    creatorLabel,
-    storedCreatorDisplayName,
-    rawCreator?.username,
-  ];
-
-  let creatorDisplayName = '';
-  for (const candidate of creatorCandidates) {
-    const sanitized = sanitizePublicLabel(candidate);
-    if (sanitized) {
-      creatorDisplayName = sanitized;
-      break;
-    }
-  }
-
-  if (!creatorDisplayName) {
-    creatorDisplayName = resolveCreatorLabel(rawCreator) || 'Usuário não identificado';
-  }
+  const safeExecutorName = sanitizePublicLabel(executorLabel) || task.executor || '';
+  const safeCreatorName = sanitizePublicLabel(creatorLabel) || task.createdByName || '';
 
   return {
-    ...rest,
+    ...task,
     executorName: safeExecutorName,
-    creatorDisplayName,
+    creatorDisplayName: safeCreatorName,
   };
 };

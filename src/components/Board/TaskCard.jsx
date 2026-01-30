@@ -88,12 +88,12 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
   }
 
   const isArchived = task.status === 'archived';
-  const explicitTaskId = typeof task.TaskId === 'string' && task.TaskId.trim() ? task.TaskId.trim().toUpperCase() : (typeof task.taskId === 'string' && task.taskId.trim() ? task.taskId.trim().toUpperCase() : '');
+  const explicitTaskId = typeof task.taskId === 'string' && task.taskId.trim() ? task.taskId.trim().toUpperCase() : '';
   const shortId = explicitTaskId || (task.id ? String(task.id).slice(0, 4).toUpperCase() : '');
-  const creatorRaw = String(task.creatorDisplayName || '').trim();
+  const creatorRaw = String(task.creatorDisplayName || task.createdByName || '').trim();
   const creatorDisplay = creatorRaw ? getShortName(creatorRaw) : '';
-  const priorityText = task.prioridade
-    ? (task.prioridade === 'Urgente' ? 'Urgente' : `${task.prioridade} prioridade`)
+  const priorityText = task.priority
+    ? (task.priority === 'Urgente' ? 'Urgente' : `${task.priority} prioridade`)
     : 'Sem prioridade';
 
   // Coluna Arquivado recolhida: mostra apenas o código
@@ -104,7 +104,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
         {...listeners}
         {...attributes}
         className={`cardTask ${task.status}Card archivedCodeOnly`}
-        title={task.titulo}
+        title={task.title}
         style={dragStyle}
       >
         <span className="archivedCodeOnly-text">{shortId ? `#${shortId}` : '#----'}</span>
@@ -114,19 +114,19 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
 
   // Modo compacto (recolher global): título + id curto
   if (showOnlyTitle) {
-    const priorityClass = task.prioridade ? `${task.prioridade}Card` : '';
+    const priorityClass = task.priority ? `${task.priority}Card` : '';
     return (
       <div
         ref={setNodeRef}
         {...listeners}
         {...attributes}
         className={`cardTask ${task.status}Card titleOnly ${priorityClass}`.trim()}
-        title={task.titulo}
+        title={task.title}
         style={dragStyle}
       >
         <h4 className="titleOnly-text">
           {shortId && <span className="titleOnly-id">#{shortId}</span>}
-          {task.titulo}
+          {task.title}
         </h4>
       </div>
     );
@@ -137,7 +137,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`cardTask ${task.status}Card ${task.prioridade}Card`}
+      className={`cardTask ${task.status}Card ${task.priority}Card`}
       style={dragStyle}
     >
       <div className="headTask">
@@ -149,7 +149,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
         <div className="infoTask">
           <div className="headerTop">
             <p className="tagName">{task.tag}</p>
-            <p className="deliveryDate">{task.dataEntrega ? new Date(task.dataEntrega).toLocaleDateString('pt-BR') : '-'}</p>
+            <p className="deliveryDate">{task.dueDate ? new Date(task.dueDate).toLocaleDateString('pt-BR') : '-'}</p>
           </div>
           <h5 className="projectName">{task.projectName || 'Sem projeto'}</h5>
         </div>
@@ -157,16 +157,16 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
 
       <p className="dateTask">
         {shortId && <span className="inline-id">#{shortId} </span>}
-        <span className="dateTask-meta">· {formatarTempoDecorrido(task.criadoEm)}</span>
+        <span className="dateTask-meta">· {formatarTempoDecorrido(task.createdAt)}</span>
         <span className="dateTask-meta">
           {' '}·{' '}
           {creatorDisplay ? `Criado por ${creatorDisplay}` : 'Criador não registrado'}
         </span>
       </p>
-      <h4>{task.titulo}</h4>
+      <h4>{task.title}</h4>
       <hr></hr>
       <div className="bottomTask">
-        <p className={task.prioridade}>{priorityText}</p>
+        <p className={task.priority}>{priorityText}</p>
         <p><a>Executor</a> {getShortName(task.executorName || task.executor)}</p>
       </div>
       

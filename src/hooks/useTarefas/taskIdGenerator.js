@@ -35,7 +35,8 @@ export const computeNextTaskId = async (tarefasRef, prefix) => {
 
     snapshot.forEach((docSnap) => {
       const data = docSnap.data();
-      const existing = normalizeValue(data?.TaskId).toUpperCase();
+      // Suporte a campo antigo (TaskId) e novo (taskId)
+      const existing = normalizeValue(data?.taskId || data?.TaskId).toUpperCase();
       if (existing.startsWith(prefix)) {
         const suffix = existing.slice(prefix.length);
         const parsed = parseInt(suffix, 10);

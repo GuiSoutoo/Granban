@@ -27,13 +27,13 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
   const isEditing = !!task;
 
   const [formData, setFormData] = useState({
-    titulo: '',
+    title: '',
     status: 'to-do',
     tag: '',
-    prioridade: '',
+    priority: '',
     executor: '',
-    dataEntrega: '',
-    descricao: '',
+    dueDate: '',
+    description: '',
   });
 
   const [teamMembers, setTeamMembers] = useState([]);
@@ -118,13 +118,13 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
   useEffect(() => {
     if (isEditing && task) {
       setFormData({
-        titulo: task.titulo || '',
+        title: task.title || '',
         status: task.status || 'to-do',
         tag: task.tag || '',
-        prioridade: task.prioridade || '',
+        priority: task.priority || '',
         executor: task.executor || '',
-        dataEntrega: task.dataEntrega || '',
-        descricao: task.descricao || '',
+        dueDate: task.dueDate || '',
+        description: task.description || '',
       });
     }
   }, [task, isEditing]);
@@ -152,8 +152,8 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
     onClose();
   }
 
-  const createdLabel = task?.criadoEm || '-';
-  const rawCreator = task ? task.creatorDisplayName || '' : '';
+  const createdLabel = task?.createdAt || '-';
+  const rawCreator = task ? task.creatorDisplayName || task.createdByName || '' : '';
   const creatorShort = rawCreator ? getShortName(rawCreator) : '';
   const creatorLabel = creatorShort || 'Nome do Criador';
   const projectLabel = projectName || task?.projectName || '';
@@ -215,8 +215,8 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
           <input
             className="modal-details-title task-input"
             type="text"
-            name="titulo"
-            value={formData.titulo}
+            name="title"
+            value={formData.title}
             onChange={handleChange}
             placeholder="Título da tarefa"
             required
@@ -229,8 +229,8 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
               <div className="select-wrapper">
                 <select
                   className="tag-select"
-                  name="prioridade"
-                  value={formData.prioridade}
+                  name="priority"
+                  value={formData.priority}
                   onChange={handleChange}
                 >
                   <option value="">Selecione</option>
@@ -248,8 +248,8 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
               <input
                 className="tag-select"
                 type="datetime-local"
-                name="dataEntrega"
-                value={formData.dataEntrega}
+                name="dueDate"
+                value={formData.dueDate}
                 onChange={handleChange}
               />
             </div>
@@ -332,8 +332,8 @@ export default function ModalTask({ task, onClose, onBack, projectId, projectNam
           {/* DESCRIPTION */}
           <textarea
             className="modal-details-description task-input"
-            name="descricao"
-            value={formData.descricao}
+            name="description"
+            value={formData.description}
             onChange={handleChange}
             placeholder="Digite uma descrição da tarefa aqui, cole imagens para facilitar a instrução."
           />

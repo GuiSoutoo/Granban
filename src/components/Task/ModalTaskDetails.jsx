@@ -47,12 +47,12 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
 
   if (!isOpen) return null;
 
-  const createdLabel = task.criadoEm || '-';
-  const rawCreator = String(task.creatorDisplayName || '').trim();
+  const createdLabel = task.createdAt || '-';
+  const rawCreator = String(task.creatorDisplayName || task.createdByName || '').trim();
   const creatorLabel = rawCreator ? getShortName(rawCreator) : '';
-  const deliveryLabel = task.dataEntrega
+  const deliveryLabel = task.dueDate
     ? (() => {
-        const date = new Date(task.dataEntrega);
+        const date = new Date(task.dueDate);
         const datePart = date.toLocaleDateString('pt-BR');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
@@ -123,12 +123,12 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
             </button>
           </div>
 
-          <div className="modal-details-title">{task.titulo || 'Sem título'}</div>
+          <div className="modal-details-title">{task.title || 'Sem título'}</div>
 
           <div className="modal-details-meta">
             <div className="modal-details-metaRow">
               <span className="modal-details-metaLabel">Prioridade</span>
-              <span className={`modal-details-metaValue priority-${(task.prioridade || '').replace(/\s+/g, '')}`}>{task.prioridade || '-'}</span>
+              <span className={`modal-details-metaValue priority-${(task.priority || '').replace(/\s+/g, '')}`}>{task.priority || '-'}</span>
             </div>
 
             <div className="modal-details-metaRow">
@@ -198,7 +198,7 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
           <div className="modal-details-divider" />
 
           <div className="modal-details-description">
-            {task.descricao || ''}
+            {task.description || ''}
           </div>
         </div>
       </div>

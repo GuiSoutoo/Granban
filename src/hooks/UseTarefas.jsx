@@ -31,17 +31,12 @@ export function useTarefa(projectId, projectName, currentUser) {
     if (cancelledRef.current) return;
 
     const effectiveMeta = meta || createEmptyMeta();
-    const requiresLookup = Boolean(
-      (effectiveMeta.executors && effectiveMeta.executors.size) ||
-      (effectiveMeta.creatorUsernames && effectiveMeta.creatorUsernames.size) ||
-      (effectiveMeta.creatorEmails && effectiveMeta.creatorEmails.size) ||
-      (effectiveMeta.creatorUids && effectiveMeta.creatorUids.size)
-    );
+    const requiresExecutorLookup = effectiveMeta.executors && effectiveMeta.executors.size > 0;
 
-    if (!requiresLookup) {
+    if (!requiresExecutorLookup) {
       setTarefas(
         list.map((task) =>
-          toPublicTask(task, task.executor, task.storedCreatorDisplayName)
+          toPublicTask(task, task.executor, task.createdByName)
         )
       );
       markLoaded?.();
@@ -51,20 +46,13 @@ export function useTarefa(projectId, projectName, currentUser) {
     const currentToken = ++requestTokenRef.current;
 
     try {
-      const { nameByUsername, nameByEmail, nameByUid } = await resolveUserMaps(effectiveMeta);
+      const { nameByUsername } = await resolveUserMaps(effectiveMeta);
       if (cancelledRef.current || currentToken !== requestTokenRef.current) return;
 
       setTarefas(
         list.map((task) => {
           const executorName = nameByUsername.get(task.executor) || task.executor;
-          const creatorName =
-            (task.rawCreator?.uid && nameByUid.get(task.rawCreator.uid)) ||
-            (task.rawCreator?.email && nameByEmail.get(task.rawCreator.email)) ||
-            (task.rawCreator?.username && nameByUsername.get(task.rawCreator.username)) ||
-            task.storedCreatorDisplayName ||
-            '';
-
-          return toPublicTask(task, executorName, creatorName);
+          return toPublicTask(task, executorName, task.createdByName);
         })
       );
       markLoaded?.();
@@ -73,7 +61,7 @@ export function useTarefa(projectId, projectName, currentUser) {
       if (!cancelledRef.current && currentToken === requestTokenRef.current) {
         setTarefas(
           list.map((task) =>
-            toPublicTask(task, task.executor, task.storedCreatorDisplayName)
+            toPublicTask(task, task.executor, task.createdByName)
           )
         );
         markLoaded?.();
@@ -97,9 +85,8 @@ export function useTarefa(projectId, projectName, currentUser) {
     const combinedMeta = {
       list: combinedList,
       executors: new Set([...personalMeta.executors, ...projectMeta.executors]),
-      creatorUsernames: new Set([...personalMeta.creatorUsernames, ...projectMeta.creatorUsernames]),
-      creatorEmails: new Set([...personalMeta.creatorEmails, ...projectMeta.creatorEmails]),
       creatorUids: new Set([...personalMeta.creatorUids, ...projectMeta.creatorUids]),
+      creatorNames: new Set([...personalMeta.creatorNames, ...projectMeta.creatorNames]),
     };
 
     applyList(combinedList, combinedMeta, () => setLoading(false));
@@ -199,7 +186,7 @@ export function useTarefa(projectId, projectName, currentUser) {
   }, [projectId, projectName, executorComparable.size, matchesCurrentUserTask, applyList, updateCombined]);
 
   const adicionarTarefa = async (dados, options) => {
-    if (!dados.titulo.trim()) {
+    if (!dados.title?.trim()) {
       alert("Por favor, digite um título");
       return;
     }
@@ -222,22 +209,20 @@ export function useTarefa(projectId, projectName, currentUser) {
       const creatorUsername = typeof currentUser?.username === 'string' ? currentUser.username.trim() : '';
       const creatorUid = typeof currentUser?.uid === 'string' ? currentUser.uid.trim() : '';
 
-      const creatorLabel = sanitizePublicLabel(creatorName) || sanitizePublicLabel(creatorUsername) || 'Usuário não identificado';
+      const creatorLabel = sanitizePublicLabel(creatorName) || sanitizePublicLabel(creatorUsername) || '';
 
       await addDoc(tarefasRef, {
-        titulo: dados.titulo,
+        title: dados.title,
+        taskId: newTaskId,
         status: dados.status || 'to-do',
-        tag: dados.tag || '',
         executor: dados.executor || '',
-        dataEntrega: dados.dataEntrega || '',
-        descricao: dados.descricao || '',
-        criadoEm: new Date(),
-        criador: creatorLabel || '',
-        criadorUid: creatorUid || '',
-        creatorDisplayName: creatorLabel,
-        prioridade: dados.prioridade || '',
-        TaskId: newTaskId,
-        ...(targetProjectId ? { projectId: targetProjectId, projectName: targetProjectName } : {}),
+        description: dados.description || '',
+        priority: dados.priority || '',
+        tag: dados.tag || '',
+        dueDate: dados.dueDate || '',
+        createdAt: new Date(),
+        createdByUid: creatorUid,
+        createdByName: creatorLabel,
       });
     } catch (error) {
       console.error("Erro ao adicionar tarefa:", error);
@@ -247,7 +232,7 @@ export function useTarefa(projectId, projectName, currentUser) {
   };
 
   const atualizarTarefa = async (id, dados, options) => {
-    if (!dados.titulo.trim()) {
+    if (!dados.title?.trim()) {
       alert("Por favor, digite um título");
       return;
     }
@@ -255,21 +240,19 @@ export function useTarefa(projectId, projectName, currentUser) {
     setLoading(true);
     try {
       const targetProjectId = resolveProjectId(projectId, options);
-      const targetProjectName = resolveProjectName(targetProjectId, projectName, options);
 
       const docRef = targetProjectId
         ? doc(db, 'projects', targetProjectId, 'tasks', id)
         : doc(db, 'tarefas', id);
+      
       await updateDoc(docRef, {
-        titulo: dados.titulo,
+        title: dados.title,
         status: dados.status || 'to-do',
-        tag: dados.tag || '',
         executor: dados.executor || '',
-        dataEntrega: dados.dataEntrega || '',
-        descricao: dados.descricao || '',
-        atualizadoEm: new Date(),
-        prioridade: dados.prioridade || '',
-        ...(targetProjectId ? { projectId: targetProjectId, projectName: targetProjectName } : {}),
+        description: dados.description || '',
+        priority: dados.priority || '',
+        tag: dados.tag || '',
+        dueDate: dados.dueDate || '',
       });
     } catch (error) {
       console.error("Erro ao atualizar tarefa:", error);
