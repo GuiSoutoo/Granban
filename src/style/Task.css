@@ -204,12 +204,6 @@
     font-weight: 700;
     margin: 0;
     line-height: 1.2;
-    transition: opacity 0.2s, text-decoration 0.2s;
-}
-
-.projectName:hover {
-    opacity: 0.8;
-    text-decoration: underline;
 }
 
 .cardTask p {

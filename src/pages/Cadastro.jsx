@@ -9,6 +9,7 @@ import UserIcon from '../assets/UserIconLogin.svg';
 import NicknameIcon from '../assets/NicknameIcon.svg';
 import EmailIconLogin from '../assets/EmailIconLogin.svg';
 import PasswordIcon from '../assets/PasswordIconLogin.svg';
+import InfoIcon from '../assets/InfoIcon.svg';
 
 
 export default function Cadastro() {
@@ -18,14 +19,23 @@ export default function Cadastro() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showNameInfo, setShowNameInfo] = useState(false);
+  const [showEmailInfo, setShowEmailInfo] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    if (password !== confirmPassword) {
+      setError('As senhas não coincidem');
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -62,10 +72,30 @@ export default function Cadastro() {
           ) : null}
 
           <form onSubmit={handleSubmit} className="cadastro-form">
-            <div className="mb-3">
+            <div className="mb-3 form-field-with-info">
               <label className="form-label">
-                <img src={UserIcon} alt="" /> nome
+                <img src={UserIcon} alt="" /> nome de exibição
+                <button
+                  type="button"
+                  className="info-icon-btn"
+                  onMouseEnter={() => setShowNameInfo(true)}
+                  onMouseLeave={() => setShowNameInfo(false)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowNameInfo(!showNameInfo);
+                  }}
+                  aria-label="Informação sobre nome de exibição"
+                >
+                  <img src={InfoIcon} alt="" className="info-icon" />
+                </button>
               </label>
+              {showNameInfo && (
+                <div className="info-tooltip">
+                  <div className="info-tooltip-arrow"></div>
+                  <strong>Atenção:</strong> O nome de exibição é público e será visível para outros usuários. 
+                  Não use seu nome verdadeiro completo. Prefira usar um apelido ou nome artístico.
+                </div>
+              )}
               <input
                 className="login-input"
                 type="text"
@@ -78,7 +108,7 @@ export default function Cadastro() {
 
             <div className="mb-3">
               <label className="form-label">
-                <img src={NicknameIcon} alt="" /> nome de usuário
+                <img src={NicknameIcon} alt="" /> usuário
               </label>
               <input
                 className="login-input"
@@ -90,10 +120,30 @@ export default function Cadastro() {
               />
             </div>
 
-            <div className="mb-3">
+            <div className="mb-3 form-field-with-info">
               <label className="form-label">
                 <img src={EmailIconLogin} alt="" /> e-mail
+                <button
+                  type="button"
+                  className="info-icon-btn"
+                  onMouseEnter={() => setShowEmailInfo(true)}
+                  onMouseLeave={() => setShowEmailInfo(false)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowEmailInfo(!showEmailInfo);
+                  }}
+                  aria-label="Informação sobre e-mail"
+                >
+                  <img src={InfoIcon} alt="" className="info-icon" />
+                </button>
               </label>
+              {showEmailInfo && (
+                <div className="info-tooltip">
+                  <div className="info-tooltip-arrow"></div>
+                  <strong>Aviso de Segurança:</strong> Este é um sistema experimental e pode estar sujeito a problemas de segurança. 
+                  Recomendamos usar um e-mail secundário ou menos importante para seu cadastro.
+                </div>
+              )}
               <input
                 className="login-input"
                 type="email"
@@ -113,6 +163,21 @@ export default function Cadastro() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                autoComplete="new-password"
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">
+                <img src={PasswordIcon} alt="" /> confirmar senha
+              </label>
+              <input
+                className="login-input"
+                type={showPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={6}
                 autoComplete="new-password"

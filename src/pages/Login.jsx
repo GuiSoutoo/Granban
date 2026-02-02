@@ -49,14 +49,15 @@ export default function Login() {
 
       <div className="login-container">
         <div className="login-left">
-          {error ? (
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
-          ) : null}
-
           <form onSubmit={handleSubmit} className="login-form">
             <h1>Login</h1>
+            
+            {error ? (
+              <div className="alert alert-danger" role="alert">
+                {error}
+              </div>
+            ) : null}
+
             <div className="mb-3">
               <label className="form-label">
                 <img src={UserIcon} alt="" /> email ou usuário

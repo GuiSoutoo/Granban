@@ -19,6 +19,45 @@ function normalizeEmail(value) {
   return String(value || '').trim().toLowerCase();
 }
 
+function censorEmail(email) {
+  const emailStr = String(email || '').trim();
+  if (!emailStr || !emailStr.includes('@')) return emailStr;
+  
+  const [localPart, domain] = emailStr.split('@');
+  
+  // Censura a parte local (antes do @)
+  let censoredLocal;
+  if (localPart.length <= 2) {
+    censoredLocal = '*'.repeat(localPart.length);
+  } else {
+    const firstChar = localPart[0];
+    const lastChar = localPart[localPart.length - 1];
+    const middleLength = localPart.length - 2;
+    censoredLocal = firstChar + '*'.repeat(Math.min(middleLength, 5)) + lastChar;
+  }
+  
+  // Censura o domínio (depois do @)
+  if (!domain || !domain.includes('.')) {
+    return `${censoredLocal}@${domain}`;
+  }
+  
+  const domainParts = domain.split('.');
+  const mainDomain = domainParts[0];
+  const extension = domainParts.slice(1).join('.');
+  
+  let censoredDomain;
+  if (mainDomain.length <= 2) {
+    censoredDomain = '*'.repeat(mainDomain.length);
+  } else {
+    const firstDomainChar = mainDomain[0];
+    const lastDomainChar = mainDomain[mainDomain.length - 1];
+    const domainMiddleLength = mainDomain.length - 2;
+    censoredDomain = firstDomainChar + '*'.repeat(Math.min(domainMiddleLength, 4)) + lastDomainChar;
+  }
+  
+  return `${censoredLocal}@${censoredDomain}.${extension}`;
+}
+
 export default function ModalManageTeam({
   open,
   onClose,
@@ -223,6 +262,7 @@ export default function ModalManageTeam({
               const photoURL = String(info?.photoURL || '').trim();
               const role = normalizeEmail(email) && normalizedOwnerEmail && normalizeEmail(email) === normalizedOwnerEmail ? 'Owner' : 'Executor';
               const disableDots = !isOwner;
+              const displayEmail = censorEmail(email);
 
               return (
                 <div key={email} className="modal-team-row">
@@ -234,7 +274,7 @@ export default function ModalManageTeam({
                     )}
                   </div>
                   <div className="modal-team-cell modal-team-cell--name">{name}</div>
-                  <div className="modal-team-cell modal-team-cell--email">{email}</div>
+                  <div className="modal-team-cell modal-team-cell--email">{displayEmail}</div>
                   <div className={`modal-team-role${role === 'Owner' ? ' modal-team-role--owner' : ''}`}>{role}</div>
                   <button
                     type="button"
@@ -329,7 +369,7 @@ export default function ModalManageTeam({
                   <>
                     <div className="modal-team-confirmTitle">Tornar owner?</div>
                     <div className="modal-team-confirmText">
-                      Você tem certeza que deseja tornar <strong>{confirmTarget}</strong> o novo owner do projeto?
+                      Você tem certeza que deseja tornar <strong>{censorEmail(confirmTarget)}</strong> o novo owner do projeto?
                     </div>
                     <div className="modal-team-confirmActions">
                       <button
@@ -354,7 +394,7 @@ export default function ModalManageTeam({
                   <>
                     <div className="modal-team-confirmTitle">Remover membro?</div>
                     <div className="modal-team-confirmText">
-                      Você tem certeza que deseja remover <strong>{confirmTarget}</strong> do projeto?
+                      Você tem certeza que deseja remover <strong>{censorEmail(confirmTarget)}</strong> do projeto?
                     </div>
                     <div className="modal-team-confirmActions">
                       <button

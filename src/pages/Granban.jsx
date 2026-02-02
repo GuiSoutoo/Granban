@@ -597,19 +597,19 @@ export default function Granban() {
               >
                 <span className="heading-threeDots" aria-hidden="true">•••</span>
               </button>
-              <button
-                type="button"
-                className="heading-btn"
-                aria-label="Adicionar membro"
-                title="Adicionar membro"
-                onClick={() => {
-                  if (!canInviteMembers) return;
-                  setInviteMemberOpen(true);
-                }}
-                disabled={!canInviteMembers}
-              >
-                <img src={AddMemberIcon} alt="" aria-hidden="true" />
-              </button>
+              {canInviteMembers ? (
+                <button
+                  type="button"
+                  className="heading-btn"
+                  aria-label="Adicionar membro"
+                  title="Adicionar membro"
+                  onClick={() => {
+                    setInviteMemberOpen(true);
+                  }}
+                >
+                  <img src={AddMemberIcon} alt="" aria-hidden="true" />
+                </button>
+              ) : null}
             </>
           ) : null}
           onFuncClick={canAddTask ? handleAddTask : undefined}

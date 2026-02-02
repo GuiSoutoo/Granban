@@ -111,6 +111,22 @@ async function findEmailByUsername(username) {
 }
 
 /**
+ * Valida a força da senha.
+ * @param {string} password 
+ * @returns {boolean}
+ */
+function validatePasswordStrength(password) {
+  if (!password || password.length < 6) {
+    return false;
+  }
+  
+  const hasLetter = /[a-zA-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  
+  return hasLetter && hasNumber;
+}
+
+/**
  * Cria conta no Firebase Auth + salva perfil no Firestore.
  * @param {{ name: string, username: string, email: string, password: string }} input
  */
@@ -121,6 +137,11 @@ export async function createAccount(input) {
   if (!username) throw new Error('username é obrigatório');
   if (!email) throw new Error('email é obrigatório');
   if (!password) throw new Error('password é obrigatório');
+  
+  // Validação de senha no backend
+  if (!validatePasswordStrength(password)) {
+    throw new Error('A senha deve ter pelo menos 6 caracteres, incluindo letras e números');
+  }
 
   const credential = await createUserWithEmailAndPassword(auth, email, password);
   const user = credential.user;
@@ -177,16 +198,41 @@ export async function login(input) {
 
   const raw = String(identifier).trim();
   const email = raw.includes('@') ? raw : await withTimeout(findEmailByUsername(raw), 15000, 'Busca de usuário demorou demais');
-  if (!email) throw new Error('Usuário não encontrado');
+  if (!email) throw new Error('Usuário ou senha incorretos');
 
-  const credential = await signInWithEmailAndPassword(auth, email, password);
-  // Best-effort: garante doc em users/{uid}, mas não impede login se Firestore estiver bloqueado.
   try {
-    await withTimeout(ensureUserDoc(credential.user), 15000, 'Firestore demorou demais');
-  } catch {
-    // ignore
+    const credential = await signInWithEmailAndPassword(auth, email, password);
+    // Best-effort: garante doc em users/{uid}, mas não impede login se Firestore estiver bloqueado.
+    try {
+      await withTimeout(ensureUserDoc(credential.user), 15000, 'Firestore demorou demais');
+    } catch {
+      // ignore
+    }
+    return credential.user;
+  } catch (err) {
+    // Interpreta erros do Firebase Auth
+    const errorCode = err?.code || '';
+    
+    if (
+      errorCode === 'auth/user-not-found' ||
+      errorCode === 'auth/wrong-password' ||
+      errorCode === 'auth/invalid-credential' ||
+      errorCode === 'auth/invalid-email'
+    ) {
+      throw new Error('Usuário ou senha incorretos');
+    }
+    
+    if (errorCode === 'auth/too-many-requests') {
+      throw new Error('Muitas tentativas de login. Tente novamente mais tarde');
+    }
+    
+    if (errorCode === 'auth/user-disabled') {
+      throw new Error('Esta conta foi desativada');
+    }
+    
+    // Erro genérico para outros casos
+    throw new Error(err?.message || 'Erro ao fazer login');
   }
-  return credential.user;
 }
 
 export async function logout() {

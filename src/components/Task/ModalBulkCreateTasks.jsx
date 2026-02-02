@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTarefa } from '../../hooks/UseTarefas';
 import '../../style/Modal.css';
 import '../../style/Task.css';
+import AddTaskIcon from '../../assets/NovaTarefaIcon.svg';
 
 const MAX_TASKS = 10;
 
@@ -164,33 +165,56 @@ export default function ModalBulkCreateTasks({
 
   return (
     <div className="modal-overlay">
-      <div className="modal-task-container modal-bulk-container">
-        <div className="modal-task-header">
-          <h2 className="modal-task-title">Criar tarefas em massa</h2>
-          <button
-            type="button"
-            className="modal-task-close"
-            onClick={onClose}
-            disabled={saving}
-            aria-label="Fechar"
-          >
-            ×
-          </button>
-        </div>
+      <div className="modal-details-wrap modal-bulk-wrap" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-details-card modal-bulk-card">
+          <div className="modal-details-header">
+            <div className="modal-details-headerLeft">
+              <div
+                className="modal-details-appIcon"
+                aria-hidden="true"
+                style={{ width: 50, height: 50 }}
+              >
+                <img
+                  src={AddTaskIcon}
+                  alt=""
+                  style={{ width: '80%', height: '80%', objectFit: 'contain' }}
+                />
+              </div>
+              <div className="modal-details-tagWrap">
+                <div className="modal-details-tag">
+                  <h4>Criar tarefas em massa</h4>
+                </div>
+                <div className="modal-details-project">
+                  {projectId ? (
+                    <>Projeto: {projectName || 'Sem nome'}</>
+                  ) : (
+                    <>Tarefas pessoais</>
+                  )}
+                </div>
+              </div>
+            </div>
 
-        <div className="modal-bulk-content">
-          <div className="modal-bulk-info">
-            {projectId ? (
-              <p className="modal-bulk-project">
-                Projeto: <strong>{projectName || 'Sem nome'}</strong>
-              </p>
-            ) : (
-              <p className="modal-bulk-project">Tarefas pessoais</p>
-            )}
-            <p className="modal-bulk-count">
-              {tasks.length} / {MAX_TASKS} tarefas
-            </p>
+            <button
+              type="button"
+              className="modal-details-closeBtn"
+              onClick={onClose}
+              disabled={saving}
+              aria-label="Fechar"
+              title="Fechar"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
           </div>
+
+          <div className="modal-bulk-content">
+            <div className="modal-bulk-info">
+              <p className="modal-bulk-count">
+                {tasks.length} / {MAX_TASKS} tarefas
+              </p>
+            </div>
 
           <div className="modal-bulk-table-wrapper">
             <table className="bulk-task-table">
@@ -223,32 +247,33 @@ export default function ModalBulkCreateTasks({
 
           {error && <p className="modal-bulk-error">{error}</p>}
 
-          <div className="modal-bulk-actions">
-            <button
-              type="button"
-              className="modal-bulk-btn modal-bulk-btn--add"
-              onClick={handleAdd}
-              disabled={!canAddMore || saving}
-            >
-              + Adicionar linha
-            </button>
-            <div className="modal-bulk-actions-right">
+            <div className="modal-bulk-actions">
               <button
                 type="button"
-                className="modal-bulk-btn modal-bulk-btn--cancel"
-                onClick={onClose}
-                disabled={saving}
+                className="modal-bulk-btn modal-bulk-btn--add"
+                onClick={handleAdd}
+                disabled={!canAddMore || saving}
               >
-                Cancelar
+                + Adicionar linha
               </button>
-              <button
-                type="button"
-                className="modal-bulk-btn modal-bulk-btn--save"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? 'Salvando...' : 'Criar tarefas'}
-              </button>
+              <div className="modal-bulk-actions-right">
+                <button
+                  type="button"
+                  className="modal-bulk-btn modal-bulk-btn--cancel"
+                  onClick={onClose}
+                  disabled={saving}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="modal-bulk-btn modal-bulk-btn--save"
+                  onClick={handleSave}
+                  disabled={saving}
+                >
+                  {saving ? 'Salvando...' : 'Criar tarefas'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
