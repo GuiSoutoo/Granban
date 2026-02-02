@@ -34,6 +34,13 @@
   outline: none;
 }
 
+/* Opções do select */
+.tag-select option {
+  background-color: #1f1f2e;
+  color: #ffffff;
+  padding: 8px;
+}
+
 /* Focus */
 .tag-select:focus {
   border-color: #c4b5fd;

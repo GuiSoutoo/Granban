@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import '../../style/Modal.css';
+import ModalConfirmDelete from './ModalConfirmDelete';
 
 import ChangeExecutorIcon from '../../assets/changeExecutorIcon.svg';
 import AlterIcon from '../../assets/TagIcon/AlterIcon.svg';
@@ -38,6 +39,8 @@ const getShortName = (fullName = '') => {
 export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onStatusChange }) {
   const isOpen = !!task;
   const [currentStatus, setCurrentStatus] = useState(task?.status || 'to-do');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (task?.status) {
@@ -64,10 +67,18 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
 
   const handleDelete = async () => {
     if (!task?.id) return;
-    const confirmed = window.confirm('Deseja excluir esta tarefa?');
-    if (!confirmed) return;
-    await onDelete?.(task);
-    onClose?.();
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!task?.id) return;
+    setDeleteLoading(true);
+    try {
+      await onDelete?.(task);
+      onClose?.();
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   return (
@@ -202,6 +213,15 @@ export default function ModalTaskDetails({ task, onClose, onEdit, onDelete, onSt
           </div>
         </div>
       </div>
+
+      {showDeleteConfirm && (
+        <ModalConfirmDelete
+          task={task}
+          isLoading={deleteLoading}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
     </div>
   );
 }
