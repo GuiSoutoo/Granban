@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Granban from './pages/Granban';
 import Projetos from './pages/Projetos';
 import InviteJoin from './pages/InviteJoin';
+import Configuracoes from './pages/Configuracoes';
 import RequireAuth from './routes/RequireAuth';
 
 export function AppRoutes(){
@@ -16,6 +17,7 @@ export function AppRoutes(){
         <Route path='/Granban' element={<RequireAuth><Granban/></RequireAuth>}/>
         <Route path='/Granban/:projectKey' element={<RequireAuth><Granban/></RequireAuth>}/>
         <Route path='/Projetos' element={<RequireAuth><Projetos/></RequireAuth>}/>
+        <Route path='/configuracoes' element={<RequireAuth><Configuracoes/></RequireAuth>}/>
         <Route path='/invite/:token' element={<RequireAuth><InviteJoin/></RequireAuth>}/>
         <Route path='/projetos' element={<Navigate to="/Projetos" replace />} />
       </Routes>

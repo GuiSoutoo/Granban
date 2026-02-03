@@ -14,6 +14,7 @@ import {
   updateDoc,
   serverTimestamp,
   runTransaction,
+  deleteDoc,
   deleteField,
 } from 'firebase/firestore';
 
@@ -96,6 +97,41 @@ async function reserveUsername(user, username) {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+  });
+}
+
+async function updateUsernameReservation(user, username, previousUsername) {
+  const rawUsername = (username || '').trim();
+  const usernameLower = normalizeUsername(rawUsername);
+  if (!rawUsername || !usernameLower) return;
+
+  const prevLower = normalizeUsername(previousUsername);
+  const newRef = usernameDocRef(usernameLower);
+
+  await runTransaction(db, async (tx) => {
+    const existing = await tx.get(newRef);
+    if (existing.exists()) {
+      const existingUid = existing.data()?.uid;
+      if (existingUid && existingUid !== user.uid) {
+        throw new Error('Nome de usuário já está em uso');
+      }
+    }
+
+    tx.set(newRef, {
+      uid: user.uid,
+      email: user.email || null,
+      username: rawUsername,
+      updatedAt: serverTimestamp(),
+      createdAt: existing.exists() ? (existing.data()?.createdAt || serverTimestamp()) : serverTimestamp(),
+    }, { merge: true });
+
+    if (prevLower && prevLower !== usernameLower) {
+      const prevRef = usernameDocRef(prevLower);
+      const prevSnap = await tx.get(prevRef);
+      if (prevSnap.exists() && prevSnap.data()?.uid === user.uid) {
+        tx.delete(prevRef);
+      }
+    }
   });
 }
 
@@ -265,13 +301,17 @@ export async function getUserProfile(uid) {
  * @param {{ uid: string, username?: string }} input
  */
 export async function updateUserProfile(input) {
-  const { uid, username } = input || {};
+  const { uid, username, name, previousUsername } = input || {};
   if (!uid) throw new Error('uid é obrigatório');
 
   const updates = {};
 
   if (typeof username === 'string' && username.trim()) {
     updates.username = username.trim();
+  }
+
+  if (typeof name === 'string' && name.trim()) {
+    updates.name = name.trim();
   }
 
   if (Object.keys(updates).length === 0) return;
@@ -283,9 +323,52 @@ export async function updateUserProfile(input) {
   const current = auth.currentUser;
   if (current && current.uid === uid) {
     await updateProfile(current, {
-      displayName: updates.username ?? current.displayName ?? undefined,
+      displayName: updates.name ?? current.displayName ?? undefined,
     });
+    if (typeof updates.username === 'string') {
+      try {
+        await updateUsernameReservation(current, updates.username, previousUsername);
+      } catch (err) {
+        const code = err?.code || '';
+        const message = String(err?.message || '').toLowerCase();
+        if (code === 'permission-denied' || message.includes('insufficient permissions')) {
+          // Ignora falta de permissão na coleção usernames
+        } else {
+          throw err;
+        }
+      }
+    }
   }
+}
+
+/**
+ * Exclui a conta do usuário atual (Firestore + Auth)
+ * @param {{ uid: string, username?: string }} input
+ */
+export async function deleteUserAccount(input) {
+  const { uid, username } = input || {};
+  if (!uid) throw new Error('uid é obrigatório');
+
+  const current = auth.currentUser;
+  if (!current || current.uid !== uid) throw new Error('Usuário não autenticado');
+
+  const usernameLower = normalizeUsername(username);
+
+  try {
+    await deleteDoc(userDocRef(uid));
+  } catch {
+    // best-effort
+  }
+
+  if (usernameLower) {
+    try {
+      await deleteDoc(usernameDocRef(usernameLower));
+    } catch {
+      // best-effort
+    }
+  }
+
+  await deleteUser(current);
 }
 
 /**
@@ -326,4 +409,5 @@ export const authBackend = {
   getUserProfile,
   updateUserProfile,
   updateUserPhoto,
+  deleteUserAccount,
 };

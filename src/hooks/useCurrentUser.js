@@ -28,11 +28,13 @@ export function useCurrentUser() {
         const username = typeof profile?.username === 'string' ? profile.username.trim() : '';
         const name = typeof profile?.name === 'string' ? profile.name.trim() : (user.displayName || user.email || '');
 
+        const photoURL = typeof profile?.photoURL === 'string' ? profile.photoURL : (user.photoURL || '');
         setUserProfile({
           uid: user.uid,
           email: user.email || '',
           username,
           name,
+          photoURL,
         });
       } catch {
         if (cancelled) return;
@@ -41,6 +43,7 @@ export function useCurrentUser() {
           email: user.email || '',
           username: '',
           name: user.displayName || user.email || '',
+          photoURL: user.photoURL || '',
         });
       } finally {
         if (!cancelled) setLoading(false);

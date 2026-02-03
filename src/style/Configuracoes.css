@@ -1,0 +1,518 @@
+/* ==================== CONFIGURAÇÕES ==================== */
+
+.configuracoes-container {
+  display: flex;
+  min-height: calc(100vh - 64px);
+  background: #0a0015;
+  color: #ffffff;
+}
+
+/* ==================== SIDEBAR ==================== */
+
+.configuracoes-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  background: linear-gradient(180deg, #1a0033 0%, #140026 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2rem 0;
+  gap: 0.5rem;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.sidebar-item__icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.sidebar-item__label {
+  flex: 1;
+}
+
+.sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.sidebar-item.active {
+  background: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+  border-right: 3px solid #8b5cf6;
+}
+
+.sidebar-item--exit {
+  margin-top: auto;
+  color: #ef4444;
+}
+
+.sidebar-item--exit:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ff6b6b;
+}
+
+/* ==================== MAIN CONTENT ==================== */
+
+.configuracoes-main {
+  flex: 1;
+  padding: 3rem;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.configuracoes-main__content {
+  width: 100%;
+  max-width: 900px;
+}
+
+.configuracoes-header {
+  margin-bottom: 2rem;
+}
+
+.configuracoes-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.configuracoes-title__icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.configuracoes-title__heading {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.configuracoes-title__subtitle {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0.25rem 0 0 0;
+}
+
+.configuracoes-instruction {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 2.5rem;
+  line-height: 1.5;
+}
+
+/* ==================== CARDS ==================== */
+
+.configuracoes-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  max-width: 800px;
+}
+
+.config-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #6c5ce7 0%, #8b5cf6 100%);
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 2rem;
+}
+
+.config-card__icon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  filter: brightness(1.2);
+}
+
+.config-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(139, 92, 246, 0.3);
+}
+
+.config-card:active {
+  transform: translateY(-2px);
+}
+
+/* ==================== CONTEÚDO DE CONFIGURAÇÃO ==================== */
+
+.config-content {
+  max-width: 600px;
+}
+
+.config-content-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.config-content-header__icon {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.config-content-header__title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.config-content-header__subtitle {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0.25rem 0 0 0;
+}
+
+.config-section {
+  margin-bottom: 2.5rem;
+}
+
+.config-section__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: #ffffff;
+}
+
+.config-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.config-option:last-child {
+  border-bottom: none;
+}
+
+.config-option__label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* ==================== TOGGLE SWITCH ==================== */
+
+.config-toggle {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  border-radius: 13px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  padding: 0;
+}
+
+.config-toggle.active {
+  background: #8b5cf6;
+}
+
+.config-toggle__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+.config-toggle.active .config-toggle__thumb {
+  transform: translateX(22px);
+}
+
+.config-toggle.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==================== SELECT ==================== */
+
+.config-select {
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  color: #ffffff;
+  padding: 0.65rem 2.5rem 0.65rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  transition: all 0.2s ease;
+}
+
+.config-select:hover {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: rgba(139, 92, 246, 0.7);
+}
+
+.config-select:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.config-select option {
+  background: #1a0033;
+  color: #ffffff;
+}
+
+/* ==================== INPUTS E AÇÕES ==================== */
+
+.config-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  width: 220px;
+  transition: all 0.2s ease;
+}
+
+.config-input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.config-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.config-avatar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.config-avatar__image,
+.config-avatar__fallback {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.config-avatar__image {
+  object-fit: cover;
+}
+
+.config-avatar__button {
+  background: rgba(139, 92, 246, 0.2);
+  color: #ffffff;
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.config-avatar__button:hover {
+  background: rgba(139, 92, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.config-avatar__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.config-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.config-message {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.config-message--success {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #86efac;
+}
+
+.config-message--error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fecaca;
+}
+
+.config-save {
+  background: #8b5cf6;
+  color: #ffffff;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.config-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+}
+
+.config-danger {
+  background: transparent;
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  padding: 0.7rem 1.4rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.config-danger:hover {
+  background: rgba(248, 113, 113, 0.15);
+  color: #fecaca;
+}
+
+/* ==================== SCROLLBAR ==================== */
+
+.configuracoes-main {
+  scrollbar-width: thin;
+  scrollbar-color: #8A70B3 transparent;
+}
+
+.configuracoes-main::-webkit-scrollbar {
+  width: 6px;
+}
+
+.configuracoes-main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.configuracoes-main::-webkit-scrollbar-thumb {
+  background-color: #8A70B3;
+  border-radius: 10px;
+}
+
+.configuracoes-main::-webkit-scrollbar-thumb:hover {
+  background-color: #5F4588;
+}
+
+/* ==================== RESPONSIVO ==================== */
+
+@media (max-width: 768px) {
+  .configuracoes-container {
+    flex-direction: column;
+  }
+
+  .configuracoes-sidebar {
+    width: 100%;
+    flex-direction: row;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-x: auto;
+    padding: 1rem;
+    gap: 0;
+  }
+
+  .sidebar-item {
+    min-width: 120px;
+    padding: 0.75rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+    border-right: none !important;
+    border-bottom: 3px solid transparent;
+  }
+
+  .sidebar-item.active {
+    border-bottom: 3px solid #8b5cf6;
+    border-right: none;
+  }
+
+  .sidebar-item__label {
+    font-size: 0.75rem;
+  }
+
+  .sidebar-item--exit {
+    margin-top: 0;
+    margin-left: auto;
+  }
+
+  .configuracoes-main {
+    padding: 1.5rem 1rem;
+  }
+
+  .configuracoes-title__heading {
+    font-size: 1.5rem;
+  }
+
+  .configuracoes-cards {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+
+  .config-card {
+    padding: 1.5rem;
+  }
+
+  .config-card__icon {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .configuracoes-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .configuracoes-title {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .configuracoes-title__icon {
+    width: 40px;
+    height: 40px;
+  }
+}

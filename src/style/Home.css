@@ -54,6 +54,29 @@
   padding-bottom: 1rem;
 }
 
+.home-tasks-groups {
+  scrollbar-width: thin;
+  scrollbar-color: #8A70B3 transparent;
+}
+
+.home-tasks-groups::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.home-tasks-groups::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.home-tasks-groups::-webkit-scrollbar-thumb {
+  background-color: #8A70B3;
+  border-radius: 10px;
+}
+
+.home-tasks-groups::-webkit-scrollbar-thumb:hover {
+  background-color: #5F4588;
+}
+
 .home-tasks-group {
   flex-shrink: 0;
 }

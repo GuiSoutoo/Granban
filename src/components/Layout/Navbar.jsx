@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import logo from '../../assets/GranbanLogoIcon.svg'
 import DropmenuIcon from '../../assets/DropmenuIcon.svg'
+import ConfigIcon from '../../assets/ConfigIcon.svg'
 import '../../style/Navbar.css'
 import Avatar from './Avatar.jsx';
 import { NavLink } from 'react-router-dom';
@@ -53,6 +54,14 @@ export function Navbar() {
             >
               <img src={DropmenuIcon} alt="Menu" />
             </button>
+            <NavLink
+              to="/configuracoes"
+              className="navbar-config"
+              aria-label="Configurações"
+              title="Configurações"
+            >
+              <img src={ConfigIcon} alt="" />
+            </NavLink>
             <Avatar />
           </div>
         </div>

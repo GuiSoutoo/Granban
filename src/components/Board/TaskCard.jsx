@@ -57,6 +57,59 @@ function formatarTempoDecorrido(dataString) {
   return `Há ${dias} dias`;
 }
 
+function formatarDataPrazo(value) {
+  if (!value) return '-';
+
+  if (typeof value?.toDate === 'function') {
+    const d = value.toDate();
+    if (d instanceof Date && !Number.isNaN(d.getTime())) {
+      return d.toLocaleDateString('pt-BR');
+    }
+  }
+
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toLocaleDateString('pt-BR');
+  }
+
+  const str = String(value).trim();
+  if (!str) return '-';
+
+  const cleaned = str.split('T')[0].split(' ')[0];
+
+  if (cleaned.includes('-')) {
+    const parts = cleaned.split('-');
+    if (parts.length >= 3) {
+      const year = Number(parts[0]);
+      const month = Number(parts[1]);
+      const day = Number(parts[2]);
+      if (day && month && year) {
+        const localDate = new Date(year, month - 1, day);
+        return localDate.toLocaleDateString('pt-BR');
+      }
+    }
+  }
+
+  if (cleaned.includes('/')) {
+    const parts = cleaned.split('/');
+    if (parts.length >= 3) {
+      const day = Number(parts[0]);
+      const month = Number(parts[1]);
+      const year = Number(parts[2]);
+      if (day && month && year) {
+        const localDate = new Date(year, month - 1, day);
+        return localDate.toLocaleDateString('pt-BR');
+      }
+    }
+  }
+
+  const fallback = new Date(str);
+  if (!Number.isNaN(fallback.getTime())) {
+    return fallback.toLocaleDateString('pt-BR');
+  }
+
+  return str;
+}
+
 export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenReview, isMoving, isExpanded = true, showOnlyTitle = false, onCardClick, hideDetailsButton = false }) {
   const { atualizarStatusTarefa } = useTarefa();
   const navigate = useNavigate();
@@ -161,7 +214,7 @@ export function TaskCard({ task, index, onDelete, onEdit, onOpenDetails, onOpenR
         <div className="infoTask">
           <div className="headerTop">
             <p className="tagName">{task.tag}</p>
-            <p className="deliveryDate">{task.dueDate ? new Date(task.dueDate).toLocaleDateString('pt-BR') : '-'}</p>
+            <p className="deliveryDate">{formatarDataPrazo(task.dueDate)}</p>
           </div>
           <h5 
             className="projectName" 
