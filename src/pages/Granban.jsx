@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Column } from '../components/Board/Column';
 import { useTarefa } from '../hooks/UseTarefas';
 import { COLUNAS } from '../constants/boardConfig';
@@ -491,7 +492,7 @@ export default function Granban() {
   }, [projectOptionsOpen]);
 
   useEffect(() => {
-    const lockScroll = projectOptionsOpen || confirmLeaveOpen || manageTeamOpen;
+    const lockScroll = confirmLeaveOpen || manageTeamOpen;
     if (!lockScroll) return;
 
     const body = document.body;
@@ -506,7 +507,7 @@ export default function Granban() {
       body.style.overflow = prevOverflow;
       body.style.paddingRight = prevPaddingRight;
     };
-  }, [projectOptionsOpen, confirmLeaveOpen, manageTeamOpen]);
+  }, [confirmLeaveOpen, manageTeamOpen]);
 
   const handleLeaveProject = async () => {
     if (!projectId) return;
@@ -617,37 +618,40 @@ export default function Granban() {
           isCompact={compactCards}
         />
 
-        {projectId && projectOptionsOpen ? (
-          <div
-            className="project-optionsMenu"
-            role="dialog"
-            aria-label="Opções do projeto"
-            style={{ top: projectOptionsPos.top, left: projectOptionsPos.left }}
-            ref={projectOptionsMenuRef}
-          >
-            <button
-              type="button"
-              className="project-optionsMenu__item"
-              onClick={() => {
-                setProjectOptionsOpen(false);
-                setManageTeamOpen(true);
-              }}
-            >
-              Gerenciar equipe
-            </button>
-            <div className="project-optionsMenu__divider" aria-hidden="true" />
-            <button
-              type="button"
-              className="project-optionsMenu__item project-optionsMenu__item--danger"
-              onClick={() => {
-                setProjectOptionsOpen(false);
-                setConfirmLeaveOpen(true);
-              }}
-            >
-              Se retirar do projeto
-            </button>
-          </div>
-        ) : null}
+        {projectId && projectOptionsOpen && typeof document !== 'undefined'
+          ? createPortal(
+              <div
+                className="project-optionsMenu project-optionsMenu--projectDots"
+                role="dialog"
+                aria-label="Opções do projeto"
+                style={{ position: 'fixed', top: projectOptionsPos.top, left: projectOptionsPos.left }}
+                ref={projectOptionsMenuRef}
+              >
+                <button
+                  type="button"
+                  className="project-optionsMenu__item"
+                  onClick={() => {
+                    setProjectOptionsOpen(false);
+                    setManageTeamOpen(true);
+                  }}
+                >
+                  Gerenciar equipe
+                </button>
+                <div className="project-optionsMenu__divider" aria-hidden="true" />
+                <button
+                  type="button"
+                  className="project-optionsMenu__item project-optionsMenu__item--danger"
+                  onClick={() => {
+                    setProjectOptionsOpen(false);
+                    setConfirmLeaveOpen(true);
+                  }}
+                >
+                  Se retirar do projeto
+                </button>
+              </div>,
+              document.body
+            )
+          : null}
 
         <ModalManageTeam
           open={projectId && manageTeamOpen}
