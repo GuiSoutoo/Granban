@@ -311,6 +311,15 @@
     z-index: 1200;
 }
 
+/* Specific to the 3-dots menu inside a project.
+   Ensures it never scrolls with the page due to CSS containing blocks. */
+.project-optionsMenu--projectDots {
+    margin: 0;
+    max-height: calc(100vh - 24px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 .project-optionsMenu__item {
     width: 100%;
     background: transparent;
