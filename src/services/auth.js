@@ -16,6 +16,11 @@ import {
   runTransaction,
   deleteDoc,
   deleteField,
+  collectionGroup,
+  query,
+  where,
+  getDocs,
+  writeBatch,
 } from 'firebase/firestore';
 
 const USERS_COLLECTION = 'users';
@@ -42,6 +47,61 @@ function usernameDocRef(usernameLower) {
 function normalizeUsername(username) {
   const value = (username || '').trim();
   return value ? value.toLowerCase() : '';
+}
+
+async function updateTasksWithNewName(uid, oldName, newName) {
+  if (!oldName || !newName || oldName === newName) return;
+
+  try {
+    const q = query(collectionGroup(db, 'tasks'), where('createdByUid', '==', uid));
+    const snapshot = await getDocs(q);
+    
+    console.log(`Buscando tarefas com createdByUid=${uid}. Encontradas: ${snapshot.size}`);
+    
+    if (snapshot.empty) {
+      console.log('Nenhuma tarefa encontrada para atualizar.');
+      return;
+    }
+
+    const batch = writeBatch(db);
+    let updateCount = 0;
+    
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const updates = {};
+      
+      if (data?.createdByName === oldName) {
+        updates.createdByName = newName;
+        updateCount++;
+      }
+      if (data?.executorName === oldName) {
+        updates.executorName = newName;
+        updateCount++;
+      }
+      
+      if (Object.keys(updates).length > 0) {
+        console.log(`Atualizando tarefa ${docSnap.id}:`, updates);
+        batch.update(docSnap.ref, updates);
+      }
+    });
+
+    if (updateCount === 0) {
+      console.log('Nenhum campo para atualizar nas tarefas.');
+      return;
+    }
+
+    console.log(`Total de campos a atualizar: ${updateCount}`);
+    await batch.commit();
+    console.log('Tarefas atualizadas com sucesso.');
+  } catch (err) {
+    const code = err?.code || '';
+    if (code === 'permission-denied') {
+      console.warn('Permissão insuficiente para atualizar tarefas. Continuando mesmo assim.');
+    } else {
+      console.error('Erro ao atualizar tarefas:', err);
+    }
+    // Sempre continua, independente do erro
+  }
 }
 
 async function ensureUserDoc(user, extras = {}) {
@@ -317,10 +377,22 @@ export async function updateUserProfile(input) {
   if (Object.keys(updates).length === 0) return;
 
   updates.updatedAt = serverTimestamp();
+
+  // Atualiza nome em tarefas se o nome mudou
+  const current = auth.currentUser;
+  if (current && current.uid === uid && typeof updates.name === 'string') {
+    const oldName = current.displayName || '';
+    if (oldName && updates.name !== oldName) {
+      // best-effort: não bloqueia o salvamento do perfil se falhar
+      updateTasksWithNewName(uid, oldName, updates.name).catch((err) => {
+        console.error('Falha ao atualizar tarefas (continuando):', err);
+      });
+    }
+  }
+
   await updateDoc(userDocRef(uid), updates);
 
   // Se o usuário logado for o mesmo, sincroniza com Auth profile também.
-  const current = auth.currentUser;
   if (current && current.uid === uid) {
     await updateProfile(current, {
       displayName: updates.name ?? current.displayName ?? undefined,

@@ -66,6 +66,7 @@ export function useProfileSettings(profile) {
       });
       setSuccess('Alterações salvas.');
     } catch (err) {
+      console.error('Erro ao salvar perfil:', err);
       setError(toPtError(err));
     } finally {
       setSaving(false);
