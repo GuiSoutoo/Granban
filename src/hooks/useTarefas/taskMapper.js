@@ -23,13 +23,26 @@ export const buildTask = (taskDoc, fallbackProjectId = '', fallbackProjectName =
 
   // Formata data de criação
   let createdAt = '';
+  let createdAtMs = 0;
   const rawCreatedAt = data.createdAt || data.criadoEm;
   if (rawCreatedAt) {
     try {
       const date = typeof rawCreatedAt.toDate === 'function' ? rawCreatedAt.toDate() : new Date(rawCreatedAt);
-      createdAt = date.toLocaleDateString();
+      if (date instanceof Date && !Number.isNaN(date.getTime())) createdAtMs = date.getTime();
+      createdAt = date.toLocaleDateString('pt-BR');
     } catch {
       createdAt = '';
+    }
+  }
+
+  // Normaliza dueDate para facilitar filtros/ordenação (ms desde epoch)
+  let dueDateMs = 0;
+  if (dueDate) {
+    try {
+      const dueRaw = typeof dueDate?.toDate === 'function' ? dueDate.toDate() : new Date(dueDate);
+      if (dueRaw instanceof Date && !Number.isNaN(dueRaw.getTime())) dueDateMs = dueRaw.getTime();
+    } catch {
+      dueDateMs = 0;
     }
   }
 
@@ -44,7 +57,9 @@ export const buildTask = (taskDoc, fallbackProjectId = '', fallbackProjectName =
     priority,
     taskId,
     dueDate,
+    dueDateMs,
     createdAt,
+    createdAtMs,
     createdByUid,
     createdByName,
     projectId: parentProjectId,

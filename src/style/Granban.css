@@ -301,7 +301,7 @@
 
 /* ==================== PROJECT OPTIONS MENU (3 PONTINHOS) ==================== */
 .project-optionsMenu {
-    position: fixed;
+    position: absolute;
     width: 260px;
     border-radius: 14px;
     background: linear-gradient(180deg, #3b1f62 0%, #2e174f 100%);
@@ -343,6 +343,148 @@
 
 .project-optionsMenu__item--danger {
     color: #ff7b7b;
+}
+
+/* ==================== HEADING FILTER / ORDER DROPDOWNS ==================== */
+.heading-dropdownMenu {
+    position: absolute;
+    width: 340px;
+    max-width: calc(100vw - 24px);
+    border-radius: 14px;
+    background: linear-gradient(180deg, #3b1f62 0%, #2e174f 100%);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    overflow: hidden;
+    z-index: 1210;
+}
+
+.heading-dropdownMenu--order {
+    width: 300px;
+}
+
+.heading-dropdownMenu__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 12px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.heading-dropdownMenu__title {
+    color: rgba(255, 255, 255, 0.94);
+    font-weight: 900;
+    letter-spacing: 0.2px;
+}
+
+.heading-dropdownMenu__close {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 10px;
+}
+
+.heading-dropdownMenu__close:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.heading-dropdownMenu__section {
+    padding: 12px 12px 0;
+}
+
+.heading-dropdownMenu__label {
+    color: rgba(255, 255, 255, 0.78);
+    font-weight: 800;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+}
+
+.heading-dropdownMenu__select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 10px 10px;
+    color: rgba(255, 255, 255, 0.92);
+    outline: none;
+    color-scheme: dark;
+}
+
+/* Alguns browsers usam menu nativo branco para <option>. */
+.heading-dropdownMenu__select option,
+.heading-dropdownMenu__select optgroup {
+    background-color: #2e174f;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.heading-dropdownMenu__checks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 10px;
+}
+
+.heading-dropdownMenu__checks--tags {
+    grid-template-columns: 1fr;
+    max-height: 220px;
+    overflow: auto;
+    padding-right: 4px;
+}
+
+.heading-dropdownMenu__check,
+.heading-dropdownMenu__radio {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.88);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.heading-dropdownMenu__check input,
+.heading-dropdownMenu__radio input {
+    accent-color: #b36bff;
+}
+
+.heading-dropdownMenu__hint {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 13px;
+    padding: 2px 0 8px;
+}
+
+.heading-dropdownMenu__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 12px;
+    margin-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.heading-dropdownMenu__btn {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.heading-dropdownMenu__btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.heading-dropdownMenu__btn--primary {
+    background: rgba(179, 107, 255, 0.22);
+    color: rgba(255, 255, 255, 0.96);
+}
+
+.heading-dropdownMenu__btn--primary:hover {
+    background: rgba(179, 107, 255, 0.32);
 }
 
 /* ==================== LEAVE PROJECT CONFIRM MODAL ==================== */

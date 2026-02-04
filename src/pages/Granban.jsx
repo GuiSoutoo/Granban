@@ -145,6 +145,7 @@ export default function Granban() {
   }, [projectKey, initialProjectId, projectId]);
 
   const {
+    tarefas,
     loading,
     excluirTarefa,
     atualizarStatusTarefa,
@@ -159,12 +160,31 @@ export default function Granban() {
   const [movingTaskId, setMovingTaskId] = useState(null);
   const [compactCards, setCompactCards] = useState(false);
 
+  const [searchValue, setSearchValue] = useState('');
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+  const [filterMenuPos, setFilterMenuPos] = useState({ top: 0, left: 0 });
+  const filterMenuRef = useRef(null);
+  const filterAnchorRef = useRef(null);
+  const [orderMenuOpen, setOrderMenuOpen] = useState(false);
+  const [orderMenuPos, setOrderMenuPos] = useState({ top: 0, left: 0 });
+  const orderMenuRef = useRef(null);
+  const orderAnchorRef = useRef(null);
+
+  const [filters, setFilters] = useState({
+    dueRange: 'all',
+    priorities: [],
+    executor: 'all',
+    tags: [],
+  });
+
+  const [sortKey, setSortKey] = useState('default');
+
   useEffect(() => {
     if (loading) return;
     if (!openTaskKey && !openTaskId) return;
     if (detailsTask) return;
 
-    const allTasks = COLUNAS.flatMap((col) => getTarefasPorColuna?.(col.id) || []);
+    const allTasks = Array.isArray(tarefas) ? tarefas : [];
     const found = allTasks.find((task) => {
       if (openTaskKey) return task.uniqueKey === openTaskKey;
       if (openTaskProjectId) return task.id === openTaskId && task.projectId === openTaskProjectId;
@@ -182,12 +202,207 @@ export default function Granban() {
     openTaskId,
     openTaskProjectId,
     detailsTask,
-    getTarefasPorColuna,
+    tarefas,
     projectId,
     projectName,
     location.pathname,
     navigate,
   ]);
+
+  const priorityRank = (value) => {
+    const normalized = String(value || '').trim().toLowerCase();
+    if (normalized === 'urgente') return 4;
+    if (normalized === 'alta') return 3;
+    if (normalized === 'média' || normalized === 'media') return 2;
+    if (normalized === 'baixa') return 1;
+    return 0;
+  };
+
+  const normalizeStr = (value) => String(value || '').trim().toLowerCase();
+
+  const parseBrDateToMs = (value) => {
+    const str = String(value || '').trim();
+    if (!str) return 0;
+    const parts = str.split('/');
+    if (parts.length !== 3) return 0;
+    const day = Number(parts[0]);
+    const month = Number(parts[1]);
+    const year = Number(parts[2]);
+    if (!day || !month || !year) return 0;
+    const d = new Date(year, month - 1, day);
+    const ms = d.getTime();
+    return Number.isNaN(ms) ? 0 : ms;
+  };
+
+  const executorOptions = useMemo(() => {
+    const list = Array.isArray(tarefas) ? tarefas : [];
+    const byKey = new Map();
+    list.forEach((t) => {
+      const key = String(t?.executor || '').trim();
+      if (!key) return;
+      const label = String(t?.executorName || t?.executor || '').trim();
+      if (!byKey.has(key)) byKey.set(key, label || key);
+    });
+
+    return Array.from(byKey.entries())
+      .map(([key, label]) => ({ key, label }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR', { sensitivity: 'base' }));
+  }, [tarefas]);
+
+  const tagOptions = useMemo(() => {
+    const list = Array.isArray(tarefas) ? tarefas : [];
+    const set = new Set();
+    list.forEach((t) => {
+      const tag = String(t?.tag || '').trim();
+      if (tag) set.add(tag);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+  }, [tarefas]);
+
+  const visibleSortedTasks = useMemo(() => {
+    const list = Array.isArray(tarefas) ? tarefas : [];
+    const search = normalizeStr(searchValue);
+    const now = Date.now();
+    const end7d = now + 7 * 24 * 60 * 60 * 1000;
+    const end30d = now + 30 * 24 * 60 * 60 * 1000;
+
+    const selectedPriorities = Array.isArray(filters.priorities) ? filters.priorities : [];
+    const prioritiesActive = selectedPriorities.length > 0;
+    const selectedTags = Array.isArray(filters.tags) ? filters.tags.map((t) => normalizeStr(t)) : [];
+    const tagsActive = selectedTags.length > 0;
+
+    const matches = (task) => {
+      if (!task) return false;
+
+      if (search) {
+        const haystack = [
+          task.title,
+          task.description,
+          task.taskId,
+          task.projectName,
+          task.tag,
+          task.executorName,
+          task.executor,
+        ]
+          .map((v) => normalizeStr(v))
+          .filter(Boolean)
+          .join(' ');
+        if (!haystack.includes(search)) return false;
+      }
+
+      if (filters.dueRange && filters.dueRange !== 'all') {
+        const dueMs = Number(task.dueDateMs || 0);
+        if (!dueMs) return false;
+        if (filters.dueRange === 'overdue') {
+          if (dueMs >= now) return false;
+        } else if (filters.dueRange === '7d') {
+          if (dueMs < now || dueMs > end7d) return false;
+        } else if (filters.dueRange === '30d') {
+          if (dueMs < now || dueMs > end30d) return false;
+        }
+      }
+
+      if (prioritiesActive) {
+        if (!selectedPriorities.includes(task.priority || '')) return false;
+      }
+
+      if (projectId && filters.executor && filters.executor !== 'all') {
+        const execKey = String(task.executor || '').trim();
+        if (filters.executor === 'none') {
+          if (execKey) return false;
+        } else {
+          if (execKey !== filters.executor) return false;
+        }
+      }
+
+      if (tagsActive) {
+        const taskTag = normalizeStr(task.tag);
+        if (!selectedTags.includes(taskTag)) return false;
+      }
+
+      return true;
+    };
+
+    const compareDefault = (a, b) => {
+      const pr = priorityRank(b?.priority) - priorityRank(a?.priority);
+      if (pr !== 0) return pr;
+
+      const aMs = Number(a?.createdAtMs || 0) || parseBrDateToMs(a?.createdAt);
+      const bMs = Number(b?.createdAtMs || 0) || parseBrDateToMs(b?.createdAt);
+      if (aMs !== bMs) return aMs - bMs;
+
+      const at = String(a?.title || '');
+      const bt = String(b?.title || '');
+      return at.localeCompare(bt, 'pt-BR', { sensitivity: 'base' });
+    };
+
+    const compare = (a, b) => {
+      if (sortKey === 'default') return compareDefault(a, b);
+
+      if (sortKey === 'priority') {
+        const pr = priorityRank(b?.priority) - priorityRank(a?.priority);
+        if (pr !== 0) return pr;
+        return compareDefault(a, b);
+      }
+
+      if (sortKey === 'title') {
+        const at = String(a?.title || '');
+        const bt = String(b?.title || '');
+        const cmp = at.localeCompare(bt, 'pt-BR', { sensitivity: 'base' });
+        if (cmp !== 0) return cmp;
+        return compareDefault(a, b);
+      }
+
+      if (sortKey === 'executor') {
+        const ae = String(a?.executorName || a?.executor || '');
+        const be = String(b?.executorName || b?.executor || '');
+        const cmp = ae.localeCompare(be, 'pt-BR', { sensitivity: 'base' });
+        if (cmp !== 0) return cmp;
+        return compareDefault(a, b);
+      }
+
+      if (sortKey === 'dueDate') {
+        const aDue = Number(a?.dueDateMs || 0);
+        const bDue = Number(b?.dueDateMs || 0);
+        if (aDue && bDue && aDue !== bDue) return aDue - bDue;
+        if (aDue && !bDue) return -1;
+        if (!aDue && bDue) return 1;
+        return compareDefault(a, b);
+      }
+
+      if (sortKey === 'project') {
+        const ap = String(a?.projectName || '');
+        const bp = String(b?.projectName || '');
+        const cmp = ap.localeCompare(bp, 'pt-BR', { sensitivity: 'base' });
+        if (cmp !== 0) return cmp;
+        return compareDefault(a, b);
+      }
+
+      if (sortKey === 'tag') {
+        const at = String(a?.tag || '');
+        const bt = String(b?.tag || '');
+        const cmp = at.localeCompare(bt, 'pt-BR', { sensitivity: 'base' });
+        if (cmp !== 0) return cmp;
+        return compareDefault(a, b);
+      }
+
+      return compareDefault(a, b);
+    };
+
+    return list.filter(matches).slice().sort(compare);
+  }, [tarefas, searchValue, filters, sortKey, projectId]);
+
+  const tasksByColumn = useMemo(() => {
+    const map = {};
+    COLUNAS.forEach((c) => {
+      map[c.id] = [];
+    });
+    visibleSortedTasks.forEach((t) => {
+      const status = t?.status;
+      if (status && map[status]) map[status].push(t);
+    });
+    return map;
+  }, [visibleSortedTasks]);
 
   useEffect(() => {
     if (showEditModal) return;
@@ -437,7 +652,9 @@ export default function Granban() {
   const openProjectOptions = (event) => {
     const rect = event?.currentTarget?.getBoundingClientRect?.();
     if (!rect) {
-      setProjectOptionsPos({ top: 78, left: Math.max(16, window.innerWidth - 260) });
+      const x = window.scrollX || 0;
+      const y = window.scrollY || 0;
+      setProjectOptionsPos({ top: y + 78, left: x + Math.max(16, window.innerWidth - 260) });
       setProjectOptionsOpen(true);
       return;
     }
@@ -449,7 +666,9 @@ export default function Granban() {
       Math.max(12, window.innerWidth - menuWidth - 12)
     );
     const top = rect.bottom + gap;
-    setProjectOptionsPos({ top, left });
+    const x = window.scrollX || 0;
+    const y = window.scrollY || 0;
+    setProjectOptionsPos({ top: y + top, left: x + left });
     setProjectOptionsOpen(true);
   };
 
@@ -461,6 +680,108 @@ export default function Granban() {
     }
     openProjectOptions(event);
   };
+
+  const openFilterMenu = (event) => {
+    const rect = event?.currentTarget?.getBoundingClientRect?.();
+    filterAnchorRef.current = event?.currentTarget || null;
+    if (!rect) {
+      const x = window.scrollX || 0;
+      const y = window.scrollY || 0;
+      setFilterMenuPos({ top: y + 72, left: x + 16 });
+      setFilterMenuOpen(true);
+      return;
+    }
+
+    const width = 340;
+    const gap = 10;
+    const left = Math.min(
+      Math.max(12, rect.left),
+      Math.max(12, window.innerWidth - width - 12)
+    );
+    const top = rect.bottom + gap;
+    setFilterMenuPos({ top: (window.scrollY || 0) + top, left: (window.scrollX || 0) + left });
+    setFilterMenuOpen(true);
+    setOrderMenuOpen(false);
+  };
+
+  const openOrderMenu = (event) => {
+    const rect = event?.currentTarget?.getBoundingClientRect?.();
+    orderAnchorRef.current = event?.currentTarget || null;
+    if (!rect) {
+      const x = window.scrollX || 0;
+      const y = window.scrollY || 0;
+      setOrderMenuPos({ top: y + 72, left: x + 16 });
+      setOrderMenuOpen(true);
+      return;
+    }
+
+    const width = 300;
+    const gap = 10;
+    const left = Math.min(
+      Math.max(12, rect.left),
+      Math.max(12, window.innerWidth - width - 12)
+    );
+    const top = rect.bottom + gap;
+    setOrderMenuPos({ top: (window.scrollY || 0) + top, left: (window.scrollX || 0) + left });
+    setOrderMenuOpen(true);
+    setFilterMenuOpen(false);
+  };
+
+  useEffect(() => {
+    if (!filterMenuOpen) return;
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setFilterMenuOpen(false);
+    };
+
+    const onPointerDown = (e) => {
+      const menuEl = filterMenuRef.current;
+      const anchorEl = filterAnchorRef.current;
+      const target = e.target;
+
+      if (menuEl && menuEl.contains(target)) return;
+      if (anchorEl && anchorEl.contains && anchorEl.contains(target)) return;
+      setFilterMenuOpen(false);
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('touchstart', onPointerDown, { passive: true });
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('mousedown', onPointerDown);
+      window.removeEventListener('touchstart', onPointerDown);
+    };
+  }, [filterMenuOpen]);
+
+  useEffect(() => {
+    if (!orderMenuOpen) return;
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setOrderMenuOpen(false);
+    };
+
+    const onPointerDown = (e) => {
+      const menuEl = orderMenuRef.current;
+      const anchorEl = orderAnchorRef.current;
+      const target = e.target;
+
+      if (menuEl && menuEl.contains(target)) return;
+      if (anchorEl && anchorEl.contains && anchorEl.contains(target)) return;
+      setOrderMenuOpen(false);
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('touchstart', onPointerDown, { passive: true });
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('mousedown', onPointerDown);
+      window.removeEventListener('touchstart', onPointerDown);
+    };
+  }, [orderMenuOpen]);
 
   useEffect(() => {
     if (!projectOptionsOpen) return;
@@ -613,10 +934,225 @@ export default function Granban() {
               ) : null}
             </>
           ) : null}
+          onFilterClick={(e) => {
+            e?.stopPropagation?.();
+            if (filterMenuOpen) {
+              setFilterMenuOpen(false);
+              return;
+            }
+            openFilterMenu(e);
+          }}
+          onOrderClick={(e) => {
+            e?.stopPropagation?.();
+            if (orderMenuOpen) {
+              setOrderMenuOpen(false);
+              return;
+            }
+            openOrderMenu(e);
+          }}
+          onSearchChange={(value) => setSearchValue(value)}
+          searchValue={searchValue}
           onFuncClick={canAddTask ? handleAddTask : undefined}
           onExpandClick={() => setCompactCards((prev) => !prev)}
           isCompact={compactCards}
         />
+
+        {filterMenuOpen && typeof document !== 'undefined'
+          ? createPortal(
+              <div
+                className="heading-dropdownMenu heading-dropdownMenu--filter"
+                role="dialog"
+                aria-label="Filtros"
+                style={{ top: filterMenuPos.top, left: filterMenuPos.left }}
+                ref={filterMenuRef}
+              >
+                <div className="heading-dropdownMenu__header">
+                  <div className="heading-dropdownMenu__title">Filtrar</div>
+                  <button
+                    type="button"
+                    className="heading-dropdownMenu__close"
+                    onClick={() => setFilterMenuOpen(false)}
+                    aria-label="Fechar"
+                    title="Fechar"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="heading-dropdownMenu__section">
+                  <div className="heading-dropdownMenu__label">Prazo</div>
+                  <select
+                    className="heading-dropdownMenu__select"
+                    value={filters.dueRange}
+                    onChange={(e) => setFilters((prev) => ({ ...prev, dueRange: e.target.value }))}
+                  >
+                    <option value="all">Todos</option>
+                    <option value="7d">Vence dentro de 7 dias</option>
+                    <option value="30d">Vence dentro de 1 mês</option>
+                    <option value="overdue">Vencidos</option>
+                  </select>
+                </div>
+
+                <div className="heading-dropdownMenu__section">
+                  <div className="heading-dropdownMenu__label">Prioridade</div>
+                  <div className="heading-dropdownMenu__checks">
+                    {['Urgente', 'Alta', 'Média', 'Baixa'].map((p) => {
+                      const checked = (filters.priorities || []).includes(p);
+                      return (
+                        <label key={p} className="heading-dropdownMenu__check">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => {
+                              setFilters((prev) => {
+                                const current = Array.isArray(prev.priorities) ? prev.priorities : [];
+                                const next = checked
+                                  ? current.filter((x) => x !== p)
+                                  : [...current, p];
+                                return { ...prev, priorities: next };
+                              });
+                            }}
+                          />
+                          <span>{p}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {projectId ? (
+                  <div className="heading-dropdownMenu__section">
+                    <div className="heading-dropdownMenu__label">Executor</div>
+                    <select
+                      className="heading-dropdownMenu__select"
+                      value={filters.executor}
+                      onChange={(e) => setFilters((prev) => ({ ...prev, executor: e.target.value }))}
+                    >
+                      <option value="all">Todos</option>
+                      <option value="none">Sem executor</option>
+                      {executorOptions.map((opt) => (
+                        <option key={opt.key} value={opt.key}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
+
+                <div className="heading-dropdownMenu__section">
+                  <div className="heading-dropdownMenu__label">Tag</div>
+                  {tagOptions.length ? (
+                    <div className="heading-dropdownMenu__checks heading-dropdownMenu__checks--tags">
+                      {tagOptions.map((tag) => {
+                        const checked = (filters.tags || []).includes(tag);
+                        return (
+                          <label key={tag} className="heading-dropdownMenu__check">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => {
+                                setFilters((prev) => {
+                                  const current = Array.isArray(prev.tags) ? prev.tags : [];
+                                  const next = checked
+                                    ? current.filter((x) => x !== tag)
+                                    : [...current, tag];
+                                  return { ...prev, tags: next };
+                                });
+                              }}
+                            />
+                            <span>{tag}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="heading-dropdownMenu__hint">Nenhuma tag encontrada.</div>
+                  )}
+                </div>
+
+                <div className="heading-dropdownMenu__footer">
+                  <button
+                    type="button"
+                    className="heading-dropdownMenu__btn"
+                    onClick={() => setFilters({ dueRange: 'all', priorities: [], executor: 'all', tags: [] })}
+                  >
+                    Limpar
+                  </button>
+                  <button
+                    type="button"
+                    className="heading-dropdownMenu__btn heading-dropdownMenu__btn--primary"
+                    onClick={() => setFilterMenuOpen(false)}
+                  >
+                    Ok
+                  </button>
+                </div>
+              </div>,
+              document.body
+            )
+          : null}
+
+        {orderMenuOpen && typeof document !== 'undefined'
+          ? createPortal(
+              <div
+                className="heading-dropdownMenu heading-dropdownMenu--order"
+                role="dialog"
+                aria-label="Ordenação"
+                style={{ top: orderMenuPos.top, left: orderMenuPos.left }}
+                ref={orderMenuRef}
+              >
+                <div className="heading-dropdownMenu__header">
+                  <div className="heading-dropdownMenu__title">Ordenar</div>
+                  <button
+                    type="button"
+                    className="heading-dropdownMenu__close"
+                    onClick={() => setOrderMenuOpen(false)}
+                    aria-label="Fechar"
+                    title="Fechar"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="heading-dropdownMenu__section">
+                  {[
+                    { key: 'default', label: 'Padrão (Prioridade + Criação)' },
+                    { key: 'priority', label: 'Prioridade' },
+                    { key: 'title', label: 'Nome (A-Z)' },
+                    ...(projectId ? [{ key: 'executor', label: 'Executor' }] : []),
+                    { key: 'dueDate', label: 'Data de entrega' },
+                    ...(!projectId ? [{ key: 'project', label: 'Projeto' }] : []),
+                    { key: 'tag', label: 'Tag' },
+                  ].map((opt) => (
+                    <label key={opt.key} className="heading-dropdownMenu__radio">
+                      <input
+                        type="radio"
+                        name="granban-sort"
+                        checked={sortKey === opt.key}
+                        onChange={() => setSortKey(opt.key)}
+                      />
+                      <span>{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+
+                <div className="heading-dropdownMenu__footer">
+                  <button
+                    type="button"
+                    className="heading-dropdownMenu__btn"
+                    onClick={() => setSortKey('default')}
+                  >
+                    Resetar
+                  </button>
+                  <button
+                    type="button"
+                    className="heading-dropdownMenu__btn heading-dropdownMenu__btn--primary"
+                    onClick={() => setOrderMenuOpen(false)}
+                  >
+                    Ok
+                  </button>
+                </div>
+              </div>,
+              document.body
+            )
+          : null}
 
         {projectId && projectOptionsOpen && typeof document !== 'undefined'
           ? createPortal(
@@ -624,7 +1160,7 @@ export default function Granban() {
                 className="project-optionsMenu project-optionsMenu--projectDots"
                 role="dialog"
                 aria-label="Opções do projeto"
-                style={{ position: 'fixed', top: projectOptionsPos.top, left: projectOptionsPos.left }}
+                style={{ top: projectOptionsPos.top, left: projectOptionsPos.left }}
                 ref={projectOptionsMenuRef}
               >
                 <button
@@ -800,7 +1336,7 @@ export default function Granban() {
                   key={coluna.id}
                   id={coluna.id}
                   title={coluna.titulo}
-                  tasks={getTarefasPorColuna(coluna.id)}
+                  tasks={tasksByColumn[coluna.id] || []}
                   onDelete={excluirTarefa}
                   onEdit={handleEdit}
                   onOpenDetails={handleOpenDetails}
