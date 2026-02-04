@@ -1,0 +1,240 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
+    function isAuth() {
+      return request.auth != null;
+    }
+    
+    function isOwner(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+    
+    function getProject(projectId) {
+      return get(/databases/$(database)/documents/projects/$(projectId)).data;
+    }
+    
+    function isProjectOwner(projectId) {
+      return isAuth() && getProject(projectId).ownerEmail == request.auth.token.email;
+    }
+    
+    function isProjectMember(projectId) {
+      return isAuth() && request.auth.token.email in getProject(projectId).members;
+    }
+    
+    function isProjectOwnerOrMember(projectId) {
+      let project = getProject(projectId);
+      return isAuth() && (
+        project.ownerEmail == request.auth.token.email ||
+        request.auth.token.email in project.members
+      );
+    }
+    
+    // Valida estrutura de dados de usuário
+    function validUserData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['username', 'displayName', 'email', 'createdAt']) &&
+             data.username is string &&
+             data.displayName is string &&
+             data.email is string &&
+             data.email == request.auth.token.email;
+    }
+    
+    // Valida estrutura de dados de projeto
+    function validProjectData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['name', 'owner', 'ownerEmail', 'createdAt', 'members', 'slug']) &&
+             data.name is string &&
+             data.owner is string &&
+             data.ownerEmail is string &&
+             data.ownerEmail == request.auth.token.email &&
+             data.members is list &&
+             data.slug is string;
+    }
+    
+    // Valida que apenas campos permitidos são alterados
+    function onlyUpdatingAllowedFields(allowedFields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedFields);
+    }
+    
+    // ============================================
+    // USERS COLLECTION
+    // ============================================
+    
+    match /users/{uid} {
+      // Ler: apenas o próprio usuário
+      allow read: if isOwner(uid);
+      
+      // Criar: apenas o próprio usuário com dados válidos
+      allow create: if isOwner(uid) && validUserData();
+      
+      // Atualizar: apenas o próprio usuário, campos específicos
+      allow update: if isOwner(uid) && 
+                       onlyUpdatingAllowedFields(['displayName', 'username', 'photoURL', 'privacySettings']);
+      
+      // Deletar: apenas o próprio usuário
+      allow delete: if isOwner(uid);
+    }
+    
+    // ============================================
+    // USERNAMES COLLECTION (Reserva de usernames)
+    // ============================================
+    
+    match /usernames/{username} {
+      // Ler: qualquer usuário autenticado
+      allow read: if isAuth();
+      
+      // Criar: apenas se o uid corresponde ao usuário autenticado
+      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
+      
+      // Atualizar/Deletar: apenas o próprio dono
+      allow update, delete: if isAuth() && resource.data.uid == request.auth.uid;
+    }
+    
+    // ============================================
+    // PROJECTS COLLECTION
+    // ============================================
+    
+    match /projects/{projectId} {
+      // Ler: apenas dono ou membros
+      allow read: if isProjectOwnerOrMember(projectId);
+      
+      // Criar: apenas com dados válidos e owner == auth.email
+      allow create: if isAuth() && validProjectData();
+      
+      // Atualizar: validações específicas por caso
+      allow update: if isAuth() && (
+        // Dono pode atualizar campos específicos
+        (isProjectOwner(projectId) && onlyUpdatingAllowedFields(['name', 'description', 'coverImage', 'members', 'updatedAt', 'slug'])) ||
+        
+        // Membro aceitando convite (adicionando apenas seu próprio email à lista)
+        (onlyUpdatingAllowedFields(['members']) &&
+         request.resource.data.members.hasAll(resource.data.members) &&
+         request.resource.data.members.size() == resource.data.members.size() + 1 &&
+         request.auth.token.email in request.resource.data.members &&
+         !(request.auth.token.email in resource.data.members)) ||
+        
+        // Membro saindo do projeto (removendo apenas seu próprio email)
+        (isProjectMember(projectId) &&
+         onlyUpdatingAllowedFields(['members']) &&
+         resource.data.members.hasAll(request.resource.data.members) &&
+         resource.data.members.size() == request.resource.data.members.size() + 1 &&
+         !(request.auth.token.email in request.resource.data.members) &&
+         request.auth.token.email in resource.data.members)
+      );
+      
+      // Deletar: apenas o dono
+      allow delete: if isProjectOwner(projectId);
+      
+      // ============================================
+      // TASKS SUBCOLLECTION
+      // ============================================
+      
+      match /tasks/{taskId} {
+        // Ler: qualquer membro do projeto
+        allow read: if isProjectOwnerOrMember(projectId);
+        
+        // Criar: qualquer membro do projeto com validação de dados
+        allow create: if isProjectOwnerOrMember(projectId) &&
+                         request.resource.data.keys().hasAll(['title', 'status', 'createdAt']) &&
+                         request.resource.data.title is string &&
+                         request.resource.data.status is string;
+        
+        // Atualizar: qualquer membro do projeto
+        allow update: if isProjectOwnerOrMember(projectId);
+        
+        // Deletar: qualquer membro do projeto
+        allow delete: if isProjectOwnerOrMember(projectId);
+      }
+    }
+    
+    // ============================================
+    // TAREFAS COLLECTION (Tarefas pessoais)
+    // ============================================
+    
+    match /tarefas/{taskId} {
+      // Ler: apenas tarefas do próprio usuário
+      allow read: if isAuth() && resource.data.userId == request.auth.uid;
+      
+      // Criar: apenas com userId == auth.uid e validação de dados
+      allow create: if isAuth() && 
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['title', 'status', 'createdAt', 'userId']) &&
+                       request.resource.data.title is string &&
+                       request.resource.data.status is string;
+      
+      // Atualizar: apenas tarefas do próprio usuário
+      allow update: if isAuth() && resource.data.userId == request.auth.uid;
+      
+      // Deletar: apenas tarefas do próprio usuário
+      allow delete: if isAuth() && resource.data.userId == request.auth.uid;
+    }
+    
+    // ============================================
+    // PROJECT INVITES COLLECTION
+    // ============================================
+    
+    match /projectInvites/{inviteId} {
+      // Ler: apenas o convidado ou o criador do convite
+      allow read: if isAuth() && (
+        resource.data.invitedEmail == request.auth.token.email ||
+        resource.data.inviterEmail == request.auth.token.email
+      );
+      
+      // Criar: apenas o dono do projeto pode criar convites
+      allow create: if isAuth() && 
+                       isProjectOwner(request.resource.data.projectId) &&
+                       request.resource.data.inviterEmail == request.auth.token.email &&
+                       request.resource.data.keys().hasAll(['projectId', 'projectName', 'invitedEmail', 'inviterEmail', 'createdAt']) &&
+                       request.resource.data.projectId is string &&
+                       request.resource.data.invitedEmail is string;
+      
+      // Deletar: o convidado pode deletar (declinar) OU o criador pode cancelar
+      allow delete: if isAuth() && (
+        resource.data.invitedEmail == request.auth.token.email ||
+        resource.data.inviterEmail == request.auth.token.email
+      );
+      
+      // Não permite update (convite é criado e deletado apenas)
+      allow update: if false;
+    }
+    
+    // ============================================
+    // PROJECT INVITE LINKS COLLECTION
+    // ============================================
+    
+    match /projectInviteLinks/{linkId} {
+      // Ler: qualquer usuário autenticado pode ler links ativos
+      allow read: if isAuth() && resource.data.active == true;
+      
+      // Criar: apenas o dono do projeto
+      allow create: if isAuth() && 
+                       isProjectOwner(request.resource.data.projectId) &&
+                       request.resource.data.createdBy == request.auth.token.email &&
+                       request.resource.data.keys().hasAll(['projectId', 'projectName', 'createdBy', 'createdAt', 'active']) &&
+                       request.resource.data.projectId is string &&
+                       request.resource.data.active == true;
+      
+      // Atualizar: apenas para desativar link (owner pode desativar)
+      allow update: if isAuth() && 
+                       isProjectOwner(resource.data.projectId) &&
+                       onlyUpdatingAllowedFields(['active']) &&
+                       request.resource.data.active == false;
+      
+      // Deletar: apenas o dono do projeto
+      allow delete: if isAuth() && isProjectOwner(resource.data.projectId);
+    }
+    
+    // ============================================
+    // DENY ALL OTHER COLLECTIONS
+    // ============================================
+    
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
